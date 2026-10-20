@@ -65,15 +65,52 @@ historia de los atributos que cambian (Q2), y esas lecturas compiten con la escr
 
 ## 2. Decisiones de diseño (Parte B)
 
-_Pendiente. Se responderán, en este orden, los puntos del enunciado:_
+**Proceso de negocio y grano de la tabla de hechos.**  
+El proceso es el **procesamiento de pagos**: cada intento de pago de un cliente en un comercio con un método de pago,
+aprobado o rechazado. El grano es **una fila por transacción** de `oltp.transactions`, el nivel más atómico: las tres preguntas se responden agregando. `transaction_id` es la
+PK de `fact_transactions` y una *dimensión degenerada*: identifica la transacción, pero no tiene atributos propios.
 
-- _**Proceso de negocio y grano** de la tabla de hechos._
-- _**Dimensiones** y los atributos de cada una. ¿Qué datos del OLTP *no* deben llegar al data warehouse?_
-- _**Medidas** de la tabla de hechos y si son aditivas, semiaditivas o no aditivas._
-- _**Por qué surrogate keys** en lugar de las llaves del OLTP._
-- _**Por qué SCD Tipo 2** para la dimensión cliente: ¿qué atributo puede cambiar y qué análisis se daña si se sobrescribe?_
+**Dimensiones y los atributos de cada una. ¿Qué datos del OLTP *no* deben llegar al data warehouse?**
 
-_Incluye el diagrama del esquema estrella hecho en draw.io: tablas, llaves, cardinalidades y grano de la tabla de hechos._
+| Dimensión | Surrogate key | Natural key | Atributos |
+|---|---|---|---|
+| `dim_date` (dada) | `date_key` | `full_date` | año, trimestre, mes, semana, día, festivo |
+| `dim_time` (dada) | `time_key` | — | `hour`, `minute`, `period_of_day` |
+| `dim_customer` (SCD2) | `customer_key` | `customer_id` | `city`, `segment`, `income_band`, `valid_from`, `valid_to`, `is_current` |
+| `dim_merchant` | `merchant_key` | `merchant_id` | `name`, `category`, `city` |
+| `dim_payment_method` | `payment_method_key` | `method_name` | `method_type` (card, digital_wallet, bank_transfer) |
+
+No llegan al DW:
+
+- `name` y `email` del cliente: identifican a la persona y no responden ninguna pregunta analítica (principio de minimización, Ley 1581 de 2012).
+- `monthly_income_cop` exacto: es un dato financiero sensible. Se reemplaza por `income_band` (< 3 M, 3–6 M,
+  6–10 M, ≥ 10 M COP), que conserva su valor analítico.
+- `method_id` (llave técnica del OLTP) y el detalle operativo de `fraud_events` (`event_id`, `pattern`,
+  `detected_at`): de ese evento solo pasa `risk_score` como medida. `status` se convierte en la medida `is_approved`.
+
+**Medidas de la tabla de hechos y si son aditivas, semiaditivas o no aditivas.**
+
+- `amount_cop`: **aditiva**. Se suma por cualquier dimensión.
+- `is_fraud` e `is_approved`: banderas que, como 0/1, son **aditivas** (`SUM(is_fraud::INT)` da el número de
+  fraudes). Las tasas que se derivan de ellas, como `fraud_rate_pct` en Q2, son **no aditivas**: se calculan como
+  cociente de sumas, nunca sumando tasas.
+- `fraud_risk_score`: **no aditiva**. Se agrega con `AVG` o `MAX`; sumar puntajes no tiene significado. Es `NULL` en las transacciones sin evento de fraude.
+- **Semiaditivas: ninguna.** Una semiaditiva, como un saldo, no se suma a lo largo del tiempo; eso ocurre en hechos
+  *snapshot*, no en uno transaccional.
+
+**Por qué surrogate keys en lugar de las llaves del OLTP.**  
+(1) **SCD2:** un mismo `customer_id` tiene varias versiones en `dim_customer`, así que no puede ser PK; cada
+versión necesita su propia llave. (2) **Independencia:** el DW no depende de que el OLTP conserve, reutilice o
+cambie sus llaves, y se pueden integrar otras fuentes. (3) **Tamaño:** un `INT` de 4 bytes frente a un
+`VARCHAR(10)` hace más pequeños la tabla de hechos y sus índices, y más baratos los joins. Pesa con 182,5 M de filas al año.
+
+**Por qué SCD Tipo 2 para la dimensión cliente: ¿qué atributo puede cambiar y qué análisis se daña si se sobrescribe?**  
+Pueden cambiar `segment` y `city`. El propio generador del curso simula clientes que *"se mudan de ciudad o cambian
+de segmento entre lotes"*. Si se sobrescribe (tipo 1), las transacciones antiguas quedan atribuidas al valor actual: un cliente que tuvo fraudes siendo `mass` y luego pasó a `premium` sube la tasa de fraude de `premium` y
+baja la de `mass`, y la pregunta *"¿Qué segmento de clientes tiene mayor tasa de fraude?"* queda con una respuesta
+falsa (igual con `city`). Con SCD2
+cada cambio crea una versión (`valid_from`, `valid_to`, `is_current`), y cada transacción apunta con
+`customer_key` a la versión vigente en su fecha.
 
 ## 3. Comparación de rendimiento con planes de ejecución (Parte D)
 
