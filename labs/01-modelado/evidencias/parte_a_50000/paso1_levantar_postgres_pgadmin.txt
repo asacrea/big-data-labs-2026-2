@@ -1,5 +1,5 @@
- Container docker-postgres-1 Running 
  Container docker-pgadmin-1 Running 
+ Container docker-postgres-1 Running 
 NAME                IMAGE                   COMMAND                  SERVICE    CREATED       STATUS       PORTS
 docker-pgadmin-1    dpage/pgadmin4:latest   "/entrypoint.sh"         pgadmin    4 hours ago   Up 4 hours   0.0.0.0:5050->80/tcp, [::]:5050->80/tcp
-docker-postgres-1   postgres:16-alpine      "docker-entrypoint.s…"   postgres   4 hours ago   Up 4 hours   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+docker-postgres-1   postgres:16-alpine      "docker-entrypoint.s…"   postgres   5 hours ago   Up 4 hours   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp

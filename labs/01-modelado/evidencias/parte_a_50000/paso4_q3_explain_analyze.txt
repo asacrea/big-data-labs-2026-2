@@ -1,0 +1,30 @@
+-- Q3: Volumen de transacciones por día de la semana y hora (últimos 7 días)
+EXPLAIN ANALYZE
+SELECT
+    EXTRACT(DOW  FROM t.created_at) AS day_of_week,
+    EXTRACT(HOUR FROM t.created_at) AS hour,
+    COUNT(*)                        AS num_transactions,
+    SUM(t.amount_cop)               AS total_cop
+FROM oltp.transactions t
+WHERE t.status = 'approved'
+  AND t.created_at >= CURRENT_DATE - 7
+GROUP BY day_of_week, hour
+ORDER BY day_of_week, hour;
+                                                                  QUERY PLAN                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=969.54..1082.83 rows=3776 width=104) (actual time=4.041..4.696 rows=168 loops=1)
+   Group Key: (EXTRACT(dow FROM created_at)), (EXTRACT(hour FROM created_at))
+   ->  Sort  (cost=969.54..978.98 rows=3777 width=72) (actual time=4.018..4.140 rows=3729 loops=1)
+         Sort Key: (EXTRACT(dow FROM created_at)), (EXTRACT(hour FROM created_at))
+         Sort Method: quicksort  Memory: 270kB
+         ->  Bitmap Heap Scan on transactions t  (cost=81.60..745.13 rows=3777 width=72) (actual time=0.391..2.016 rows=3729 loops=1)
+               Recheck Cond: (created_at >= (CURRENT_DATE - 7))
+               Filter: ((status)::text = 'approved'::text)
+               Rows Removed by Filter: 6
+               Heap Blocks: exact=569
+               ->  Bitmap Index Scan on idx_txn_created_at  (cost=0.00..80.66 rows=3782 width=0) (actual time=0.301..0.302 rows=3735 loops=1)
+                     Index Cond: (created_at >= (CURRENT_DATE - 7))
+ Planning Time: 0.160 ms
+ Execution Time: 4.864 ms
+(14 rows)
+

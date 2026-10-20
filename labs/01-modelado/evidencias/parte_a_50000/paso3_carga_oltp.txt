@@ -3,6 +3,6 @@ Cargando clientes... ---------------------------------------- 100% 0:00:00
 ✓ 500 clientes cargados
 Cargando transacciones... ---------------------------------------- 100% 0:00:00
 ✓ 50000 transacciones cargadas
-✓ 192 eventos de fraude cargados
+✓ 200 eventos de fraude cargados
 
 ¡Carga OLTP completada!

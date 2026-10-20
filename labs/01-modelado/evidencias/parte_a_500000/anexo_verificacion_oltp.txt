@@ -14,26 +14,26 @@
  merchants       |      8
  payment_methods |      5
  transactions    | 500000
- fraud_events    |   1947
+ fraud_events    |   1919
 (5 rows)
 
           primera           |           ultima           |   total_cop    
 ----------------------------+----------------------------+----------------
- 2026-07-21 23:33:59.196126 | 2026-10-19 23:33:33.196126 | 37354328131.17
+ 2026-07-21 23:38:16.845115 | 2026-10-19 23:37:24.845115 | 37242782417.79
 (1 row)
 
   status  |  txn   | fraudes 
 ----------+--------+---------
- approved | 499418 |    1365
- declined |    582 |     582
+ approved | 499447 |    1366
+ declined |    553 |     553
 (2 rows)
 
                     chequeo                     | debe_ser_0 
 ------------------------------------------------+------------
- transacciones con más de un evento             |          0
- evento en transacción no fraude                |          0
- transacción anterior a la creación del cliente |          0
  fraude sin evento                              |          0
+ evento en transacción no fraude                |          0
+ transacciones con más de un evento             |          0
+ transacción anterior a la creación del cliente |          0
 (4 rows)
 
  method_id | method_name 
@@ -47,9 +47,9 @@
 
   segment   | clientes 
 ------------+----------
- high_value |       83
- mass       |      314
- premium    |      103
+ high_value |       91
+ mass       |      308
+ premium    |      101
 (3 rows)
 
  category  | comercios 
