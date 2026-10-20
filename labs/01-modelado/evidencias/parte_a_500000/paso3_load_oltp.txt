@@ -1,0 +1,8 @@
+✓ Esquema OLTP creado
+Cargando clientes... ---------------------------------------- 100% 0:00:00
+✓ 500 clientes cargados
+Cargando transacciones... ---------------------------------------- 100% 0:00:00
+✓ 500000 transacciones cargadas
+✓ 1947 eventos de fraude cargados
+
+¡Carga OLTP completada!

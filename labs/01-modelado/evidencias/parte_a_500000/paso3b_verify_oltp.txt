@@ -8,32 +8,32 @@
  oltp   | transactions    | table | postgres
 (5 rows)
 
-      tabla      | filas 
------------------+-------
- customers       |   500
- merchants       |     8
- payment_methods |     5
- transactions    | 50000
- fraud_events    |   218
+      tabla      | filas  
+-----------------+--------
+ customers       |    500
+ merchants       |      8
+ payment_methods |      5
+ transactions    | 500000
+ fraud_events    |   1947
 (5 rows)
 
-          primera           |           ultima           |   total_cop   
-----------------------------+----------------------------+---------------
- 2026-07-21 18:57:54.609674 | 2026-10-19 18:47:08.609674 | 3720445469.16
+          primera           |           ultima           |   total_cop    
+----------------------------+----------------------------+----------------
+ 2026-07-21 23:33:59.196126 | 2026-10-19 23:33:33.196126 | 37354328131.17
 (1 row)
 
-  status  |  txn  | fraudes 
-----------+-------+---------
- approved | 49938 |     156
- declined |    62 |      62
+  status  |  txn   | fraudes 
+----------+--------+---------
+ approved | 499418 |    1365
+ declined |    582 |     582
 (2 rows)
 
                     chequeo                     | debe_ser_0 
 ------------------------------------------------+------------
  transacciones con más de un evento             |          0
- fraude sin evento                              |          0
- transacción anterior a la creación del cliente |          0
  evento en transacción no fraude                |          0
+ transacción anterior a la creación del cliente |          0
+ fraude sin evento                              |          0
 (4 rows)
 
  method_id | method_name 
@@ -47,9 +47,9 @@
 
   segment   | clientes 
 ------------+----------
- high_value |      101
- mass       |      301
- premium    |       98
+ high_value |       83
+ mass       |      314
+ premium    |      103
 (3 rows)
 
  category  | comercios 
