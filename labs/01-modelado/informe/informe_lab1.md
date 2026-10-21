@@ -2,7 +2,7 @@
 
 **SI7006 Almacenamiento y Procesamiento de Grandes Datos · Maestría en Ingeniería de Datos · EAFIT 2026-2**
 **Caso:** PayTrack Colombia
-**Equipo:** Santiago Vélez Casallas · _[nombre del compañero]_
+**Equipo:** Santiago Vélez Casallas · Luis Alberto Ortiz Quiroga
 **Repositorio:** https://github.com/santiagovelcasallas/big-data-labs-2026-2
 
 > Borrador en Markdown; se entrega en PDF. Enunciado: *"Informe en PDF (máx. 3 páginas): diagnóstico del OLTP
