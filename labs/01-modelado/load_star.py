@@ -65,7 +65,6 @@ SELECT
 FROM generate_series(0, 23) AS h, generate_series(0, 59) AS m;
 """
 
-
 # ── TODO 1: dim_customer ─────────────────────────────────────────────────────
 # Carga un registro por cliente desde oltp.customers.
 # - La surrogate key (customer_key) la genera la base de datos: no la insertes.
@@ -132,10 +131,32 @@ SELECT
 #   transacciones tienen evento de fraude: ¿qué tipo de JOIN necesitas?).
 SQL_FACT = """
 INSERT INTO dw.fact_transactions (customer_key, merchant_key, payment_method_key, 
-                                  date_key, time_key, amount_cop, is_approved, is_fraud,
-                                  fraud_risk_score) 
-SELECT ,,,,, s.amount_cop,,is_fraud, 
- FROM oltp.transactions s;
+                                  date_key,     time_key,     amount_cop,
+                                  is_approved,  is_fraud,     fraud_risk_score) 
+SELECT 
+    c.customer_key,
+    m.merchant_key,
+    p.payment_method_key,
+    d.date_key,
+    h.time_key,
+    s.amount_cop,
+    CASE WHEN s.status = 'approved' THEN TRUE ELSE FALSE END,
+    is_fraud,
+    r.risk_score
+ FROM oltp.transactions s
+ LEFT JOIN dw.dim_customer c
+       ON  c.customer_id = t.customer_id
+       AND s.created_at::DATE BETWEEN c.valid_from AND c.valid_to
+ LEFT JOIN dw.dim_merchant m
+       ON m.merchant_id = s.merchant_id
+ LEFT JOIN dw.dim_payment_method p
+       ON p.method_name = s.method_name;
+ LEFT JOIN dw.dim_date d
+       ON d.full_date = s.created_at::DATE;
+ LEFT JOIN dw.dim_hour h
+       ON h.hour = EXTRACT(HOUR FROM TIMESTAMP s.created_at);
+ LEFT JOIN oltp.fraud_events r
+       ON r.transaction_id = r.transaction_id;
 """
 
 # ── Ejecución (dado) ─────────────────────────────────────────────────────────
