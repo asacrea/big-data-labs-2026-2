@@ -20,81 +20,43 @@ SELECT
     COUNT(*)                           AS num_transactions,
     SUM(t.amount_cop)                  AS total_cop,
     AVG(t.amount_cop)                  AS avg_cop
-FROM dw.fact_transactions t
-JOIN dw.dim_merchants m ON t.merchant_key = m.merchant_key
-JOIN dw.dim_date d 		  ON f.date_key     = d.date_key 
-
-  WHERE t.created_at >= CURRENT_DATE - 30
-  AND t.status = 'approved'
+FROM  dw.fact_transactions t
+JOIN  dw.dim_merchants m ON t.merchant_key = m.merchant_key
+JOIN  dw.dim_date d 		ON t.date_key     = d.date_key 
+WHERE d.full_date   >= CURRENT_DATE - 30
+AND   t.is_approved = 1
 GROUP BY m.category
 ORDER BY total_cop DESC;
 
- 
-
-AND d.full_date >= CURRENT_DATE - 30 
-GROUP BY m.category 
-ORDER BY total_cop DESC; 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Q2: Tasa de fraude por segmento de cliente
 -- Pista: dim_customer es SCD2. ¿Debes filtrar por is_current? ¿Por qué?
+-- * No se puede filtrar por is_current o se puede perder información para clientes que han cambiado de segmento
+-- * y tienen historia en dos segmentos. Aqui la pregunta de negocio no acota periodos especificos o fechas
+--
 -- TODO
 
-
-
--- Q2: Tasa de fraude por segmento de cliente
 EXPLAIN ANALYZE
 SELECT
     c.segment,
-    COUNT(*)                                              AS total_txn,
-    SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END)          AS fraud_txn,
-    ROUND(
-        100.0 * SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END) / COUNT(*), 2
-    )                                                     AS fraud_rate_pct
-FROM oltp.transactions t
-JOIN oltp.customers c ON t.customer_id = c.customer_id
+    COUNT(*)                                     AS total_txn,
+    SUM(t.is_fraud)                              AS fraud_txn,
+    ROUND(100.0 * SUM(t.is_fraud) / COUNT(*), 2) AS tasa_fraude
+FROM dw.fact_transactions t
+JOIN dw.customers c ON t.customer_key = c.customer_key
 GROUP BY c.segment
-ORDER BY fraud_rate_pct DESC;
-
-
-
-;
+ORDER BY tasa_fraude DESC; 
 
 -- Q3: Volumen de transacciones por día de la semana y hora (últimos 7 días)
 -- TODO
 
-
-
--- Q3: Volumen de transacciones por día de la semana y hora (últimos 7 días)
 EXPLAIN ANALYZE
-SELECT
-    EXTRACT(DOW  FROM t.created_at) AS day_of_week,
-    EXTRACT(HOUR FROM t.created_at) AS hour,
-    COUNT(*)                        AS num_transactions,
-    SUM(t.amount_cop)               AS total_cop
-FROM oltp.transactions t
-WHERE t.status = 'approved'
-  AND t.created_at >= CURRENT_DATE - 7
-GROUP BY day_of_week, hour
-ORDER BY day_of_week, hour;
-
-
-
-
-
-
-;
+SELECT  d.day_name   AS dia_semana, 
+        t.hour       AS hora, 
+    	COUNT(*)     AS num_txn 
+FROM  dw.fact_transactions f 
+JOIN  dw.dim_date d	ON f.date_key = d.date_key 
+JOIN  dw.dim_time t	ON f.time_key = t.time_key  
+WHERE t.is_approved = 1
+AND   d.full_date >= CURRENT_DATE - 7
+GROUP BY dia_semana, hora 
+ORDER BY dia_semana, hora; 
