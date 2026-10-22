@@ -1,0 +1,38 @@
+-- Q1: Monto total por categoría de comercio (últimos 30 días) · OLAP
+EXPLAIN ANALYZE
+SELECT
+    m.category,
+    COUNT(*)                           AS num_transactions,
+    SUM(t.amount_cop)                  AS total_cop,
+    AVG(t.amount_cop)                  AS avg_cop
+FROM  dw.fact_transactions t
+JOIN  dw.dim_merchant m  ON t.merchant_key = m.merchant_key
+JOIN  dw.dim_date d 		ON t.date_key     = d.date_key 
+WHERE d.full_date   >= CURRENT_DATE - 30
+AND   t.is_approved
+GROUP BY m.category
+ORDER BY total_cop DESC;
+
+Sort  (cost=1334.48..1334.50 rows=7 width=80) (actual time=13.384..13.391 rows=7 loops=1)
+  Sort Key: (sum(t.amount_cop)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  ->  HashAggregate  (cost=1334.27..1334.38 rows=7 width=80) (actual time=13.360..13.369 rows=7 loops=1)
+        Group Key: m.category
+        Batches: 1  Memory Usage: 24kB
+        ->  Hash Join  (cost=4.12..1219.03 rows=15366 width=16) (actual time=0.063..10.417 rows=15510 loops=1)
+              Hash Cond: (t.merchant_key = m.merchant_key)
+              ->  Hash Join  (cost=2.94..1156.14 rows=15366 width=12) (actual time=0.033..8.670 rows=15510 loops=1)
+                    Hash Cond: (t.date_key = d.date_key)
+                    ->  Seq Scan on fact_transactions t  (cost=0.00..1016.00 rows=49940 width=16) (actual time=0.004..4.992 rows=49936 loops=1)
+                          Filter: is_approved
+                          Rows Removed by Filter: 64
+                    ->  Hash  (cost=2.59..2.59 rows=28 width=4) (actual time=0.019..0.021 rows=28 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                          ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=28 width=4) (actual time=0.006..0.008 rows=28 loops=1)
+                                Filter: (full_date >= (CURRENT_DATE - 30))
+                                Rows Removed by Filter: 63
+              ->  Hash  (cost=1.08..1.08 rows=8 width=12) (actual time=0.019..0.021 rows=8 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                    ->  Seq Scan on dim_merchant m  (cost=0.00..1.08 rows=8 width=12) (actual time=0.006..0.008 rows=8 loops=1)
+Planning Time: 0.379 ms
+Execution Time: 13.604 ms

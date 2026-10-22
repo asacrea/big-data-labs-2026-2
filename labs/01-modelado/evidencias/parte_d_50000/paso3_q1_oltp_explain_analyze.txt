@@ -1,0 +1,34 @@
+-- Q1: Monto total por categoría de comercio (últimos 30 días) · OLTP
+EXPLAIN ANALYZE
+SELECT
+    m.category,
+    COUNT(*)                           AS num_transactions,
+    SUM(t.amount_cop)                  AS total_cop,
+    AVG(t.amount_cop)                  AS avg_cop
+FROM oltp.transactions t
+JOIN oltp.merchants m ON t.merchant_id = m.merchant_id
+WHERE t.created_at >= CURRENT_DATE - 30
+  AND t.status = 'approved'
+GROUP BY m.category
+ORDER BY total_cop DESC;
+
+Sort  (cost=1373.93..1373.94 rows=7 width=80) (actual time=8.961..8.966 rows=7 loops=1)
+  Sort Key: (sum(t.amount_cop)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  ->  HashAggregate  (cost=1373.72..1373.83 rows=7 width=80) (actual time=8.937..8.944 rows=7 loops=1)
+        Group Key: m.category
+        Batches: 1  Memory Usage: 24kB
+        ->  Hash Join  (cost=320.59..1258.61 rows=15348 width=16) (actual time=0.722..6.605 rows=15510 loops=1)
+              Hash Cond: ((t.merchant_id)::text = (m.merchant_id)::text)
+              ->  Bitmap Heap Scan on transactions t  (cost=319.41..1195.81 rows=15348 width=13) (actual time=0.689..4.631 rows=15510 loops=1)
+                    Recheck Cond: (created_at >= (CURRENT_DATE - 30))
+                    Filter: ((status)::text = 'approved'::text)
+                    Rows Removed by Filter: 22
+                    Heap Blocks: exact=569
+                    ->  Bitmap Index Scan on idx_txn_created_at  (cost=0.00..315.57 rows=15370 width=0) (actual time=0.627..0.628 rows=15532 loops=1)
+                          Index Cond: (created_at >= (CURRENT_DATE - 30))
+              ->  Hash  (cost=1.08..1.08 rows=8 width=13) (actual time=0.019..0.020 rows=8 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                    ->  Seq Scan on merchants m  (cost=0.00..1.08 rows=8 width=13) (actual time=0.005..0.006 rows=8 loops=1)
+Planning Time: 0.299 ms
+Execution Time: 9.211 ms

@@ -1,0 +1,37 @@
+-- Q3: Volumen de transacciones por día de la semana y hora (últimos 7 días) · OLAP
+EXPLAIN ANALYZE
+SELECT  d.day_of_week     AS day_of_week,
+        t.hour            AS hour,
+    	COUNT(*)          AS num_transactions,
+        SUM(f.amount_cop) AS total_cop
+FROM  dw.fact_transactions f
+JOIN  dw.dim_date d	ON f.date_key = d.date_key
+JOIN  dw.dim_time t	ON f.time_key = t.time_key
+WHERE f.is_approved
+AND   d.full_date >= CURRENT_DATE - 7
+GROUP BY d.day_of_week, t.hour
+ORDER BY d.day_of_week, t.hour;
+
+Sort  (cost=1236.28..1236.52 rows=96 width=44) (actual time=8.369..8.376 rows=120 loops=1)
+  Sort Key: d.day_of_week, t.hour
+  Sort Method: quicksort  Memory: 31kB
+  ->  HashAggregate  (cost=1231.92..1233.12 rows=96 width=44) (actual time=8.286..8.316 rows=120 loops=1)
+        Group Key: d.day_of_week, t.hour
+        Batches: 1  Memory Usage: 96kB
+        ->  Hash Join  (cost=44.05..1204.48 rows=2744 width=12) (actual time=0.322..7.569 rows=2627 loops=1)
+              Hash Cond: (f.time_key = t.time_key)
+              ->  Hash Join  (cost=2.66..1155.86 rows=2744 width=14) (actual time=0.047..6.723 rows=2627 loops=1)
+                    Hash Cond: (f.date_key = d.date_key)
+                    ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=49940 width=16) (actual time=0.011..4.301 rows=49936 loops=1)
+                          Filter: is_approved
+                          Rows Removed by Filter: 64
+                    ->  Hash  (cost=2.59..2.59 rows=5 width=6) (actual time=0.023..0.024 rows=5 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                          ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=5 width=6) (actual time=0.010..0.011 rows=5 loops=1)
+                                Filter: (full_date >= (CURRENT_DATE - 7))
+                                Rows Removed by Filter: 86
+              ->  Hash  (cost=23.40..23.40 rows=1440 width=6) (actual time=0.255..0.256 rows=1440 loops=1)
+                    Buckets: 2048  Batches: 1  Memory Usage: 73kB
+                    ->  Seq Scan on dim_time t  (cost=0.00..23.40 rows=1440 width=6) (actual time=0.004..0.094 rows=1440 loops=1)
+Planning Time: 0.732 ms
+Execution Time: 8.555 ms
