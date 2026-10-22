@@ -130,10 +130,11 @@ SELECT
 # - Traer el risk_score de oltp.fraud_events cuando exista (no todas las
 #   transacciones tienen evento de fraude: ¿qué tipo de JOIN necesitas?).
 SQL_FACT = """
-INSERT INTO dw.fact_transactions (customer_key, merchant_key, payment_method_key, 
+INSERT INTO dw.fact_transactions (transaction_id, customer_key, merchant_key, payment_method_key, 
                                   date_key,     time_key,     amount_cop,
                                   is_approved,  is_fraud,     fraud_risk_score) 
 SELECT 
+    c.transaction_id,
     c.customer_key,
     m.merchant_key,
     p.payment_method_key,
