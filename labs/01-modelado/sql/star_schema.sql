@@ -67,7 +67,7 @@ CREATE TABLE dw.dim_customer (
     customer_id   VARCHAR(10)  NOT NULL,
     city          VARCHAR(100),
     segment       VARCHAR(50), -- mass, premium, high_value
-    income_band   DECIMAL(18,2),
+    income_band   VARCHAR(20),
     valid_from    DATE         NOT NULL,
     valid_to      DATE         NOT NULL DEFAULT DATE '9999-12-31',
     is_current    BOOLEAN      NOT NULL DEFAULT TRUE,
