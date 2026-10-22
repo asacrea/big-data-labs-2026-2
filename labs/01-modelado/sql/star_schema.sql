@@ -51,23 +51,60 @@ CREATE TABLE dw.dim_time (
 -- ¿Cuáles NO deberían estar en el data warehouse (piensa en datos personales)?
 -- ¿Por qué la PK no puede ser customer_id si la dimensión es SCD2?
 
-
+CREATE TABLE dw.dim_customer (
+    customer_key    INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,  -- surrogate key
+    customer_id     VARCHAR(10)  NOT NULL,                          -- llave natural del OLTP
+    city            VARCHAR(100),
+    segment         VARCHAR(50),
+    income_band     VARCHAR(20),                                    -- rango, no el ingreso exacto
+    customer_since  DATE         NOT NULL,
+    valid_from      TIMESTAMP    NOT NULL,
+    valid_to        TIMESTAMP    NOT NULL DEFAULT '9999-12-31',
+    is_current      BOOLEAN      NOT NULL DEFAULT TRUE
+);
+-- Un cliente puede tener varias versiones, pero solo una vigente
+CREATE UNIQUE INDEX ux_dim_customer_vigente
+    ON dw.dim_customer (customer_id) WHERE is_current;
 
 -- ── TODO 2: Dimensión comercio ─────────────────────────────
 
-
+CREATE TABLE dw.dim_merchant (
+    merchant_key    INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    merchant_id     VARCHAR(10)  NOT NULL UNIQUE,
+    merchant_name   VARCHAR(200) NOT NULL,
+    category        VARCHAR(100),
+    city            VARCHAR(100)
+);
 
 -- ── TODO 3: Dimensión método de pago ───────────────────────
 
-
+CREATE TABLE dw.dim_payment_method (
+    payment_method_key  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    method_name         VARCHAR(50)  NOT NULL UNIQUE,
+    method_type         VARCHAR(30)  NOT NULL
+);
 
 -- ── TODO 4: Tabla de hechos ────────────────────────────────
 -- Grano: una fila por transacción.
 -- Cada foreign key debe referenciar la PK de su dimensión.
 
-
+CREATE TABLE dw.fact_transactions (
+    transaction_id      VARCHAR(20)   PRIMARY KEY,  -- dimensión degenerada
+    date_key            INT           NOT NULL REFERENCES dw.dim_date (date_key),
+    time_key            INT           NOT NULL REFERENCES dw.dim_time (time_key),
+    customer_key        INT           NOT NULL REFERENCES dw.dim_customer (customer_key),
+    merchant_key        INT           NOT NULL REFERENCES dw.dim_merchant (merchant_key),
+    payment_method_key  INT           NOT NULL REFERENCES dw.dim_payment_method (payment_method_key),
+    amount_cop          NUMERIC(15,2) NOT NULL,
+    is_fraud            BOOLEAN       NOT NULL,
+    is_approved         BOOLEAN       NOT NULL,
+    fraud_risk_score    NUMERIC(5,4)                -- vacío si no hubo evento de fraude
+);
 
 -- ── TODO 5: Índices para las consultas analíticas ──────────
 -- Revisa los filtros y JOIN de olap_queries.sql. ¿Qué columnas de la
 -- tabla de hechos conviene indexar? Mide el efecto con EXPLAIN ANALYZE.
 
+CREATE INDEX ix_fact_date     ON dw.fact_transactions (date_key);
+CREATE INDEX ix_fact_customer ON dw.fact_transactions (customer_key);
+CREATE INDEX ix_fact_merchant ON dw.fact_transactions (merchant_key);
