@@ -65,45 +65,39 @@ SELECT
 FROM generate_series(0, 23) AS h, generate_series(0, 59) AS m;
 """
 
+
 # ── TODO 1: dim_customer ─────────────────────────────────────────────────────
 # Carga un registro por cliente desde oltp.customers.
 # - La surrogate key (customer_key) la genera la base de datos: no la insertes.
 # - Es una dimensión SCD Tipo 2. En esta carga inicial cada cliente tiene una
 #   sola versión: ¿qué valores deben tener valid_from, valid_to e is_current?
 SQL_DIM_CUSTOMER = """
-INSERT INTO dw.dim_customer (customer_id, city, segment, income_band,
-                             valid_from, valid_to, is_current) 
-SELECT 
-    s.customer_id,
-    s.city,
-    s.segment,
-    s.monthly_income_cop,
-    CASE
-        WHEN EXISTS (SELECT 1 FROM dw.dim_customer h
-                     WHERE h.customer_id = s.customer_id)
-        THEN CURRENT_DATE            -- ya existía: nueva versión por cambio
-        ELSE DATE '1900-01-01'       -- cliente nuevo: primera versión
+INSERT INTO dw.dim_customer (customer_id, city, segment, income_band, valid_from, valid_to, is_current)
+SELECT
+    customer_id,
+    city,
+    segment,
+    CASE                                  -- rango en lugar del ingreso exacto (dato sensible)
+        WHEN monthly_income_cop <  3000000 THEN '<3M'
+        WHEN monthly_income_cop <  6000000 THEN '3-6M'
+        WHEN monthly_income_cop < 10000000 THEN '6-10M'
+        ELSE '>=10M'
     END,
-    DATE '9999-12-31',
+    created_at::DATE,                     -- primera versión: vigente desde el alta del cliente
+    DATE '9999-12-31',                    -- sin fecha de fin: es la versión actual
     TRUE
-FROM oltp.customers s
-WHERE NOT EXISTS (
-    SELECT 1 FROM dw.dim_customer c
-     WHERE c.customer_id = s.customer_id
-     AND   c.is_current;
+FROM oltp.customers;
 """
+
 
 # ── TODO 2: dim_merchant ─────────────────────────────────────────────────────
 # Un registro por comercio desde oltp.merchants.
 SQL_DIM_MERCHANT = """
-INSERT INTO dw.dim_merchant (merchant_id, name, category, city) 
-SELECT 
-    s.merchant_id,
-    s.name,
-    s.category,
-    s.city
- FROM oltp.merchants s;
+INSERT INTO dw.dim_merchant (merchant_id, name, category, city)
+SELECT merchant_id, name, category, city
+FROM oltp.merchants;
 """
+
 
 # ── TODO 3: dim_payment_method ───────────────────────────────────────────────
 # Un registro por método de pago desde oltp.payment_methods.
@@ -112,11 +106,17 @@ SELECT
 #   nequi, daviplata        → 'digital_wallet'
 #   pse                     → 'bank_transfer'
 SQL_DIM_PAYMENT_METHOD = """
-INSERT INTO dw.dim_payment_method (method_name) 
+INSERT INTO dw.dim_payment_method (method_name, method_type)
 SELECT
-    s.method_name
- FROM oltp.payment_methods s;
+    method_name,
+    CASE
+        WHEN method_name IN ('credit_card', 'debit_card') THEN 'card'
+        WHEN method_name IN ('nequi', 'daviplata')        THEN 'digital_wallet'
+        WHEN method_name = 'pse'                          THEN 'bank_transfer'
+    END
+FROM oltp.payment_methods;
 """
+
 
 # ── TODO 4: fact_transactions ────────────────────────────────────────────────
 # Grano: una fila por transacción de oltp.transactions.
@@ -130,35 +130,35 @@ SELECT
 # - Traer el risk_score de oltp.fraud_events cuando exista (no todas las
 #   transacciones tienen evento de fraude: ¿qué tipo de JOIN necesitas?).
 SQL_FACT = """
-INSERT INTO dw.fact_transactions (transaction_id, customer_key, merchant_key, payment_method_key, 
-                                  date_key,     time_key,     amount_cop,
-                                  is_approved,  is_fraud,     fraud_risk_score) 
-SELECT 
-    c.transaction_id,
+INSERT INTO dw.fact_transactions (
+    transaction_id, customer_key, merchant_key, payment_method_key, date_key, time_key,
+    amount_cop, is_approved, is_fraud, fraud_risk_score
+)
+SELECT
+    t.transaction_id,
     c.customer_key,
     m.merchant_key,
     p.payment_method_key,
-    d.date_key,
-    h.time_key,
-    s.amount_cop,
-    CASE WHEN s.status = 'approved' THEN TRUE ELSE FALSE END,
-    is_fraud,
-    r.risk_score
- FROM oltp.transactions s
- LEFT JOIN dw.dim_customer c
-       ON  c.customer_id = t.customer_id
-       AND s.created_at::DATE BETWEEN c.valid_from AND c.valid_to
- LEFT JOIN dw.dim_merchant m
-       ON m.merchant_id = s.merchant_id
- LEFT JOIN dw.dim_payment_method p
-       ON p.method_name = s.method_name;
- LEFT JOIN dw.dim_date d
-       ON d.full_date = s.created_at::DATE;
- LEFT JOIN dw.dim_hour h
-       ON h.hour = EXTRACT(HOUR FROM TIMESTAMP s.created_at);
- LEFT JOIN oltp.fraud_events r
-       ON r.transaction_id = r.transaction_id;
+    TO_CHAR(t.created_at, 'YYYYMMDD')::INT                                   AS date_key,
+    (EXTRACT(HOUR FROM t.created_at) * 100 + EXTRACT(MINUTE FROM t.created_at))::INT AS time_key,
+    t.amount_cop,
+    t.status = 'approved'                                                    AS is_approved,
+    t.is_fraud,
+    f.risk_score                                                             AS fraud_risk_score
+FROM oltp.transactions t
+-- SCD2: la versión del cliente vigente en la fecha de la transacción.
+-- Intervalo semiabierto [valid_from, valid_to): una fecha cae en una sola versión.
+JOIN dw.dim_customer c
+  ON  c.customer_id = t.customer_id
+  AND t.created_at::DATE >= c.valid_from
+  AND t.created_at::DATE <  c.valid_to
+JOIN dw.dim_merchant m          ON m.merchant_id  = t.merchant_id
+JOIN oltp.payment_methods pm    ON pm.method_id   = t.method_id
+JOIN dw.dim_payment_method p    ON p.method_name  = pm.method_name
+-- No todas las transacciones tienen evento de fraude: LEFT JOIN para no perderlas
+LEFT JOIN oltp.fraud_events f   ON f.transaction_id = t.transaction_id;
 """
+
 
 # ── Ejecución (dado) ─────────────────────────────────────────────────────────
 

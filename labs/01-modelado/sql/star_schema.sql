@@ -67,7 +67,7 @@ CREATE TABLE dw.dim_customer (
     customer_id   VARCHAR(10)  NOT NULL,
     city          VARCHAR(100),
     segment       VARCHAR(50), -- mass, premium, high_value
-    income_band   VARCHAR(20),
+    income_band   VARCHAR(20),  -- rango de ingreso mensual (<3M, 3-6M, 6-10M, >=10M), no el valor exacto
     valid_from    DATE         NOT NULL,
     valid_to      DATE         NOT NULL DEFAULT DATE '9999-12-31',
     is_current    BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -108,7 +108,7 @@ CREATE TABLE dw.dim_payment_method (
 -- Cada foreign key debe referenciar la PK de su dimensión.
 
 CREATE TABLE dw.fact_transactions (
-    transaction_id     VARCHAR(20)   NOT NULL,
+    transaction_id     VARCHAR(20)   NOT NULL,  -- dimensión degenerada: id de la transacción en el OLTP
     customer_key       INT           NOT NULL,
     merchant_key       INT           NOT NULL,
     payment_method_key INT           NOT NULL,
@@ -117,7 +117,7 @@ CREATE TABLE dw.fact_transactions (
     amount_cop         DECIMAL(18,2) NOT NULL,
     is_approved        BOOLEAN       NOT NULL,
     is_fraud           BOOLEAN       NOT NULL,
-    fraud_risk_score   DECIMAL(5,4),
+    fraud_risk_score   DECIMAL(5,4),            -- mismo tipo que oltp.fraud_events.risk_score; NULL si no hay evento
     CONSTRAINT pk_fact_transactions PRIMARY KEY (transaction_id),
     CONSTRAINT fk_fact_customer
         FOREIGN KEY (customer_key)       REFERENCES dw.dim_customer (customer_key),
@@ -135,9 +135,10 @@ CREATE TABLE dw.fact_transactions (
 -- Revisa los filtros y JOIN de olap_queries.sql. ¿Qué columnas de la
 -- tabla de hechos conviene indexar? Mide el efecto con EXPLAIN ANALYZE.
 
-CREATE INDEX dw.ix_fact_customer       ON dw.fact_transactions (customer_key);
-CREATE INDEX dw.ix_fact_merchant       ON dw.fact_transactions (merchant_key);
-CREATE INDEX dw.ix_fact_payment_method ON dw.fact_transactions (payment_method_key);
-CREATE INDEX dw.ix_fact_date           ON dw.fact_transactions (date_key);
-CREATE INDEX dw.ix_fact_time           ON dw.fact_transactions (time_key);
+-- En PostgreSQL el índice se crea en el esquema de su tabla: el nombre va sin "dw."
+CREATE INDEX ix_fact_customer       ON dw.fact_transactions (customer_key);
+CREATE INDEX ix_fact_merchant       ON dw.fact_transactions (merchant_key);
+CREATE INDEX ix_fact_payment_method ON dw.fact_transactions (payment_method_key);
+CREATE INDEX ix_fact_date           ON dw.fact_transactions (date_key);
+CREATE INDEX ix_fact_time           ON dw.fact_transactions (time_key);
   
