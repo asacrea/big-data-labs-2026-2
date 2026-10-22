@@ -72,16 +72,39 @@ FROM generate_series(0, 23) AS h, generate_series(0, 59) AS m;
 # - Es una dimensión SCD Tipo 2. En esta carga inicial cada cliente tiene una
 #   sola versión: ¿qué valores deben tener valid_from, valid_to e is_current?
 SQL_DIM_CUSTOMER = """
--- TODO: INSERT INTO dw.dim_customer (...) SELECT ... FROM oltp.customers;
+INSERT INTO dw.dim_customer (customer_id, city, segment, income_band,
+                             valid_from, valid_to, is_current) 
+SELECT 
+    s.customer_id,
+    s.city,
+    s.segment,
+    s.monthly_income_cop,
+    CASE
+        WHEN EXISTS (SELECT 1 FROM dw.dim_customer h
+                     WHERE h.customer_id = s.customer_id)
+        THEN CURRENT_DATE            -- ya existía: nueva versión por cambio
+        ELSE DATE '1900-01-01'       -- cliente nuevo: primera versión
+    END,
+    DATE '9999-12-31',
+    TRUE
+FROM oltp.customers s
+WHERE NOT EXISTS (
+    SELECT 1 FROM dw.dim_customer c
+     WHERE c.customer_id = s.customer_id
+     AND   c.is_current;
 """
-
 
 # ── TODO 2: dim_merchant ─────────────────────────────────────────────────────
 # Un registro por comercio desde oltp.merchants.
 SQL_DIM_MERCHANT = """
--- TODO: INSERT INTO dw.dim_merchant (...) SELECT ... FROM oltp.merchants;
+INSERT INTO dw.dim_merchant (merchant_id, name, category, city) 
+SELECT 
+    s.merchant_id,
+    s.name,
+    s.category,
+    s.city
+ FROM oltp.merchants s;
 """
-
 
 # ── TODO 3: dim_payment_method ───────────────────────────────────────────────
 # Un registro por método de pago desde oltp.payment_methods.
@@ -90,7 +113,9 @@ SQL_DIM_MERCHANT = """
 #   nequi, daviplata        → 'digital_wallet'
 #   pse                     → 'bank_transfer'
 SQL_DIM_PAYMENT_METHOD = """
--- TODO: INSERT INTO dw.dim_payment_method (...) SELECT ... FROM oltp.payment_methods;
+INSERT INTO dw.dim_payment_method (method_name) 
+SELECT s.method_name
+ FROM oltp.payment_methods s;
 """
 
 
@@ -106,7 +131,10 @@ SQL_DIM_PAYMENT_METHOD = """
 # - Traer el risk_score de oltp.fraud_events cuando exista (no todas las
 #   transacciones tienen evento de fraude: ¿qué tipo de JOIN necesitas?).
 SQL_FACT = """
--- TODO: INSERT INTO dw.fact_transactions (...) SELECT ... FROM oltp.transactions ...;
+INSERT INTO dw.fact_transactions (...) 
+SELECT ... 
+ FROM oltp.transactions s
+ ;
 """
 
 
