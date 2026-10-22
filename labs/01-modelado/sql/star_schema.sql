@@ -117,7 +117,7 @@ CREATE TABLE dw.fact_transactions (
     amount_cop         DECIMAL(18,2) NOT NULL,
     is_approved        BOOLEAN       NOT NULL,
     is_fraud           BOOLEAN       NOT NULL,
-    fraud_risk_score   DECIMAL(5,2),
+    fraud_risk_score   DECIMAL(5,4),
     CONSTRAINT pk_fact_transactions PRIMARY KEY (transaction_id),
     CONSTRAINT fk_fact_customer
         FOREIGN KEY (customer_key)       REFERENCES dw.dim_customer (customer_key),
