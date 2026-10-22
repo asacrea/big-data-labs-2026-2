@@ -114,10 +114,10 @@ SELECT
 #   pse                     → 'bank_transfer'
 SQL_DIM_PAYMENT_METHOD = """
 INSERT INTO dw.dim_payment_method (method_name) 
-SELECT s.method_name
+SELECT
+    s.method_name
  FROM oltp.payment_methods s;
 """
-
 
 # ── TODO 4: fact_transactions ────────────────────────────────────────────────
 # Grano: una fila por transacción de oltp.transactions.
@@ -131,12 +131,12 @@ SELECT s.method_name
 # - Traer el risk_score de oltp.fraud_events cuando exista (no todas las
 #   transacciones tienen evento de fraude: ¿qué tipo de JOIN necesitas?).
 SQL_FACT = """
-INSERT INTO dw.fact_transactions (...) 
-SELECT ... 
- FROM oltp.transactions s
- ;
+INSERT INTO dw.fact_transactions (customer_key, merchant_key, payment_method_key, 
+                                  date_key, time_key, amount_cop, is_approved, is_fraud,
+                                  fraud_risk_score) 
+SELECT ,,,,, s.amount_cop,,is_fraud, 
+ FROM oltp.transactions s;
 """
-
 
 # ── Ejecución (dado) ─────────────────────────────────────────────────────────
 
