@@ -24,7 +24,7 @@ FROM  dw.fact_transactions t
 JOIN  dw.dim_merchants m ON t.merchant_key = m.merchant_key
 JOIN  dw.dim_date d 		ON t.date_key     = d.date_key 
 WHERE d.full_date   >= CURRENT_DATE - 30
-AND   t.is_approved = 1
+AND   t.is_approved
 GROUP BY m.category
 ORDER BY total_cop DESC;
 
@@ -39,8 +39,10 @@ EXPLAIN ANALYZE
 SELECT
     c.segment,
     COUNT(*)                                     AS total_txn,
-    SUM(t.is_fraud)                              AS fraud_txn,
-    ROUND(100.0 * SUM(t.is_fraud) / COUNT(*), 2) AS tasa_fraude
+    SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END)  AS fraud_txn,
+    ROUND(
+        100.0 * SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END) / COUNT(*), 2
+    )                                                     AS tasa_fraude
 FROM dw.fact_transactions t
 JOIN dw.customers c ON t.customer_key = c.customer_key
 GROUP BY c.segment
@@ -56,7 +58,7 @@ SELECT  d.day_name   AS dia_semana,
 FROM  dw.fact_transactions f 
 JOIN  dw.dim_date d	ON f.date_key = d.date_key 
 JOIN  dw.dim_time t	ON f.time_key = t.time_key  
-WHERE t.is_approved = 1
+WHERE t.is_approved
 AND   d.full_date >= CURRENT_DATE - 7
 GROUP BY dia_semana, hora 
 ORDER BY dia_semana, hora; 
