@@ -34,6 +34,8 @@ proyección lineal con los datos en memoria.
 **Conclusión.** El 3FN optimiza registrar pagos sin redundancia. A cambio, cada consulta analítica reconstruye el
 contexto con joins, atributos de calendario calculados y lecturas amplias, y además pierde la historia de los atributos que cambian.
 
+<div class="secb" markdown="1">
+
 ## 2. Decisiones de diseño (Parte B)
 
 **Proceso de negocio y grano de la tabla de hechos.**  
@@ -70,10 +72,11 @@ No llegan al DW:
 - `fraud_risk_score`: **no aditiva**. Se agrega con `AVG` o `MAX`; sumar puntajes no tiene significado. Es `NULL` en las transacciones sin evento de fraude.
 - **Semiaditivas: ninguna.** Un saldo no se suma en el tiempo; eso ocurre en hechos *snapshot*, no en uno transaccional.
 
-**Por qué surrogate keys en lugar de las llaves del OLTP.**  
-(1) **SCD2:** un `customer_id` tiene varias versiones, así que no puede ser PK; cada versión necesita su propia llave.
-(2) **Independencia:** el DW no depende de que el OLTP conserve o reutilice sus llaves, y admite otras fuentes.
-(3) **Tamaño:** un `INT` de 4 bytes frente a un `VARCHAR(10)` achica hechos e índices y abarata los joins (182,5 M de filas al año).
+**Por qué surrogate keys en lugar de las llaves del OLTP.**
+
+1. **SCD2:** un `customer_id` tiene varias versiones, así que no puede ser PK; cada versión necesita su propia llave.
+2. **Independencia:** el DW no depende de que el OLTP conserve o reutilice sus llaves, y admite otras fuentes.
+3. **Tamaño:** un `INT` de 4 bytes frente a un `VARCHAR(10)` achica hechos e índices y abarata los joins (182,5 M de filas al año).
 
 **Por qué SCD Tipo 2 para la dimensión cliente: ¿qué atributo puede cambiar y qué análisis se daña si se sobrescribe?**  
 Pueden cambiar `segment` y `city`: el generador del curso simula clientes que *"se mudan de ciudad o cambian de segmento
@@ -93,6 +96,8 @@ tasa de fraude?"* queda con una respuesta falsa. Con SCD2 cada cambio crea una v
 | `ix_fact_*` | B-tree en las 5 FK | Para joins y filtros; su efecto se mide en la Parte D. |
 
 La carga que implementa este diseño (Parte C) y sus 9 validaciones en verde están en el **Anexo C**.
+
+</div>
 
 ## 3. Comparación de rendimiento con planes de ejecución (Parte D)
 
