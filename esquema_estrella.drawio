@@ -1,0 +1,73 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="paytrack" name="PayTrack OLAP">
+    <mxGraphModel dx="1400" dy="1000" grid="0" page="0" pageScale="1" pageWidth="1400" pageHeight="1000" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="PayTrack | Esquema estrella" vertex="1" parent="1" style="text;html=0;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Helvetica;fontSize=28;fontColor=#15384e;">
+          <mxGeometry as="geometry" x="30" y="15" width="950" height="45" />
+        </mxCell>
+        <mxCell id="subtitle" value="Proceso: pagos procesados. Grano: una fila por transacción, aprobada o rechazada." vertex="1" parent="1" style="text;html=0;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Helvetica;fontSize=18;fontColor=#15384e;">
+          <mxGeometry as="geometry" x="30" y="65" width="1200" height="40" />
+        </mxCell>
+        <mxCell id="date" value="dim_date" vertex="1" parent="1" style="swimlane;html=0;startSize=38;horizontal=1;rounded=0;fillColor=#e8f2f7;swimlaneFillColor=#ffffff;strokeColor=#68849a;fontColor=#15384e;fontStyle=1;fontSize=18;align=left;spacingLeft=12;">
+          <mxGeometry as="geometry" x="30" y="145" width="320" height="300" />
+        </mxCell>
+        <mxCell id="date_fields" value="PK  date_key : INT (YYYYMMDD)&#10;full_date : DATE&#10;year, quarter, month : SMALLINT&#10;month_name : VARCHAR(20)&#10;week_of_year, day_of_month&#10;day_of_week : SMALLINT (0-6)&#10;day_name : VARCHAR(20)&#10;is_weekend : BOOLEAN&#10;is_holiday_co : BOOLEAN" vertex="1" parent="date" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;spacingLeft=12;spacingTop=10;fontFamily=Helvetica;fontSize=15;fontColor=#253b47;">
+          <mxGeometry as="geometry" x="0" y="38" width="320" height="262" />
+        </mxCell>
+        <mxCell id="time" value="dim_time" vertex="1" parent="1" style="swimlane;html=0;startSize=38;horizontal=1;rounded=0;fillColor=#e8f2f7;swimlaneFillColor=#ffffff;strokeColor=#68849a;fontColor=#15384e;fontStyle=1;fontSize=18;align=left;spacingLeft=12;">
+          <mxGeometry as="geometry" x="30" y="550" width="320" height="160" />
+        </mxCell>
+        <mxCell id="time_fields" value="PK  time_key : INT (HHMM)&#10;hour, minute : SMALLINT&#10;period_of_day : VARCHAR(20)" vertex="1" parent="time" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;spacingLeft=12;spacingTop=10;fontFamily=Helvetica;fontSize=15;fontColor=#253b47;">
+          <mxGeometry as="geometry" x="0" y="38" width="320" height="122" />
+        </mxCell>
+        <mxCell id="fact" value="fact_transactions" vertex="1" parent="1" style="swimlane;html=0;startSize=38;horizontal=1;rounded=0;fillColor=#b9dedb;swimlaneFillColor=#ffffff;strokeColor=#68849a;fontColor=#15384e;fontStyle=1;fontSize=18;align=left;spacingLeft=12;">
+          <mxGeometry as="geometry" x="465" y="310" width="360" height="350" />
+        </mxCell>
+        <mxCell id="fact_fields" value="PK  transaction_id : VARCHAR(20)&#10;FK  date_key : INT&#10;FK  time_key : INT&#10;FK  customer_key : INT&#10;FK  merchant_key : INT&#10;FK  payment_method_key : INT&#10;amount_cop : NUMERIC(15,2)&#10;is_fraud : BOOLEAN&#10;is_approved : BOOLEAN&#10;fraud_risk_score : NUMERIC(5,4)&#10;&#10;1 fila = 1 transacción" vertex="1" parent="fact" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;spacingLeft=12;spacingTop=10;fontFamily=Helvetica;fontSize=15;fontColor=#253b47;">
+          <mxGeometry as="geometry" x="0" y="38" width="360" height="312" />
+        </mxCell>
+        <mxCell id="customer" value="dim_customer | SCD2" vertex="1" parent="1" style="swimlane;html=0;startSize=38;horizontal=1;rounded=0;fillColor=#e8f2f7;swimlaneFillColor=#ffffff;strokeColor=#68849a;fontColor=#15384e;fontStyle=1;fontSize=18;align=left;spacingLeft=12;">
+          <mxGeometry as="geometry" x="940" y="145" width="345" height="300" />
+        </mxCell>
+        <mxCell id="customer_fields" value="PK  customer_key : INT&#10;NK  customer_id : VARCHAR(10)&#10;city : VARCHAR(100)&#10;segment : VARCHAR(50)&#10;valid_from : TIMESTAMP&#10;valid_to : TIMESTAMP (NULL: abierta)&#10;is_current : BOOLEAN&#10;UNIQUE (customer_id, valid_from)&#10;1 versión vigente por customer_id" vertex="1" parent="customer" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;spacingLeft=12;spacingTop=10;fontFamily=Helvetica;fontSize=15;fontColor=#253b47;">
+          <mxGeometry as="geometry" x="0" y="38" width="345" height="262" />
+        </mxCell>
+        <mxCell id="merchant" value="dim_merchant" vertex="1" parent="1" style="swimlane;html=0;startSize=38;horizontal=1;rounded=0;fillColor=#e8f2f7;swimlaneFillColor=#ffffff;strokeColor=#68849a;fontColor=#15384e;fontStyle=1;fontSize=18;align=left;spacingLeft=12;">
+          <mxGeometry as="geometry" x="940" y="535" width="345" height="180" />
+        </mxCell>
+        <mxCell id="merchant_fields" value="PK  merchant_key : INT&#10;NK  merchant_id : VARCHAR(10), UQ&#10;name : VARCHAR(200)&#10;category, city : VARCHAR(100)" vertex="1" parent="merchant" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;spacingLeft=12;spacingTop=10;fontFamily=Helvetica;fontSize=15;fontColor=#253b47;">
+          <mxGeometry as="geometry" x="0" y="38" width="345" height="142" />
+        </mxCell>
+        <mxCell id="payment" value="dim_payment_method" vertex="1" parent="1" style="swimlane;html=0;startSize=38;horizontal=1;rounded=0;fillColor=#e8f2f7;swimlaneFillColor=#ffffff;strokeColor=#68849a;fontColor=#15384e;fontStyle=1;fontSize=18;align=left;spacingLeft=12;">
+          <mxGeometry as="geometry" x="465" y="785" width="360" height="150" />
+        </mxCell>
+        <mxCell id="payment_fields" value="PK  payment_method_key : INT&#10;NK  method_name : VARCHAR(50), UQ&#10;method_type : VARCHAR(30)" vertex="1" parent="payment" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;spacingLeft=12;spacingTop=10;fontFamily=Helvetica;fontSize=15;fontColor=#253b47;">
+          <mxGeometry as="geometry" x="0" y="38" width="360" height="112" />
+        </mxCell>
+        <mxCell id="rel_date" value="1 : N" edge="1" parent="1" source="date" target="fact" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;strokeColor=#527688;strokeWidth=2;fontSize=15;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.15;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="rel_time" value="1 : N" edge="1" parent="1" source="time" target="fact" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;strokeColor=#527688;strokeWidth=2;fontSize=15;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.8;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="rel_customer" value="1 : N" edge="1" parent="1" source="customer" target="fact" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;strokeColor=#527688;strokeWidth=2;fontSize=15;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.15;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="rel_merchant" value="1 : N" edge="1" parent="1" source="merchant" target="fact" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;strokeColor=#527688;strokeWidth=2;fontSize=15;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.8;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="rel_payment" value="1 : N" edge="1" parent="1" source="payment" target="fact" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;strokeColor=#527688;strokeWidth=2;fontSize=15;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="legend" value="PK: primaria | FK: foránea | NK: natural | UQ: única&#10;Cada hecho tiene exactamente una fila de cada dimensión. Una fila de dimensión puede tener 0..N hechos." vertex="1" parent="1" style="text;html=0;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Helvetica;fontSize=17;fontColor=#15384e;">
+          <mxGeometry as="geometry" x="30" y="960" width="1250" height="65" />
+        </mxCell>
+        <mxCell id="scd" value="SCD2: vigencia [valid_from, valid_to).&#10;Los hechos conservan la versión histórica." vertex="1" parent="1" style="text;html=0;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Helvetica;fontSize=16;fontColor=#15384e;">
+          <mxGeometry as="geometry" x="940" y="775" width="345" height="100" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

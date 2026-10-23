@@ -1,0 +1,10 @@
+# Python 3.12; dependencias del notebook y de los scripts del laboratorio.
+psycopg2-binary==2.9.13
+Faker==40.43.0
+rich==15.0.0
+pandas==3.0.6
+matplotlib==3.10.3
+nbformat==5.10.4
+nbclient==0.11.0
+nbconvert==7.17.1
+ipykernel==6.29.5
