@@ -1,7 +1,7 @@
 # Lab 1 · Modelado OLTP → OLAP
 
 **SI7006 Almacenamiento y Procesamiento de Grandes Datos · Maestría en Ingeniería de Datos · EAFIT 2026-2**  
-**Caso:** PayTrack Colombia · **Equipo:** Santiago Vélez Casallas · Luis Alberto Ortiz Quiroga  
+**Caso:** PayTrack Colombia · **Equipo:** Luis Alberto Ortiz Quiroga · Santiago Vélez Casallas  
 **Repositorio:** https://github.com/santiagovelcasallas/big-data-labs-2026-2
 
 > Borrador en Markdown; se entrega en PDF. Enunciado: *"Informe en PDF (máx. 3 páginas): diagnóstico del OLTP
