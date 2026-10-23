@@ -99,6 +99,8 @@ La carga que implementa este diseño (Parte C) y sus 9 validaciones en verde est
 
 </div>
 
+<div class="secd" markdown="1">
+
 ## 3. Comparación de rendimiento con planes de ejecución (Parte D)
 
 Las consultas de `sql/olap_queries.sql` usan solo `dw.*` y dan los mismos resultados que las del OLTP en los dos volúmenes
@@ -151,6 +153,8 @@ acceso aleatorio por fila (`random_page_cost = 4`). Cuando se necesita una fracc
 sequential scan es más barato, y forzar el índice multiplica el tiempo hasta por 3,2. En Q3, que es selectiva, el
 índice sí sería más rápido, pero el optimizador no lo ve. Hay dos causas: el filtro llega desde `dim_date` y no desde
 la tabla de hechos, y `random_page_cost = 4` supone un disco giratorio, no un SSD con los datos en caché.
+
+</div>
 
 ---
 
