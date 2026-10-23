@@ -1,0 +1,42 @@
+-- Q1: Monto total por categoría de comercio (últimos 30 días) · OLTP
+EXPLAIN ANALYZE
+SELECT
+    m.category,
+    COUNT(*)                           AS num_transactions,
+    SUM(t.amount_cop)                  AS total_cop,
+    AVG(t.amount_cop)                  AS avg_cop
+FROM oltp.transactions t
+JOIN oltp.merchants m ON t.merchant_id = m.merchant_id
+WHERE t.created_at >= CURRENT_DATE - 30
+  AND t.status = 'approved'
+GROUP BY m.category
+ORDER BY total_cop DESC;
+
+Sort  (cost=11564.14..11564.16 rows=7 width=80) (actual time=40.073..44.007 rows=7 loops=1)
+  Sort Key: (sum(t.amount_cop)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  ->  Finalize GroupAggregate  (cost=11562.16..11564.04 rows=7 width=80) (actual time=40.044..43.990 rows=7 loops=1)
+        Group Key: m.category
+        ->  Gather Merge  (cost=11562.16..11563.80 rows=14 width=80) (actual time=40.030..43.965 rows=21 loops=1)
+              Workers Planned: 2
+              Workers Launched: 2
+              ->  Sort  (cost=10562.14..10562.16 rows=7 width=80) (actual time=36.653..36.656 rows=7 loops=3)
+                    Sort Key: m.category
+                    Sort Method: quicksort  Memory: 26kB
+                    Worker 0:  Sort Method: quicksort  Memory: 26kB
+                    Worker 1:  Sort Method: quicksort  Memory: 26kB
+                    ->  Partial HashAggregate  (cost=10561.95..10562.04 rows=7 width=80) (actual time=36.602..36.606 rows=7 loops=3)
+                          Group Key: m.category
+                          Batches: 1  Memory Usage: 24kB
+                          Worker 0:  Batches: 1  Memory Usage: 24kB
+                          Worker 1:  Batches: 1  Memory Usage: 24kB
+                          ->  Hash Join  (cost=1.18..10098.17 rows=61838 width=16) (actual time=0.059..28.516 rows=49870 loops=3)
+                                Hash Cond: ((t.merchant_id)::text = (m.merchant_id)::text)
+                                ->  Parallel Seq Scan on transactions t  (cost=0.00..9848.67 rows=61838 width=13) (actual time=0.010..21.793 rows=49870 loops=3)
+                                      Filter: (((status)::text = 'approved'::text) AND (created_at >= (CURRENT_DATE - 30)))
+                                      Rows Removed by Filter: 116797
+                                ->  Hash  (cost=1.08..1.08 rows=8 width=13) (actual time=0.023..0.024 rows=8 loops=3)
+                                      Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                      ->  Seq Scan on merchants m  (cost=0.00..1.08 rows=8 width=13) (actual time=0.013..0.013 rows=8 loops=3)
+Planning Time: 0.330 ms
+Execution Time: 44.213 ms

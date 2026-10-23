@@ -3,7 +3,7 @@
 Ejecución de la Parte D del [README del lab](README.md), **en el mismo orden y con los mismos comandos**.
 Bajo cada paso, en cita, va el texto del enunciado tal cual; debajo, la evidencia de que se ejecutó.
 
-**Estado:** ✅ pasos 1 a 4 con 50.000 transacciones (22-oct-2026). ⏳ Repetición con 500.000 pendiente (ver anexo B).
+**Estado:** ✅ pasos 1 a 4 con 50.000 y con 500.000 transacciones (22-oct-2026). Respuestas en el [informe](informe/informe_lab1.md), sección 3.
 
 Para repetir los pasos 1 a 4 de una vez y regenerar todas las evidencias:
 
@@ -111,7 +111,16 @@ Ninguno modifica archivos del profesor ni el esquema: el paso 4 revierte cada `D
 
 > 💡 Con 50K filas las diferencias pueden ser pequeñas. Prueba también con `--transactions 500000` y compara cómo crecen los tiempos en cada modelo.
 
-Ya se corrió dos veces con 500K, y en ambas la verificación salió 3/3 exacta (28/28, 12/12 y 480/480 celdas). La segunda vez Docker se cayó porque el disco C: se llenó, y las evidencias de 500K quedaron incompletas, así que no se incluyen. Queda pendiente repetirla cuando haya al menos ~2 GB libres:
+Se repitieron los pasos 1 a 4 con 500.000 transacciones: evidencias en [`evidencias/parte_d_500000/`](evidencias/parte_d_500000/).
+La verificación sigue exacta: `check_queries.py` 3/3 y [`paso2_anexo_exactitud.txt`](evidencias/parte_d_500000/paso2_anexo_exactitud.txt) con 28/28, 12/12 y 384/384 celdas iguales. Q3 tiene 96 filas porque los datos de 500K se generan con otra ventana de fechas.
+
+| Consulta | OLTP 50K | OLAP 50K | OLAP/OLTP 50K | OLTP 500K | OLAP 500K | OLAP/OLTP 500K |
+|---|---|---|---|---|---|---|
+| Q1 | 8,96 ms | 13,56 ms | 1,51× | 50,67 ms | 53,83 ms | **1,06×** |
+| Q2 | 18,19 ms | 17,98 ms | 0,99× | 73,23 ms | 74,18 ms | **1,01×** |
+| Q3 | 5,82 ms | 9,66 ms | 1,66× | 31,17 ms | 37,46 ms | **1,20×** |
+
+Con 10 veces más datos la desventaja de la estrella se reduce, porque los joins extra son con dimensiones pequeñas y cuestan casi lo mismo. Con 500K, Q1 en el OLTP abandona el índice de `created_at` y pasa a *Parallel Seq Scan*, igual que la estrella. Los índices de la tabla de hechos siguen sin usarse. Forzarlos (`enable_seqscan = off`) lleva Q1 de 55,7 a 179,0 ms y Q2 de 69,6 a 164,7 ms, y solo mejora Q3, de 36,3 a 25,1 ms ([`paso4_indices.txt`](evidencias/parte_d_500000/paso4_indices.txt)).
 
 ```bash
 bash labs/01-modelado/run_parte_d.sh 500000   # luego volver a 50K: bash labs/01-modelado/run_parte_d.sh

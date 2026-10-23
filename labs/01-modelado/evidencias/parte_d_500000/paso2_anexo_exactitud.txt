@@ -1,0 +1,115 @@
+─────────────────────────────────────── Q1: Monto total por categoría de comercio (últimos 30 días) ────────────────────────────────────────
+┌──────┬──────────────────┬────────────────────┬────────────────────┬───────┐
+│ fila │ columna          │               OLTP │               OLAP │ igual │
+├──────┼──────────────────┼────────────────────┼────────────────────┼───────┤
+│    1 │ category         │             retail │             retail │ ✓     │
+│      │ num_transactions │              37423 │              37423 │ ✓     │
+│      │ total_cop        │      2783645455.27 │      2783645455.27 │ ✓     │
+│      │ avg_cop          │ 74383.279140368223 │ 74383.279140368223 │ ✓     │
+├──────┼──────────────────┼────────────────────┼────────────────────┼───────┤
+│    2 │ category         │          streaming │          streaming │ ✓     │
+│      │ num_transactions │              18715 │              18715 │ ✓     │
+│      │ total_cop        │      1421688160.32 │      1421688160.32 │ ✓     │
+│      │ avg_cop          │ 75965.170201442693 │ 75965.170201442693 │ ✓     │
+├──────┼──────────────────┼────────────────────┼────────────────────┼───────┤
+│    3 │ category         │              telco │              telco │ ✓     │
+│      │ num_transactions │              18607 │              18607 │ ✓     │
+│      │ total_cop        │      1408202040.39 │      1408202040.39 │ ✓     │
+│      │ avg_cop          │ 75681.304906218090 │ 75681.304906218090 │ ✓     │
+├──────┼──────────────────┼────────────────────┼────────────────────┼───────┤
+│    4 │ category         │            grocery │            grocery │ ✓     │
+│      │ num_transactions │              18716 │              18716 │ ✓     │
+│      │ total_cop        │      1397320172.89 │      1397320172.89 │ ✓     │
+│      │ avg_cop          │ 74659.124433105364 │ 74659.124433105364 │ ✓     │
+├──────┼──────────────────┼────────────────────┼────────────────────┼───────┤
+│    5 │ category         │          transport │          transport │ ✓     │
+│      │ num_transactions │              18758 │              18758 │ ✓     │
+│      │ total_cop        │      1388607314.04 │      1388607314.04 │ ✓     │
+│      │ avg_cop          │ 74027.471694210470 │ 74027.471694210470 │ ✓     │
+├──────┼──────────────────┼────────────────────┼────────────────────┼───────┤
+│    6 │ category         │             travel │             travel │ ✓     │
+│      │ num_transactions │              18746 │              18746 │ ✓     │
+│      │ total_cop        │      1385288572.12 │      1385288572.12 │ ✓     │
+│      │ avg_cop          │ 73897.822048437000 │ 73897.822048437000 │ ✓     │
+├──────┼──────────────────┼────────────────────┼────────────────────┼───────┤
+│    7 │ category         │           delivery │           delivery │ ✓     │
+│      │ num_transactions │              18644 │              18644 │ ✓     │
+│      │ total_cop        │      1382233062.05 │      1382233062.05 │ ✓     │
+│      │ avg_cop          │ 74138.224739862690 │ 74138.224739862690 │ ✓     │
+└──────┴──────────────────┴────────────────────┴────────────────────┴───────┘
+  ✓ columnas (nombre y orden): ['category', 'num_transactions', 'total_cop', 'avg_cop']
+  ✓ número de filas: OLTP 7 · OLAP 7
+  ✓ valores exactos, fila a fila, sin redondeo: 28/28 celdas iguales
+  ✓ suma de control SUM(num_transactions): OLTP 149609 · OLAP 149609
+  ✓ suma de control SUM(total_cop): OLTP 11166984777.08 · OLAP 11166984777.08
+──────────────────────────────────────────────── Q2: Tasa de fraude por segmento de cliente ────────────────────────────────────────────────
+┌──────┬────────────────┬────────────┬────────────┬───────┐
+│ fila │ columna        │       OLTP │       OLAP │ igual │
+├──────┼────────────────┼────────────┼────────────┼───────┤
+│    1 │ segment        │    premium │    premium │ ✓     │
+│      │ total_txn      │     100716 │     100716 │ ✓     │
+│      │ fraud_txn      │        407 │        407 │ ✓     │
+│      │ fraud_rate_pct │       0.40 │       0.40 │ ✓     │
+├──────┼────────────────┼────────────┼────────────┼───────┤
+│    2 │ segment        │ high_value │ high_value │ ✓     │
+│      │ total_txn      │      91114 │      91114 │ ✓     │
+│      │ fraud_txn      │        350 │        350 │ ✓     │
+│      │ fraud_rate_pct │       0.38 │       0.38 │ ✓     │
+├──────┼────────────────┼────────────┼────────────┼───────┤
+│    3 │ segment        │       mass │       mass │ ✓     │
+│      │ total_txn      │     308170 │     308170 │ ✓     │
+│      │ fraud_txn      │       1162 │       1162 │ ✓     │
+│      │ fraud_rate_pct │       0.38 │       0.38 │ ✓     │
+└──────┴────────────────┴────────────┴────────────┴───────┘
+  ✓ columnas (nombre y orden): ['segment', 'total_txn', 'fraud_txn', 'fraud_rate_pct']
+  ✓ número de filas: OLTP 3 · OLAP 3
+  ✓ valores exactos, fila a fila, sin redondeo: 12/12 celdas iguales
+  ✓ suma de control SUM(total_txn): OLTP 500000 · OLAP 500000
+  ✓ suma de control SUM(fraud_txn): OLTP 1919 · OLAP 1919
+──────────────────────────────── Q3: Volumen de transacciones por día de la semana y hora (últimos 7 días) ─────────────────────────────────
+┌──────┬──────────────────┬─────────────┬─────────────┬───────┐
+│ fila │ columna          │        OLTP │        OLAP │ igual │
+├──────┼──────────────────┼─────────────┼─────────────┼───────┤
+│    1 │ day_of_week      │           0 │           0 │ ✓     │
+│      │ hour             │           0 │           0 │ ✓     │
+│      │ num_transactions │         244 │         244 │ ✓     │
+│      │ total_cop        │ 17471901.24 │ 17471901.24 │ ✓     │
+├──────┼──────────────────┼─────────────┼─────────────┼───────┤
+│    2 │ day_of_week      │           0 │           0 │ ✓     │
+│      │ hour             │           1 │           1 │ ✓     │
+│      │ num_transactions │         223 │         223 │ ✓     │
+│      │ total_cop        │ 17295480.08 │ 17295480.08 │ ✓     │
+├──────┼──────────────────┼─────────────┼─────────────┼───────┤
+│    3 │ day_of_week      │           0 │           0 │ ✓     │
+│      │ hour             │           2 │           2 │ ✓     │
+│      │ num_transactions │         214 │         214 │ ✓     │
+│      │ total_cop        │ 19035151.92 │ 19035151.92 │ ✓     │
+├──────┼──────────────────┼─────────────┼─────────────┼───────┤
+│    4 │ day_of_week      │           0 │           0 │ ✓     │
+│      │ hour             │           3 │           3 │ ✓     │
+│      │ num_transactions │         238 │         238 │ ✓     │
+│      │ total_cop        │ 18959452.51 │ 18959452.51 │ ✓     │
+├──────┼──────────────────┼─────────────┼─────────────┼───────┤
+│    5 │ day_of_week      │           0 │           0 │ ✓     │
+│      │ hour             │           4 │           4 │ ✓     │
+│      │ num_transactions │         243 │         243 │ ✓     │
+│      │ total_cop        │ 16056721.84 │ 16056721.84 │ ✓     │
+├──────┼──────────────────┼─────────────┼─────────────┼───────┤
+│    6 │ day_of_week      │           0 │           0 │ ✓     │
+│      │ hour             │           5 │           5 │ ✓     │
+│      │ num_transactions │         213 │         213 │ ✓     │
+│      │ total_cop        │ 18039059.62 │ 18039059.62 │ ✓     │
+├──────┼──────────────────┼─────────────┼─────────────┼───────┤
+│    7 │ day_of_week      │           0 │           0 │ ✓     │
+│      │ hour             │           6 │           6 │ ✓     │
+│      │ num_transactions │         208 │         208 │ ✓     │
+│      │ total_cop        │ 17296973.27 │ 17296973.27 │ ✓     │
+└──────┴──────────────────┴─────────────┴─────────────┴───────┘
+  … 89 filas más, comparadas igual pero sin mostrarlas
+  ✓ columnas (nombre y orden): ['day_of_week', 'hour', 'num_transactions', 'total_cop']
+  ✓ número de filas: OLTP 96 · OLAP 96
+  ✓ valores exactos, fila a fila, sin redondeo: 384/384 celdas iguales
+  ✓ suma de control SUM(num_transactions): OLTP 21881 · OLAP 21881
+  ✓ suma de control SUM(total_cop): OLTP 1646405169.86 · OLAP 1646405169.86
+
+3/3 consultas con resultados exactamente iguales
