@@ -161,7 +161,7 @@ la tabla de hechos, y `random_page_cost = 4` supone un disco giratorio, no un SS
 ## Anexo A. Diagrama del esquema estrella
 
 `fact_transactions` está al centro, con una relación 1:N con cada una de las 5 dimensiones; `dim_customer` es SCD Tipo 2.
-El archivo draw.io se entrega aparte.
+Editable en draw.io: `labs/01-modelado/diagrama/esquema_estrella.drawio`. Los tipos son los de `sql/star_schema.sql`.
 
 ![Esquema estrella PayTrack: fact_transactions al centro y relaciones 1:N con cada dimensión](img/esquema_estrella.png)
 **Figura A.1.** Esquema estrella PayTrack. Grano: una fila por transacción.
