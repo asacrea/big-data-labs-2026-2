@@ -6,9 +6,9 @@ INSERT ... SELECT que lee de oltp.* y escribe en dw.*.
 
 Uso: python labs/01-modelado/load_star.py
 
-Antes de ejecutarlo debes:
-  1. Completar los TODO de sql/star_schema.sql
-  2. Completar los TODO de este archivo (SQL_DIM_*, SQL_FACT)
+Archivos utilizados:
+  1. sql/star_schema.sql: diseño dimensional.
+  2. SQL_DIM_* y SQL_FACT: carga inicial completa.
 Al final se ejecuta verify(), que valida tu carga. No lo modifiques.
 """
 
@@ -66,35 +66,49 @@ FROM generate_series(0, 23) AS h, generate_series(0, 59) AS m;
 """
 
 
-# ── TODO 1: dim_customer ─────────────────────────────────────────────────────
+# ── 1: dim_customer ─────────────────────────────────────────────────────
 # Carga un registro por cliente desde oltp.customers.
 # - La surrogate key (customer_key) la genera la base de datos: no la insertes.
 # - Es una dimensión SCD Tipo 2. En esta carga inicial cada cliente tiene una
 #   sola versión: ¿qué valores deben tener valid_from, valid_to e is_current?
 SQL_DIM_CUSTOMER = """
--- TODO: INSERT INTO dw.dim_customer (...) SELECT ... FROM oltp.customers;
+INSERT INTO dw.dim_customer
+    (customer_id, city, segment, valid_from, valid_to, is_current)
+SELECT customer_id, city, segment, '-infinity'::TIMESTAMP, NULL, TRUE
+FROM oltp.customers;
 """
+# Snapshot inicial: no existe historia de cambios en la fuente. La primera
+# versión cubre los hechos disponibles; -infinity no inventa una fecha de cambio.
 
 
-# ── TODO 2: dim_merchant ─────────────────────────────────────────────────────
+# ── 2: dim_merchant ─────────────────────────────────────────────────────
 # Un registro por comercio desde oltp.merchants.
 SQL_DIM_MERCHANT = """
--- TODO: INSERT INTO dw.dim_merchant (...) SELECT ... FROM oltp.merchants;
+INSERT INTO dw.dim_merchant (merchant_id, name, category, city)
+SELECT merchant_id, name, category, city FROM oltp.merchants;
 """
 
 
-# ── TODO 3: dim_payment_method ───────────────────────────────────────────────
+# ── 3: dim_payment_method ───────────────────────────────────────────────
 # Un registro por método de pago desde oltp.payment_methods.
 # Enriquece la dimensión con method_type, un atributo que NO existe en el OLTP:
 #   credit_card, debit_card → 'card'
 #   nequi, daviplata        → 'digital_wallet'
 #   pse                     → 'bank_transfer'
 SQL_DIM_PAYMENT_METHOD = """
--- TODO: INSERT INTO dw.dim_payment_method (...) SELECT ... FROM oltp.payment_methods;
+INSERT INTO dw.dim_payment_method (method_name, method_type)
+SELECT method_name,
+       CASE
+           WHEN method_name IN ('credit_card', 'debit_card') THEN 'card'
+           WHEN method_name IN ('nequi', 'daviplata') THEN 'digital_wallet'
+           WHEN method_name = 'pse' THEN 'bank_transfer'
+           ELSE 'other'
+       END
+FROM oltp.payment_methods;
 """
 
 
-# ── TODO 4: fact_transactions ────────────────────────────────────────────────
+# ── 4: fact_transactions ────────────────────────────────────────────────
 # Grano: una fila por transacción de oltp.transactions.
 # Para cada transacción debes:
 # - Traducir cada natural key (customer_id, merchant_id, method_id) a la
@@ -106,7 +120,25 @@ SQL_DIM_PAYMENT_METHOD = """
 # - Traer el risk_score de oltp.fraud_events cuando exista (no todas las
 #   transacciones tienen evento de fraude: ¿qué tipo de JOIN necesitas?).
 SQL_FACT = """
--- TODO: INSERT INTO dw.fact_transactions (...) SELECT ... FROM oltp.transactions ...;
+INSERT INTO dw.fact_transactions
+    (transaction_id, date_key, time_key, customer_key, merchant_key,
+     payment_method_key, amount_cop, is_fraud, is_approved, fraud_risk_score)
+SELECT t.transaction_id, TO_CHAR(t.created_at, 'YYYYMMDD')::INT,
+       EXTRACT(HOUR FROM t.created_at)::INT * 100 + EXTRACT(MINUTE FROM t.created_at)::INT,
+       c.customer_key, m.merchant_key, p.payment_method_key,
+       t.amount_cop, t.is_fraud, t.status = 'approved', e.fraud_risk_score
+FROM oltp.transactions t
+JOIN dw.dim_customer c ON c.customer_id = t.customer_id
+    AND t.created_at >= c.valid_from
+    AND (c.valid_to IS NULL OR t.created_at < c.valid_to)
+JOIN dw.dim_merchant m ON m.merchant_id = t.merchant_id
+JOIN oltp.payment_methods pm ON pm.method_id = t.method_id
+JOIN dw.dim_payment_method p ON p.method_name = pm.method_name
+LEFT JOIN (
+    SELECT transaction_id, MAX(risk_score) AS fraud_risk_score
+    FROM oltp.fraud_events
+    GROUP BY transaction_id
+) e ON e.transaction_id = t.transaction_id;
 """
 
 
