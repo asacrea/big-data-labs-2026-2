@@ -1,0 +1,47 @@
+──────────────────────────────── Paso 4 · índices de la tabla de hechos: con y sin cada uno (mediana de 5) ─────────────────────────────────
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+┃ Configuración              ┃ Q1: tiempo ┃ Q1: cómo lee fact ┃ Q2: tiempo ┃ Q2: cómo lee fact ┃ Q3: tiempo ┃ Q3: cómo lee fact ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+│ con los 5 índices          │  59.738 ms │ Parallel Seq Scan │  77.077 ms │ Parallel Seq Scan │  42.821 ms │ Parallel Seq Scan │
+├────────────────────────────┼────────────┼───────────────────┼────────────┼───────────────────┼────────────┼───────────────────┤
+│ sin ix_fact_customer       │  54.659 ms │ Parallel Seq Scan │  69.961 ms │ Parallel Seq Scan │  39.044 ms │ Parallel Seq Scan │
+├────────────────────────────┼────────────┼───────────────────┼────────────┼───────────────────┼────────────┼───────────────────┤
+│ sin ix_fact_date           │  65.276 ms │ Parallel Seq Scan │  70.755 ms │ Parallel Seq Scan │  38.849 ms │ Parallel Seq Scan │
+├────────────────────────────┼────────────┼───────────────────┼────────────┼───────────────────┼────────────┼───────────────────┤
+│ sin ix_fact_merchant       │  52.521 ms │ Parallel Seq Scan │  70.579 ms │ Parallel Seq Scan │  36.937 ms │ Parallel Seq Scan │
+├────────────────────────────┼────────────┼───────────────────┼────────────┼───────────────────┼────────────┼───────────────────┤
+│ sin ix_fact_payment_method │  54.438 ms │ Parallel Seq Scan │  66.299 ms │ Parallel Seq Scan │  42.623 ms │ Parallel Seq Scan │
+├────────────────────────────┼────────────┼───────────────────┼────────────┼───────────────────┼────────────┼───────────────────┤
+│ sin ix_fact_time           │  57.007 ms │ Parallel Seq Scan │  71.228 ms │ Parallel Seq Scan │  36.209 ms │ Parallel Seq Scan │
+├────────────────────────────┼────────────┼───────────────────┼────────────┼───────────────────┼────────────┼───────────────────┤
+│ sin ningún índice          │  55.187 ms │ Parallel Seq Scan │  68.016 ms │ Parallel Seq Scan │  39.819 ms │ Parallel Seq Scan │
+└────────────────────────────┴────────────┴───────────────────┴────────────┴───────────────────┴────────────┴───────────────────┘
+
+¿Qué índice usa el optimizador en cada consulta?
+  – ix_fact_customer: ninguna consulta lo usa
+  – ix_fact_date: ninguna consulta lo usa
+  – ix_fact_merchant: ninguna consulta lo usa
+  – ix_fact_payment_method: ninguna consulta lo usa
+  – ix_fact_time: ninguna consulta lo usa
+
+Selectividad: fracción de fact_transactions que necesita cada consulta
+  Q1: 149,766 de 500,000 filas = 30.0 %
+  Q2: 500,000 de 500,000 filas = 100.0 %
+  Q3: 21,905 de 500,000 filas = 4.4 %
+
+¿Por qué el optimizador a veces prefiere un sequential scan? Se prohíbe con SET enable_seqscan = off y se compara:
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃ Consulta ┃ Plan                 ┃ Cómo lee fact                          ┃ Costo estimado ┃ Tiempo real ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│ Q1       │ elegido              │ Parallel Seq Scan                      │          9,527 │   55.702 ms │
+├──────────┼──────────────────────┼────────────────────────────────────────┼────────────────┼─────────────┤
+│          │ forzado sin seq scan │ Bitmap Heap Scan (ix_fact_date)        │         24,433 │  179.028 ms │
+├──────────┼──────────────────────┼────────────────────────────────────────┼────────────────┼─────────────┤
+│ Q2       │ elegido              │ Parallel Seq Scan                      │         10,370 │   69.593 ms │
+├──────────┼──────────────────────┼────────────────────────────────────────┼────────────────┼─────────────┤
+│          │ forzado sin seq scan │ Parallel Index Scan (ix_fact_customer) │         30,373 │  164.702 ms │
+├──────────┼──────────────────────┼────────────────────────────────────────┼────────────────┼─────────────┤
+│ Q3       │ elegido              │ Parallel Seq Scan                      │          8,992 │   36.332 ms │
+├──────────┼──────────────────────┼────────────────────────────────────────┼────────────────┼─────────────┤
+│          │ forzado sin seq scan │ Bitmap Heap Scan (ix_fact_date)        │         14,022 │   25.141 ms │
+└──────────┴──────────────────────┴────────────────────────────────────────┴────────────────┴─────────────┘

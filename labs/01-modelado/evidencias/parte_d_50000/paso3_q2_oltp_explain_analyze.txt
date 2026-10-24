@@ -1,0 +1,28 @@
+-- Q2: Tasa de fraude por segmento de cliente · OLTP
+EXPLAIN ANALYZE
+SELECT
+    c.segment,
+    COUNT(*)                                              AS total_txn,
+    SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END)          AS fraud_txn,
+    ROUND(
+        100.0 * SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END) / COUNT(*), 2
+    )                                                     AS fraud_rate_pct
+FROM oltp.transactions t
+JOIN oltp.customers c ON t.customer_id = c.customer_id
+GROUP BY c.segment
+ORDER BY fraud_rate_pct DESC;
+
+Sort  (cost=1595.70..1595.71 rows=3 width=54) (actual time=18.073..18.076 rows=3 loops=1)
+  Sort Key: (round(((100.0 * (sum(CASE WHEN t.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  ->  HashAggregate  (cost=1595.61..1595.68 rows=3 width=54) (actual time=18.055..18.060 rows=3 loops=1)
+        Group Key: c.segment
+        Batches: 1  Memory Usage: 24kB
+        ->  Hash Join  (cost=19.25..1220.61 rows=50000 width=7) (actual time=0.130..11.796 rows=50000 loops=1)
+              Hash Cond: ((t.customer_id)::text = (c.customer_id)::text)
+              ->  Seq Scan on transactions t  (cost=0.00..1069.00 rows=50000 width=9) (actual time=0.007..2.570 rows=50000 loops=1)
+              ->  Hash  (cost=13.00..13.00 rows=500 width=14) (actual time=0.111..0.112 rows=500 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 31kB
+                    ->  Seq Scan on customers c  (cost=0.00..13.00 rows=500 width=14) (actual time=0.006..0.044 rows=500 loops=1)
+Planning Time: 0.513 ms
+Execution Time: 18.187 ms

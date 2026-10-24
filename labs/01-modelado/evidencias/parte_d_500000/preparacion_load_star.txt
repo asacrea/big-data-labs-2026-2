@@ -1,0 +1,21 @@
+✓ Esquema estrella creado
+✓ dim_date: 91 filas
+✓ dim_time: 1440 filas
+✓ dim_customer: 500 filas
+✓ dim_merchant: 8 filas
+✓ dim_payment_method: 5 filas
+✓ fact_transactions: 500000 filas
+
+Validando la carga...
+  ✓ dim_customer tiene un registro vigente por cliente
+  ✓ dim_merchant tiene todos los comercios
+  ✓ dim_payment_method tiene todos los métodos
+  ✓ fact_transactions tiene una fila por transacción
+  ✓ el monto total cuadra
+  ✓ el número de fraudes cuadra
+  ✓ el número de transacciones aprobadas cuadra
+  ✓ toda transacción tiene una fecha y hora válidas en las dimensiones
+  ✓ toda transacción tiene cliente, comercio y método en las 
+dimensiones
+
+¡Esquema estrella cargado y validado!

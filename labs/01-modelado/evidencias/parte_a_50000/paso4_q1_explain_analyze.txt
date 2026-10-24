@@ -1,0 +1,38 @@
+-- Q1: Monto total por categoría de comercio (últimos 30 días)
+EXPLAIN ANALYZE
+SELECT
+    m.category,
+    COUNT(*)                           AS num_transactions,
+    SUM(t.amount_cop)                  AS total_cop,
+    AVG(t.amount_cop)                  AS avg_cop
+FROM oltp.transactions t
+JOIN oltp.merchants m ON t.merchant_id = m.merchant_id
+WHERE t.created_at >= CURRENT_DATE - 30
+  AND t.status = 'approved'
+GROUP BY m.category
+ORDER BY total_cop DESC;
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1431.46..1431.48 rows=7 width=80) (actual time=9.407..9.410 rows=7 loops=1)
+   Sort Key: (sum(t.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   ->  HashAggregate  (cost=1431.25..1431.36 rows=7 width=80) (actual time=9.358..9.363 rows=7 loops=1)
+         Group Key: m.category
+         Batches: 1  Memory Usage: 24kB
+         ->  Hash Join  (cost=341.57..1307.44 rows=16508 width=16) (actual time=0.895..6.617 rows=16624 loops=1)
+               Hash Cond: ((t.merchant_id)::text = (m.merchant_id)::text)
+               ->  Bitmap Heap Scan on transactions t  (cost=340.39..1239.97 rows=16508 width=13) (actual time=0.864..4.184 rows=16624 loops=1)
+                     Recheck Cond: (created_at >= (CURRENT_DATE - 30))
+                     Filter: ((status)::text = 'approved'::text)
+                     Rows Removed by Filter: 22
+                     Heap Blocks: exact=569
+                     ->  Bitmap Index Scan on idx_txn_created_at  (cost=0.00..336.26 rows=16529 width=0) (actual time=0.812..0.813 rows=16646 loops=1)
+                           Index Cond: (created_at >= (CURRENT_DATE - 30))
+               ->  Hash  (cost=1.08..1.08 rows=8 width=13) (actual time=0.014..0.015 rows=8 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     ->  Seq Scan on merchants m  (cost=0.00..1.08 rows=8 width=13) (actual time=0.003..0.004 rows=8 loops=1)
+ Planning Time: 2.458 ms
+ Execution Time: 9.586 ms
+(20 rows)
+
+

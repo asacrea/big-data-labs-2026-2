@@ -1,0 +1,5 @@
+  ✓ Q1: 7 filas idénticas
+  ✓ Q2: 3 filas idénticas
+  ✓ Q3: 120 filas idénticas
+
+3/3 consultas correctas

@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="840" viewBox="0 0 1280 840" font-family="Helvetica, Arial, sans-serif">
+<rect width="1280" height="840" fill="#ffffff"/>
+<text x="40" y="50" font-size="24" font-weight="bold" fill="#111">Esquema estrella PayTrack</text>
+<path d="M470,303.0 L448,303.0 C405.0,303.0 405.0,127.0 362,127.0 L340,127.0" fill="none" stroke="#3b7d3b" stroke-width="2.2"/>
+<path d="M456,303.0 L470,296.0 M456,303.0 L470,310.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="348" y1="120.0" x2="348" y2="134.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="354" y1="120.0" x2="354" y2="134.0" stroke="#3b7d3b" stroke-width="2"/>
+<path d="M810,329.0 L832,329.0 C875.0,329.0 875.0,127.0 918,127.0 L940,127.0" fill="none" stroke="#3b7d3b" stroke-width="2.2"/>
+<path d="M824,329.0 L810,322.0 M824,329.0 L810,336.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="932" y1="120.0" x2="932" y2="134.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="926" y1="120.0" x2="926" y2="134.0" stroke="#3b7d3b" stroke-width="2"/>
+<path d="M810,355.0 L832,355.0 C875.0,355.0 875.0,357.0 918,357.0 L940,357.0" fill="none" stroke="#3b7d3b" stroke-width="2.2"/>
+<path d="M824,355.0 L810,348.0 M824,355.0 L810,362.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="932" y1="350.0" x2="932" y2="364.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="926" y1="350.0" x2="926" y2="364.0" stroke="#3b7d3b" stroke-width="2"/>
+<path d="M470,381.0 L448,381.0 C405.0,381.0 405.0,447.0 362,447.0 L340,447.0" fill="none" stroke="#3b7d3b" stroke-width="2.2"/>
+<path d="M456,381.0 L470,374.0 M456,381.0 L470,388.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="348" y1="440.0" x2="348" y2="454.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="354" y1="440.0" x2="354" y2="454.0" stroke="#3b7d3b" stroke-width="2"/>
+<path d="M810,407.0 L832,407.0 C875.0,407.0 875.0,547.0 918,547.0 L940,547.0" fill="none" stroke="#3b7d3b" stroke-width="2.2"/>
+<path d="M824,407.0 L810,400.0 M824,407.0 L810,414.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="932" y1="540.0" x2="932" y2="554.0" stroke="#3b7d3b" stroke-width="2"/>
+<line x1="926" y1="540.0" x2="926" y2="554.0" stroke="#3b7d3b" stroke-width="2"/>
+<rect x="40" y="400" width="300" height="346" fill="#fff" stroke="#555" stroke-width="1.2"/>
+<rect x="40" y="400" width="300" height="34" fill="#b3d795" stroke="#555" stroke-width="1.2"/>
+<text x="190.0" y="422" font-size="15" font-weight="bold" text-anchor="middle" fill="#111">dim_date</text>
+<text x="52" y="452" font-size="13.5" font-weight="bold" fill="#24434f">date_key (PK)</text>
+<text x="328" y="452" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="52" y="478" font-size="13.5" font-weight="normal" fill="#1a7f37">full_date (NK)</text>
+<text x="328" y="478" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">DATE</text>
+<text x="52" y="504" font-size="13.5" font-weight="normal" fill="#1f2328">year</text>
+<text x="328" y="504" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="52" y="530" font-size="13.5" font-weight="normal" fill="#1f2328">quarter</text>
+<text x="328" y="530" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="52" y="556" font-size="13.5" font-weight="normal" fill="#1f2328">month</text>
+<text x="328" y="556" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="52" y="582" font-size="13.5" font-weight="normal" fill="#1f2328">month_name</text>
+<text x="328" y="582" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(20)</text>
+<text x="52" y="608" font-size="13.5" font-weight="normal" fill="#1f2328">week_of_year</text>
+<text x="328" y="608" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="52" y="634" font-size="13.5" font-weight="normal" fill="#1f2328">day_of_month</text>
+<text x="328" y="634" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="52" y="660" font-size="13.5" font-weight="normal" fill="#1f2328">day_of_week</text>
+<text x="328" y="660" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="52" y="686" font-size="13.5" font-weight="normal" fill="#1f2328">day_name</text>
+<text x="328" y="686" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(20)</text>
+<text x="52" y="712" font-size="13.5" font-weight="normal" fill="#1f2328">is_weekend</text>
+<text x="328" y="712" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">BOOLEAN</text>
+<text x="52" y="738" font-size="13.5" font-weight="normal" fill="#1f2328">is_holiday_co</text>
+<text x="328" y="738" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">BOOLEAN</text>
+<rect x="40" y="80" width="300" height="242" fill="#fff" stroke="#555" stroke-width="1.2"/>
+<rect x="40" y="80" width="300" height="34" fill="#fdf0b0" stroke="#555" stroke-width="1.2"/>
+<text x="190.0" y="102" font-size="15" font-weight="bold" text-anchor="middle" fill="#111">dim_customer</text>
+<text x="52" y="132" font-size="13.5" font-weight="bold" fill="#24434f">customer_key (PK)</text>
+<text x="328" y="132" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="52" y="158" font-size="13.5" font-weight="normal" fill="#1a7f37">customer_id (NK)</text>
+<text x="328" y="158" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(10)</text>
+<text x="52" y="184" font-size="13.5" font-weight="normal" fill="#1f2328">city</text>
+<text x="328" y="184" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(100)</text>
+<text x="52" y="210" font-size="13.5" font-weight="normal" fill="#1f2328">segment</text>
+<text x="328" y="210" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(50)</text>
+<text x="52" y="236" font-size="13.5" font-weight="normal" fill="#1f2328">income_band</text>
+<text x="328" y="236" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(20)</text>
+<text x="52" y="262" font-size="13.5" font-weight="normal" fill="#1f2328">valid_from</text>
+<text x="328" y="262" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">DATE</text>
+<text x="52" y="288" font-size="13.5" font-weight="normal" fill="#1f2328">valid_to</text>
+<text x="328" y="288" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">DATE</text>
+<text x="52" y="314" font-size="13.5" font-weight="normal" fill="#1f2328">is_current</text>
+<text x="328" y="314" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">BOOLEAN</text>
+<text x="40" y="340" font-size="12.5" font-style="italic" fill="#6e6e6e">SCD Tipo 2</text>
+<rect x="470" y="230" width="340" height="294" fill="#fff" stroke="#555" stroke-width="1.2"/>
+<rect x="470" y="230" width="340" height="34" fill="#d4aa7d" stroke="#555" stroke-width="1.2"/>
+<text x="640.0" y="252" font-size="15" font-weight="bold" text-anchor="middle" fill="#111">fact_transactions</text>
+<text x="482" y="282" font-size="13.5" font-weight="bold" fill="#24434f">transaction_id (PK)</text>
+<text x="798" y="282" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(20)</text>
+<text x="482" y="308" font-size="13.5" font-weight="bold" fill="#1f3fbf">customer_key (FK)</text>
+<text x="798" y="308" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="482" y="334" font-size="13.5" font-weight="bold" fill="#1f3fbf">merchant_key (FK)</text>
+<text x="798" y="334" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="482" y="360" font-size="13.5" font-weight="bold" fill="#1f3fbf">payment_method_key (FK)</text>
+<text x="798" y="360" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="482" y="386" font-size="13.5" font-weight="bold" fill="#1f3fbf">date_key (FK)</text>
+<text x="798" y="386" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="482" y="412" font-size="13.5" font-weight="bold" fill="#1f3fbf">time_key (FK)</text>
+<text x="798" y="412" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="482" y="438" font-size="13.5" font-weight="normal" fill="#1f2328">amount_cop</text>
+<text x="798" y="438" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">DECIMAL(18,2)</text>
+<text x="482" y="464" font-size="13.5" font-weight="normal" fill="#1f2328">is_approved</text>
+<text x="798" y="464" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">BOOLEAN</text>
+<text x="482" y="490" font-size="13.5" font-weight="normal" fill="#1f2328">is_fraud</text>
+<text x="798" y="490" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">BOOLEAN</text>
+<text x="482" y="516" font-size="13.5" font-weight="normal" fill="#1f2328">fraud_risk_score</text>
+<text x="798" y="516" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">DECIMAL(5,4)</text>
+<rect x="940" y="500" width="300" height="138" fill="#fff" stroke="#555" stroke-width="1.2"/>
+<rect x="940" y="500" width="300" height="34" fill="#c5a5c8" stroke="#555" stroke-width="1.2"/>
+<text x="1090.0" y="522" font-size="15" font-weight="bold" text-anchor="middle" fill="#111">dim_time</text>
+<text x="952" y="552" font-size="13.5" font-weight="bold" fill="#24434f">time_key (PK)</text>
+<text x="1228" y="552" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="952" y="578" font-size="13.5" font-weight="normal" fill="#1f2328">hour</text>
+<text x="1228" y="578" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="952" y="604" font-size="13.5" font-weight="normal" fill="#1f2328">minute</text>
+<text x="1228" y="604" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">SMALLINT</text>
+<text x="952" y="630" font-size="13.5" font-weight="normal" fill="#1f2328">period_of_day</text>
+<text x="1228" y="630" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(20)</text>
+<rect x="940" y="80" width="300" height="164" fill="#fff" stroke="#555" stroke-width="1.2"/>
+<rect x="940" y="80" width="300" height="34" fill="#e9b48a" stroke="#555" stroke-width="1.2"/>
+<text x="1090.0" y="102" font-size="15" font-weight="bold" text-anchor="middle" fill="#111">dim_merchant</text>
+<text x="952" y="132" font-size="13.5" font-weight="bold" fill="#24434f">merchant_key (PK)</text>
+<text x="1228" y="132" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="952" y="158" font-size="13.5" font-weight="normal" fill="#1a7f37">merchant_id (NK)</text>
+<text x="1228" y="158" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(50)</text>
+<text x="952" y="184" font-size="13.5" font-weight="normal" fill="#1f2328">name</text>
+<text x="1228" y="184" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(200)</text>
+<text x="952" y="210" font-size="13.5" font-weight="normal" fill="#1f2328">category</text>
+<text x="1228" y="210" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(100)</text>
+<text x="952" y="236" font-size="13.5" font-weight="normal" fill="#1f2328">city</text>
+<text x="1228" y="236" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(100)</text>
+<rect x="940" y="310" width="300" height="112" fill="#fff" stroke="#555" stroke-width="1.2"/>
+<rect x="940" y="310" width="300" height="34" fill="#8db9a8" stroke="#555" stroke-width="1.2"/>
+<text x="1090.0" y="332" font-size="15" font-weight="bold" text-anchor="middle" fill="#111">dim_payment_method</text>
+<text x="952" y="362" font-size="13.5" font-weight="bold" fill="#24434f">payment_method_key (PK)</text>
+<text x="1228" y="362" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">INT</text>
+<text x="952" y="388" font-size="13.5" font-weight="normal" fill="#1a7f37">method_name (NK)</text>
+<text x="1228" y="388" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(100)</text>
+<text x="952" y="414" font-size="13.5" font-weight="normal" fill="#1f2328">method_type</text>
+<text x="1228" y="414" font-size="11.5" text-anchor="end" fill="#6e6e6e" font-family="Courier New, monospace">VARCHAR(50)</text>
+<path d="M470,546 h326 l14,14 v42 h-340 z" fill="#e3f8e3" stroke="#3b7d3b"/>
+<text x="640.0" y="570" font-size="13.5" font-weight="bold" text-anchor="middle" fill="#2e6b2e">Grano: una fila por transacción</text>
+<text x="640.0" y="590" font-size="12" text-anchor="middle" fill="#2e6b2e">(transaction_id = dimensión degenerada)</text>
+<text x="40" y="818" font-size="12.5" fill="#555">PK llave primaria (surrogate) · FK llave foránea · NK llave natural del OLTP · ┼──&lt; relación 1 : N</text>
+</svg>
