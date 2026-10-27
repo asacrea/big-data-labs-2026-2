@@ -40,9 +40,23 @@ def ensure_table(df: DataFrame, path: str, partition_by: list[str]) -> None:
 # Deja una sola fila por `key`: la de ingested_at más reciente. Usa una función
 # de ventana (Window + row_number); dropDuplicates no te deja elegir cuál fila
 # se conserva.
-def deduplicate(df: DataFrame, key: str) -> DataFrame:
-    raise NotImplementedError("TODO 1: deduplicate")
 
+#def deduplicate(df: DataFrame, key: str) -> DataFrame:
+#    raise NotImplementedError("TODO 1: deduplicate")
+
+from pyspark.sql import DataFrame
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col, row_number
+
+def deduplicate(df: DataFrame, key: str) -> DataFrame:
+    # 1. Definir la ventana: agrupar por la clave y ordenar por fecha de ingesta descendente
+    window_spec = Window.partitionBy(key).orderBy(col("ingested_at").desc())
+    
+    # 2. Enumerar las filas, filtrar la más reciente (1) y eliminar la columna temporal
+    return df \
+        .withColumn("rn", row_number().over(window_spec)) \
+        .filter(col("rn") == 1) \
+        .drop("rn")
 
 # ── TODO 2: tipar ────────────────────────────────────────────────────────────
 # En Bronze todo es texto. Devuelve las transacciones con:
@@ -50,9 +64,21 @@ def deduplicate(df: DataFrame, key: str) -> DataFrame:
 #   - event_ts (timestamp) a partir de "timestamp", sin la columna "timestamp"
 #   - is_fraud como boolean
 #   - columnas de partición year ("YYYY") y month ("MM") derivadas de event_ts
-def standardize(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 2: standardize")
 
+#def standardize(df: DataFrame) -> DataFrame:
+#    raise NotImplementedError("TODO 2: standardize")
+
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, year, month, lpad
+
+def standardize(df: DataFrame) -> DataFrame:
+    return df \
+        .withColumn("amount_cop", col("amount_cop").cast("decimal(15,2)")) \
+        .withColumn("event_ts", col("timestamp").cast("timestamp")) \
+        .drop("timestamp") \
+        .withColumn("is_fraud", col("is_fraud").cast("boolean")) \
+        .withColumn("year", year(col("event_ts")).cast("string")) \
+        .withColumn("month", lpad(month(col("event_ts")).cast("string"), 2, "0"))
 
 # ── TODO 3: reglas de calidad ────────────────────────────────────────────────
 # Agrega la columna dq_reason con el PRIMER problema de la fila, o NULL si está bien:
