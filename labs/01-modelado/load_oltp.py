@@ -24,7 +24,7 @@ def load_oltp(data_dir: Path) -> None:
 
     # 1. Crear esquema (idempotente: borra y recrea oltp en cada ejecución)
     cur.execute("DROP SCHEMA IF EXISTS oltp CASCADE")
-    with open(Path(__file__).parent / "sql/oltp_schema.sql") as f:
+    with open(Path(__file__).parent / "sql/oltp_schema.sql", encoding="utf-8") as f:
         cur.execute(f.read())
     conn.commit()
     console.print("[green]✓ Esquema OLTP creado[/green]")

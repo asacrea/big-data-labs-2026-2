@@ -72,14 +72,44 @@ FROM generate_series(0, 23) AS h, generate_series(0, 59) AS m;
 # - Es una dimensión SCD Tipo 2. En esta carga inicial cada cliente tiene una
 #   sola versión: ¿qué valores deben tener valid_from, valid_to e is_current?
 SQL_DIM_CUSTOMER = """
--- TODO: INSERT INTO dw.dim_customer (...) SELECT ... FROM oltp.customers;
+INSERT INTO dw.dim_customer (
+    customer_id,
+    name,
+    city,
+    segment,
+    monthly_income_cop,
+    valid_from,
+    valid_to,
+    is_current
+)
+SELECT
+    customer_id,
+    name,
+    city,
+    segment,
+    monthly_income_cop,
+    created_at,
+    NULL,
+    TRUE
+FROM oltp.customers;
 """
 
 
 # ── TODO 2: dim_merchant ─────────────────────────────────────────────────────
 # Un registro por comercio desde oltp.merchants.
 SQL_DIM_MERCHANT = """
--- TODO: INSERT INTO dw.dim_merchant (...) SELECT ... FROM oltp.merchants;
+INSERT INTO dw.dim_merchant (
+    merchant_id,
+    name,
+    category,
+    city
+)
+SELECT
+    merchant_id,
+    name,
+    category,
+    city
+FROM oltp.merchants;
 """
 
 
@@ -90,7 +120,23 @@ SQL_DIM_MERCHANT = """
 #   nequi, daviplata        → 'digital_wallet'
 #   pse                     → 'bank_transfer'
 SQL_DIM_PAYMENT_METHOD = """
--- TODO: INSERT INTO dw.dim_payment_method (...) SELECT ... FROM oltp.payment_methods;
+INSERT INTO dw.dim_payment_method (
+    payment_method_id,
+    method_name,
+    method_type
+)
+SELECT
+    method_id,
+    method_name,
+    CASE method_name
+        WHEN 'credit_card' THEN 'card'
+        WHEN 'debit_card'  THEN 'card'
+        WHEN 'nequi'       THEN 'digital_wallet'
+        WHEN 'daviplata'   THEN 'digital_wallet'
+        WHEN 'pse'         THEN 'bank_transfer'
+        ELSE 'other'
+    END
+FROM oltp.payment_methods;
 """
 
 
@@ -106,7 +152,44 @@ SQL_DIM_PAYMENT_METHOD = """
 # - Traer el risk_score de oltp.fraud_events cuando exista (no todas las
 #   transacciones tienen evento de fraude: ¿qué tipo de JOIN necesitas?).
 SQL_FACT = """
--- TODO: INSERT INTO dw.fact_transactions (...) SELECT ... FROM oltp.transactions ...;
+INSERT INTO dw.fact_transactions (
+    transaction_id,
+    date_key,
+    time_key,
+    customer_key,
+    merchant_key,
+    payment_method_key,
+    amount_cop,
+    is_fraud,
+    is_approved,
+    fraud_risk_score
+)
+SELECT
+    t.transaction_id,
+    TO_CHAR(t.created_at, 'YYYYMMDD')::INT,
+    TO_CHAR(t.created_at, 'HH24MI')::INT,
+    c.customer_key,
+    m.merchant_key,
+    p.payment_method_key,
+    t.amount_cop,
+    t.is_fraud,
+    t.status = 'approved',
+    COALESCE(fe.risk_score, 0)
+FROM oltp.transactions AS t
+JOIN dw.dim_customer AS c
+  ON c.customer_id = t.customer_id
+ AND c.valid_from <= t.created_at
+ AND (c.valid_to IS NULL OR t.created_at < c.valid_to)
+JOIN dw.dim_merchant AS m
+  ON m.merchant_id = t.merchant_id
+JOIN dw.dim_payment_method AS p
+  ON p.payment_method_id = t.method_id
+LEFT JOIN (
+    SELECT transaction_id, MAX(risk_score) AS risk_score
+    FROM oltp.fraud_events
+    GROUP BY transaction_id
+) AS fe
+  ON fe.transaction_id = t.transaction_id;
 """
 
 
@@ -205,7 +288,7 @@ def load_star() -> None:
 
     # El script es idempotente: borra y recrea el esquema dw en cada ejecución
     cur.execute("DROP SCHEMA IF EXISTS dw CASCADE")
-    cur.execute((SQL_DIR / "star_schema.sql").read_text())
+    cur.execute((SQL_DIR / "star_schema.sql").read_text(encoding="utf-8"))
     conn.commit()
     console.print("[green]✓ Esquema estrella creado[/green]")
 
