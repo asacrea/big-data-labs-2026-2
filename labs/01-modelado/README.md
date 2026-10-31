@@ -99,6 +99,8 @@ El script recrea el esquema `dw` en cada ejecución y al final valida tu carga: 
 - [ ] Diagrama del esquema estrella hecho en [draw.io](https://app.diagrams.net/): tablas, llaves, cardinalidades y grano de la tabla de hechos
 - [ ] Informe en PDF (máx. 3 páginas): diagnóstico del OLTP (Parte A), decisiones de diseño (Parte B) y comparación de rendimiento con planes de ejecución (Parte D)
 
+**Video de sustentación:** [ver en Google Drive](https://drive.google.com/file/d/1HlA-1XJF1AtzJ_RjiHHEMCQ_LkjYULKe/view?usp=sharing)
+
 ## Criterios de evaluación
 
 | Criterio | Peso |
