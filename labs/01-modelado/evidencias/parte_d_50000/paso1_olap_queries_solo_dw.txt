@@ -1,0 +1,9 @@
+Tablas que usa olap_queries.sql:
+      1 dw.dim_customer
+      2 dw.dim_date
+      1 dw.dim_merchant
+      1 dw.dim_time
+      3 dw.fact_transactions
+Referencias a oltp.*:              0  (debe ser 0)
+EXTRACT() / funciones de fecha:    0  (debe ser 0)
+Consultas con EXPLAIN ANALYZE:     3  (deben ser 3)

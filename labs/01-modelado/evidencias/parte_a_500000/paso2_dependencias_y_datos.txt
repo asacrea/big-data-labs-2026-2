@@ -1,0 +1,9 @@
+Checked 19 packages in 3ms
+Generando 500 clientes...
+Generando 500000 transacciones...
+  ✓ data\500000\customers.json (500 registros)
+  ✓ data\500000\merchants.json (8 registros)
+  ✓ data\500000\transactions.json (500000 registros)
+  ✓ data\500000\fraud_events.json (1919 registros)
+
+¡Listo! Datos generados en: data\500000

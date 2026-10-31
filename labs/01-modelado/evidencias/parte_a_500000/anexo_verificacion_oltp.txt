@@ -1,0 +1,65 @@
+              List of relations
+ Schema |      Name       | Type  |  Owner   
+--------+-----------------+-------+----------
+ oltp   | customers       | table | postgres
+ oltp   | fraud_events    | table | postgres
+ oltp   | merchants       | table | postgres
+ oltp   | payment_methods | table | postgres
+ oltp   | transactions    | table | postgres
+(5 rows)
+
+      tabla      | filas  
+-----------------+--------
+ customers       |    500
+ merchants       |      8
+ payment_methods |      5
+ transactions    | 500000
+ fraud_events    |   1919
+(5 rows)
+
+          primera           |           ultima           |   total_cop    
+----------------------------+----------------------------+----------------
+ 2026-07-21 23:38:16.845115 | 2026-10-19 23:37:24.845115 | 37242782417.79
+(1 row)
+
+  status  |  txn   | fraudes 
+----------+--------+---------
+ approved | 499447 |    1366
+ declined |    553 |     553
+(2 rows)
+
+                    chequeo                     | debe_ser_0 
+------------------------------------------------+------------
+ fraude sin evento                              |          0
+ evento en transacción no fraude                |          0
+ transacciones con más de un evento             |          0
+ transacción anterior a la creación del cliente |          0
+(4 rows)
+
+ method_id | method_name 
+-----------+-------------
+         1 | credit_card
+         2 | debit_card
+         3 | nequi
+         4 | daviplata
+         5 | pse
+(5 rows)
+
+  segment   | clientes 
+------------+----------
+ high_value |       91
+ mass       |      308
+ premium    |      101
+(3 rows)
+
+ category  | comercios 
+-----------+-----------
+ delivery  |         1
+ grocery   |         1
+ retail    |         2
+ streaming |         1
+ telco     |         1
+ transport |         1
+ travel    |         1
+(7 rows)
+

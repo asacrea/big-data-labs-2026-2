@@ -1,0 +1,28 @@
+───────────────────────── Paso 3 · EXPLAIN ANALYZE OLTP vs OLAP (500,000 transacciones, mediana de 5 ejecuciones) ──────────────────────────
+┏━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Consulta ┃ Modelo ┃ Tiempo total ┃ Scans                                      ┃ Joins     ┃ Filas leídas de tablas ┃
+┡━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Q1       │ OLTP   │ 50.674 ms    │ Parallel Seq Scan transactions             │ Hash Join │ 500,025                │
+│          │        │              │ Seq Scan merchants                         │           │                        │
+├──────────┼────────┼──────────────┼────────────────────────────────────────────┼───────────┼────────────────────────┤
+│          │ OLAP   │ 53.833 ms    │ Parallel Seq Scan fact_transactions        │ Hash Join │ 500,295                │
+│          │        │              │ Seq Scan dim_date                          │ Hash Join │                        │
+│          │        │              │ Seq Scan dim_merchant                      │           │                        │
+├──────────┼────────┼──────────────┼────────────────────────────────────────────┼───────────┼────────────────────────┤
+│ Q2       │ OLTP   │ 73.226 ms    │ Parallel Seq Scan transactions             │ Hash Join │ 501,501                │
+│          │        │              │ Seq Scan customers                         │           │                        │
+├──────────┼────────┼──────────────┼────────────────────────────────────────────┼───────────┼────────────────────────┤
+│          │ OLAP   │ 74.181 ms    │ Parallel Seq Scan fact_transactions        │ Hash Join │ 501,501                │
+│          │        │              │ Seq Scan dim_customer                      │           │                        │
+├──────────┼────────┼──────────────┼────────────────────────────────────────────┼───────────┼────────────────────────┤
+│ Q3       │ OLTP   │ 31.174 ms    │ Bitmap Heap Scan transactions              │ —         │ 21,905                 │
+│          │        │              │   └ Bitmap Index Scan (idx_txn_created_at) │           │                        │
+├──────────┼────────┼──────────────┼────────────────────────────────────────────┼───────────┼────────────────────────┤
+│          │ OLAP   │ 37.464 ms    │ Parallel Seq Scan fact_transactions        │ Hash Join │ 504,591                │
+│          │        │              │ Seq Scan dim_date                          │ Hash Join │                        │
+│          │        │              │ Seq Scan dim_time                          │           │                        │
+└──────────┴────────┴──────────────┴────────────────────────────────────────────┴───────────┴────────────────────────┘
+  Q1: OLTP 50.674 ms → OLAP 53.833 ms  (1.06× más lento)
+  Q2: OLTP 73.226 ms → OLAP 74.181 ms  (1.01× más lento)
+  Q3: OLTP 31.174 ms → OLAP 37.464 ms  (1.20× más lento)
+  Planes completos en labs\01-modelado\evidencias\parte_d_500000/paso3_q*_explain_analyze.txt

@@ -1,0 +1,40 @@
+-- Q2: Tasa de fraude por segmento de cliente · OLAP
+EXPLAIN ANALYZE
+SELECT
+    c.segment,
+    COUNT(*)                                     AS total_txn,
+    SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END)  AS fraud_txn,
+    ROUND(
+        100.0 * SUM(CASE WHEN t.is_fraud THEN 1 ELSE 0 END) / COUNT(*), 2
+    )                                                     AS fraud_rate_pct
+FROM dw.fact_transactions t
+JOIN dw.dim_customer c ON t.customer_key = c.customer_key
+GROUP BY c.segment
+ORDER BY fraud_rate_pct DESC;
+
+Sort  (cost=10369.51..10369.52 rows=3 width=54) (actual time=65.075..69.195 rows=3 loops=1)
+  Sort Key: (round(((100.0 * (sum(CASE WHEN t.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  ->  Finalize GroupAggregate  (cost=10368.67..10369.48 rows=3 width=54) (actual time=65.055..69.177 rows=3 loops=1)
+        Group Key: c.segment
+        ->  Gather Merge  (cost=10368.67..10369.37 rows=6 width=22) (actual time=65.044..69.164 rows=9 loops=1)
+              Workers Planned: 2
+              Workers Launched: 2
+              ->  Sort  (cost=9368.65..9368.66 rows=3 width=22) (actual time=60.420..60.423 rows=3 loops=3)
+                    Sort Key: c.segment
+                    Sort Method: quicksort  Memory: 25kB
+                    Worker 0:  Sort Method: quicksort  Memory: 25kB
+                    Worker 1:  Sort Method: quicksort  Memory: 25kB
+                    ->  Partial HashAggregate  (cost=9368.59..9368.62 rows=3 width=22) (actual time=60.353..60.356 rows=3 loops=3)
+                          Group Key: c.segment
+                          Batches: 1  Memory Usage: 24kB
+                          Worker 0:  Batches: 1  Memory Usage: 24kB
+                          Worker 1:  Batches: 1  Memory Usage: 24kB
+                          ->  Hash Join  (cost=16.25..7806.10 rows=208333 width=7) (actual time=0.308..39.364 rows=166667 loops=3)
+                                Hash Cond: (t.customer_key = c.customer_key)
+                                ->  Parallel Seq Scan on fact_transactions t  (cost=0.00..7238.33 rows=208333 width=5) (actual time=0.012..12.492 rows=166667 loops=3)
+                                ->  Hash  (cost=10.00..10.00 rows=500 width=10) (actual time=0.201..0.202 rows=500 loops=3)
+                                      Buckets: 1024  Batches: 1  Memory Usage: 30kB
+                                      ->  Seq Scan on dim_customer c  (cost=0.00..10.00 rows=500 width=10) (actual time=0.041..0.118 rows=500 loops=3)
+Planning Time: 0.477 ms
+Execution Time: 69.449 ms
