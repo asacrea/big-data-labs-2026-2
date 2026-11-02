@@ -1,0 +1,105 @@
+Lab 2 en AWS · 2026-11-02 16:33 · log: labs/02-lakehouse/entrega/evidencias/aws_glue/ejecucion_20261102_1633.log
+
+━━━ verificación previa (16:33:19) ━━━
+  ✓ rama lab2
+  ✓ STUDENT_ID=ortizvelez
+  ✓ cuenta 809411919665, región us-east-1
+  ✓ lotes en data/batch1 y data/batch2
+  ✓ tests en verde
+  ✓ serverless Framework Core: 3.40.0
+  ✓ no existe el stack paytrack-lakehouse-dev
+  ✓ no existe el stream paytrack-transactions
+  ✓ grupos de logs de Glue previos: 0
+
+━━━ kill switch en AWS (borra el stack en 120 min si nadie lo hace antes) (16:33:37) ━━━
+  ✓ schedule paytrack-killswitch: borra paytrack-lakehouse-dev a las 2026-11-02T23:33:41 UTC
+
+━━━ deploy (16:33:55) ━━━
+
+Deploying paytrack-lakehouse to stage dev (us-east-1)
+
+✔ Service deployed to stack paytrack-lakehouse-dev (76s)
+
+  ✓ bucket paytrack-lakehouse-ortizvelez-809411919665
+
+━━━ Parte A · lote 1 (16:35:21) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+━━━ ingest ━━━
+✓ transactions: 30600 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/transactions/ingest_date=2026-09-29/part-0000.json
+✓ fraud_events: 114 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/fraud_events/ingest_date=2026-09-29/part-0000.json
+✓ customers: 500 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/customers/ingest_date=2026-09-29/part-0000.json
+✓ merchants: 8 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/merchants/ingest_date=2026-09-29/part-0000.json
+
+━━━ bronze ━━━
+........ ✓ SUCCEEDED
+
+━━━ silver ━━━
+....... ✓ SUCCEEDED
+
+━━━ gold ━━━
+........ ✓ SUCCEEDED
+
+━━━ audit ━━━
+....... ✓ SUCCEEDED
+
+Pipeline completo para el lote 2026-09-29
+
+━━━ Parte A · lote 2 (16:44:18) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+━━━ ingest ━━━
+✓ transactions: 2316 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/transactions/ingest_date=2026-09-30/part-0000.json
+✓ fraud_events: 10 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/fraud_events/ingest_date=2026-09-30/part-0000.json
+✓ customers: 500 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/customers/ingest_date=2026-09-30/part-0000.json
+✓ merchants: 8 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/merchants/ingest_date=2026-09-30/part-0000.json
+
+━━━ bronze ━━━
+......... ✓ SUCCEEDED
+
+━━━ silver ━━━
+........ ✓ SUCCEEDED
+
+━━━ gold ━━━
+....... ✓ SUCCEEDED
+
+━━━ audit ━━━
+..... ✓ SUCCEEDED
+
+Pipeline completo para el lote 2026-09-30
+
+━━━ Parte B · stream (16:52:55) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+
+━━━ stream ━━━
+Job paytrack-stream lanzado (jr_a793cdd72da85afcbc40a5b9df4cd90065f6967ec76f152c61d8f7fdc983c485). Glue tarda ~1 min en arrancar; Kinesis guarda
+los eventos mientras tanto y el job los lee desde el más antiguo.
+  enviados: 20  enviados: 40  enviados: 60  enviados: 80  enviados: 100  enviados: 120  enviados: 140  enviados: 160  enviados: 180  enviados: 200  enviados: 220  enviados: 240  enviados: 260  enviados: 280  enviados: 300  enviados: 320  enviados: 345  enviados: 365  enviados: 385  enviados: 412  enviados: 438  enviados: 458  enviados: 478  enviados: 498  enviados: 518  enviados: 538  enviados: 558  enviados: 578  enviados: 598  enviados: 618  enviados: 638  enviados: 658  enviados: 678  enviados: 698  enviados: 718  enviados: 744  enviados: 764  enviados: 784  enviados: 804  enviados: 824  enviados: 844  enviados: 871  enviados: 891  enviados: 911  enviados: 931  enviados: 951  enviados: 971  enviados: 991  enviados: 1017  enviados: 1037  enviados: 1057  enviados: 1077  enviados: 1097  enviados: 1117  enviados: 1137  enviados: 1157  enviados: 1177  enviados: 1197  enviados: 1217  enviados: 1237  enviados: 1257  enviados: 1277  enviados: 1297  enviados: 1317  enviados: 1337  enviados: 1363  enviados: 1383  enviados: 1403  enviados: 1428  enviados: 1448  enviados: 1468  enviados: 1488  enviados: 1508  enviados: 1528  enviados: 1548  enviados: 1568  enviados: 1588  enviados: 1608  enviados: 1628  enviados: 1648  enviados: 1668  enviados: 1688  enviados: 1715  enviados: 1735  enviados: 1761  enviados: 1781  enviados: 1801  enviados: 1821  enviados: 1841  enviados: 1861  enviados: 1881  enviados: 1901  enviados: 1921  enviados: 1941  enviados: 1968  enviados: 1988  enviados: 2008  enviados: 2028  enviados: 2048  enviados: 2068  enviados: 2088  enviados: 2108  enviados: 2128  enviados: 2148  enviados: 2168  enviados: 2188  enviados: 2208  enviados: 2228  enviados: 2248  enviados: 2268  enviados: 2288  enviados: 2308  enviados: 2328  enviados: 2348  enviados: 2368  enviados: 2388  enviados: 2408  enviados: 2428  enviados: 2448  enviados: 2468  enviados: 2488  enviados: 2508  enviados: 2528  enviados: 2548  enviados: 2568  enviados: 2588  enviados: 2608  enviados: 2628  enviados: 2648  enviados: 2668  enviados: 2695  enviados: 2715  enviados: 2735  enviados: 2762  enviados: 2782  enviados: 2802  enviados: 2822  enviados: 2842  enviados: 2862  enviados: 2882  enviados: 2907  enviados: 2927  enviados: 2947  enviados: 2967  enviados: 2987  enviados: 3007  enviados: 3027  enviados: 3047  enviados: 3067  enviados: 3087  enviados: 3107  enviados: 3127  enviados: 3147  enviados: 3167  enviados: 3193  enviados: 3213  enviados: 3233  enviados: 3253  enviados: 3273  enviados: 3293  enviados: 3313  enviados: 3333  enviados: 3353  enviados: 3373  enviados: 3393  enviados: 3413  enviados: 3433  enviados: 3453  enviados: 3473  enviados: 3493  enviados: 3513  enviados: 3533  enviados: 3553  enviados: 3573  enviados: 3593  enviados: 3613  enviados: 3633  enviados: 3653  enviados: 3673  enviados: 3693  enviados: 3713  enviados: 3733  enviados: 3753  enviados: 3773  enviados: 3793  enviados: 3813  enviados: 3833  enviados: 3853  enviados: 3873  enviados: 3899  enviados: 3919  enviados: 3945  enviados: 3965  enviados: 3985  enviados: 4005  enviados: 4025  enviados: 4045  enviados: 4065  enviados: 4085  enviados: 4105  enviados: 4125  enviados: 4145  enviados: 4165  enviados: 4185  enviados: 4205  enviados: 4225  enviados: 4245  enviados: 4265  enviados: 4285  enviados: 4305  enviados: 4331  enviados: 4351  enviados: 4371  enviados: 4391  enviados: 4411  enviados: 4431  enviados: 4451  enviados: 4471  enviados: 4491  enviados: 4511  enviados: 4531  enviados: 4551  enviados: 4571  enviados: 4591  enviados: 4611  enviados: 4631  enviados: 4651  enviados: 4671  enviados: 4691  enviados: 4711  enviados: 4736  enviados: 4756  enviados: 4782  enviados: 4808  enviados: 4828  enviados: 4848  enviados: 4868  enviados: 4888  enviados: 4908  enviados: 4928
+✓ 4928 eventos enviados en 241s (chargeback: 101, payment: 4827) · 0 perdidos
+Esperando a que el job termine (corre 300 s y luego valida)
+ ✗ FAILED
+KeyError: '__src_timestamp'
+Revisa los logs en CloudWatch: /aws-glue/jobs/error y /aws-glue/jobs/output (run jr_a793cdd72da85afcbc40a5b9df4cd90065f6967ec76f152c61d8f7fdc983c485)
+
+✗ ERROR en la línea 207 (código 1): 'wait $!'. Se desmonta todo para no gastar.
+
+━━━ desmontaje (16:57:10) ━━━
+  · bucket paytrack-lakehouse-ortizvelez-809411919665 vaciado
+  · bucket paytrack-lakehouse-dev-serverlessdeploymentbucket-qygnnqd35s5c vaciado
+  · borrando el stack paytrack-lakehouse-dev (puede tardar unos minutos)
+  · schedule paytrack-killswitch borrado
+  · rol paytrack-killswitch-role borrado
+  · log group /aws-glue/jobs/error borrado
+  · log group /aws-glue/jobs/logs-v2 borrado
+  · log group /aws-glue/jobs/output borrado
+
+━━━ verificación de la limpieza (16:58:56) ━━━
+  ✓ sin stack paytrack-lakehouse-dev
+  ✓ sin stream de Kinesis paytrack-transactions
+  ✓ sin buckets paytrack-lakehouse-*
+  ✓ sin jobs de Glue paytrack-*
+  ✓ sin schedule paytrack-killswitch
+  ✓ sin rol paytrack-killswitch-role
+  → AWS limpio
+Para reiniciar: corrige el error y vuelve a correr 'todo' (empieza de cero).

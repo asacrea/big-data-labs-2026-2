@@ -79,7 +79,7 @@ Comandos exactos, costos y verificación de la limpieza: [`AWS_PASO_A_PASO.md`](
 |---|---|---|
 | Instalar Serverless Framework v3 | ✅ 3.40.0 · `serverless print` resuelve el stack sin errores | |
 | Copiar `.envs/aws.env.example` a `.envs/aws.env` con las credenciales (nunca se sube) | ⬜ | |
-| `serverless deploy --stage dev` | 🟡 1.ª ejecución (2026-11-02): deploy ✅, Parte A ✅ (8 jobs `SUCCEEDED`), stream ✗ `KeyError: '__src_timestamp'` en `jobs/common.py` (archivo dado) → desmontaje automático, AWS limpio. Corregido; falta repetir | `aws_glue/ejecucion_20261102_1633.log` |
+| `serverless deploy --stage dev` | 🟡 1.ª ejecución (2026-11-02): deploy ✅, Parte A ✅ (8 jobs `SUCCEEDED`), stream ✗ `KeyError: '__src_timestamp'` en `jobs/common.py` (archivo dado) → desmontaje automático, AWS limpio. Corregido; falta repetir | `aws_glue/ejecucion_20261102_1633.txt` |
 | Parte A: `run_aws.sh` lote 1 y lote 2 · 4 jobs batch en `Succeeded` | ⬜ | capturas |
 | Parte B: `run_aws.sh stream 300` · job `paytrack-stream` en `Succeeded` | ⬜ | captura |
 | Athena: 6 consultas con resultados y MB escaneados | ⬜ | capturas |

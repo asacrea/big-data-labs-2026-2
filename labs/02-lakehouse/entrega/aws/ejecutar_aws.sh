@@ -126,7 +126,7 @@ guardar_logs_de_fallos() {
     for run in $runs; do
       for g in /aws-glue/jobs/error /aws-glue/jobs/output; do
         aws logs filter-log-events --log-group-name "$g" --log-stream-name-prefix "$run" \
-          --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' > "$dir/${job}_${g##*/}.log"
+          --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' > "$dir/${job}_${g##*/}.txt"
       done
       aws glue get-job-run --job-name "paytrack-$job" --run-id "$run" \
         --query 'JobRun.[JobRunState,ErrorMessage]' --output text > "$dir/${job}_estado.txt" 2>/dev/null
@@ -238,7 +238,7 @@ estado_jobs() {  # evidencia en texto: estado final de cada ejecución de Glue
 }
 
 todo() {
-  local log; log="$EV/aws_glue/ejecucion_$(date +%Y%m%d_%H%M).log"
+  local log; log="$EV/aws_glue/ejecucion_$(date +%Y%m%d_%H%M).txt"
   exec > >(tee -a "$log") 2>&1
   echo "Lab 2 en AWS · $(date '+%Y-%m-%d %H:%M') · log: $log"
   preflight
