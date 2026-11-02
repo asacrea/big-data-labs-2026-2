@@ -62,9 +62,9 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 | B.2 `run_local.sh stream` en modo availableNow · primera vez | ✅ 12.288 eventos · 17 ✓ · 0 ✗ | `productor_fast_600s.txt`, `stream_availablenow_1.txt` |
 | B.2 `run_local.sh stream` en modo availableNow · segunda vez (idempotencia) | ✅ 0 filas leídas en las 4 consultas · tablas sin cambios | `stream_availablenow_2_idempotencia.txt` |
 | B.2 `run_local.sh stream 180` en vivo, con el productor en paralelo | ✅ 2.487 eventos en vivo · 17 ✓ · 0 ✗ | `productor_en_vivo_120s.txt`, `stream_en_vivo_180s.txt` |
-| B.3 Experimento 1 · Watermark (availableNow vs en vivo) | 🟡 datos: 6 descartadas en availableNow vs 51 en vivo (`metrics`); falta el análisis | tabla en el informe |
-| B.3 Experimento 2 · Carga (20 vs 50 eventos/s) | ⬜ | tabla en el informe |
-| B.3 Experimento 3 · Partition key (constante y `transaction_id`) | ⬜ | `kafka-get-offsets.sh` |
+| B.3 Experimento 1 · Watermark (availableNow vs en vivo) | ✅ medido: 6 descartadas en availableNow, 51 en vivo a 20/s, 100 a 50/s · análisis en el informe ⬜ | `experimentos_resumen.md` |
+| B.3 Experimento 2 · Carga (20 vs 50 eventos/s) | ✅ medido: 25 alertas a 20/s, 47 a 50/s · precisión en AWS (Athena TODO 5) ⬜ | `experimentos_resumen.md` |
+| B.3 Experimento 3 · Partition key (constante y `transaction_id`) | ✅ medido: constante 0/1.227/0; `transaction_id` 438/397/392; `customer_id` 491/341/395 | `experimento3_partition_key.txt` |
 
 ### Preguntas del informe: 7 a 14 (Garantías, Watermark, Latencia, Precisión, Estado final, Partition key, Batch y streaming, Costos) ⬜
 

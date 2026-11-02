@@ -1,0 +1,20 @@
+Experimento 3 · Partition key (2026-11-02 14:51)
+Mismo stream en los tres casos (--duration 60 --fast --seed 7); topics de 3 particiones
+
+== llave: customer_id (la nuestra) · topic paytrack.experimento-cliente
+✓ 1227 eventos enviados en 0s (chargeback: 26, payment: 1201) · 0 perdidos
+paytrack.experimento-cliente:0:491
+paytrack.experimento-cliente:1:341
+paytrack.experimento-cliente:2:395
+
+== llave: "constante" · topic paytrack.experimento
+✓ 1227 eventos enviados en 0s (chargeback: 26, payment: 1201) · 0 perdidos
+paytrack.experimento:0:0
+paytrack.experimento:1:1227
+paytrack.experimento:2:0
+
+== llave: str(event["transaction_id"]) · topic paytrack.experimento-txn
+✓ 1227 eventos enviados en 0s (chargeback: 26, payment: 1201) · 0 perdidos
+paytrack.experimento-txn:0:438
+paytrack.experimento-txn:1:397
+paytrack.experimento-txn:2:392
