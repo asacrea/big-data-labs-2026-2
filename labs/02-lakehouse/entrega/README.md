@@ -73,10 +73,11 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 ## Ejecución en AWS (Partes A y B) → `evidencias/aws_glue/`, `evidencias/athena/`, `evidencias/limpieza/`
 
 Todo el mismo día, cuando las dos partes estén en verde en local. Kinesis cobra por hora mientras exista.
+Comandos exactos, costos y verificación de la limpieza: [`AWS_PASO_A_PASO.md`](AWS_PASO_A_PASO.md).
 
 | Paso | Estado | Evidencia |
 |---|---|---|
-| Instalar Serverless Framework v3 (`npm i -g serverless@3`; no está instalado) | ⬜ | |
+| Instalar Serverless Framework v3 | ✅ 3.40.0 · `serverless print` resuelve el stack sin errores | |
 | Copiar `.envs/aws.env.example` a `.envs/aws.env` con las credenciales (nunca se sube) | ⬜ | |
 | `serverless deploy --stage dev` | ⬜ | |
 | Parte A: `run_aws.sh` lote 1 y lote 2 · 4 jobs batch en `Succeeded` | ⬜ | capturas |
