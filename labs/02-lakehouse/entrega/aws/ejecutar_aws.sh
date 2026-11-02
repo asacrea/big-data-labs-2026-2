@@ -114,6 +114,28 @@ borrar_kill_switch() {
 }
 
 # ── 2. Desmontaje (idempotente: se puede correr cuantas veces haga falta) ───
+# Antes de borrar los grupos de logs, guarda los de las ejecuciones de Glue que fallaron:
+# son la única evidencia del error y sin ellos no se puede diagnosticar.
+guardar_logs_de_fallos() {
+  local dir="$EV/aws_glue/logs_fallos_$(date +%Y%m%d_%H%M)" job runs
+  for job in "${JOBS[@]}"; do
+    runs=$(aws glue get-job-runs --job-name "paytrack-$job" --max-results 20 \
+      --query "JobRuns[?JobRunState=='FAILED'||JobRunState=='ERROR'||JobRunState=='TIMEOUT'].Id" --output text 2>/dev/null)
+    [[ -z $runs || $runs == None ]] && continue
+    mkdir -p "$dir"
+    for run in $runs; do
+      for g in /aws-glue/jobs/error /aws-glue/jobs/output; do
+        aws logs filter-log-events --log-group-name "$g" --log-stream-name-prefix "$run" \
+          --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' > "$dir/${job}_${g##*/}.log"
+      done
+      aws glue get-job-run --job-name "paytrack-$job" --run-id "$run" \
+        --query 'JobRun.[JobRunState,ErrorMessage]' --output text > "$dir/${job}_estado.txt" 2>/dev/null
+    done
+    echo "  · logs del fallo de paytrack-$job guardados en $dir"
+  done
+  return 0
+}
+
 DESMONTANDO=0
 desmontar() {
   [[ $DESMONTANDO == 1 ]] && return 0
@@ -121,6 +143,7 @@ desmontar() {
   set +e
   trap - ERR
   step "desmontaje"
+  guardar_logs_de_fallos
   for job in "${JOBS[@]}"; do  # detener ejecuciones de Glue que sigan corriendo
     local runs
     runs=$(aws glue get-job-runs --job-name "paytrack-$job" --max-results 20 \
