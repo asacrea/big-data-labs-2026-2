@@ -50,7 +50,9 @@ PAYMENT_METHODS = ["credit_card", "debit_card", "nequi", "daviplata", "pse"]
 #     contracargos de sus pagos) lleguen a la misma partición, en orden
 #   - la carga se reparta entre particiones (no uses un valor constante)
 def partition_key(event: dict) -> str:
-    raise NotImplementedError("TODO 1: partition_key")
+    # El cliente: sus pagos, sus ráfagas y los contracargos de sus pagos comparten
+    # partición (y orden), y con 500 clientes la carga se reparte entre particiones
+    return str(event["customer_id"])
 
 
 # ── TODO 2: configuración del productor de Kafka ─────────────────────────────
@@ -60,7 +62,11 @@ def partition_key(event: dict) -> str:
 # eventos dentro de una partición.
 # Pista: busca "acks" y "enable.idempotence" en la documentación de Kafka.
 def kafka_config(bootstrap: str) -> dict:
-    raise NotImplementedError("TODO 2: kafka_config")
+    return {
+        "bootstrap.servers": bootstrap,
+        "acks": "all",                # el líder confirma solo cuando las réplicas en sincronía tienen el evento
+        "enable.idempotence": True,   # los reintentos no duplican ni reordenan dentro de una partición
+    }
 
 
 # ── TODO 3: reintentos en Kinesis ────────────────────────────────────────────
@@ -75,7 +81,16 @@ def kafka_config(bootstrap: str) -> dict:
 # quedaron sin enviar después del último intento.
 def put_with_retries(kinesis, stream: str, records: list[dict],
                      max_attempts: int = 4, base_delay: float = 0.2) -> int:
-    raise NotImplementedError("TODO 3: put_with_retries")
+    pending = records
+    for attempt in range(max_attempts):
+        if attempt > 0:
+            time.sleep(base_delay * 2 ** (attempt - 1))
+        response = kinesis.put_records(StreamName=stream, Records=pending)
+        if response["FailedRecordCount"] == 0:
+            return 0
+        # Los resultados vienen en el mismo orden del envío: se reintentan solo los fallidos
+        pending = [rec for rec, res in zip(pending, response["Records"]) if "ErrorCode" in res]
+    return len(pending)
 
 
 # ── Dado: generación de eventos ──────────────────────────────────────────────

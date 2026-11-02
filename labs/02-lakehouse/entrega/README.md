@@ -50,7 +50,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 
 | Archivo | TODO | Estado |
 |---|---|---|
-| `producer.py` | 1–3: partition key, configuración de Kafka, reintentos en Kinesis | ⬜ |
+| `producer.py` | 1–3: partition key, configuración de Kafka, reintentos en Kinesis | ✅ `test_producer.py` 8/8 · prueba real en Kafka: 100 eventos, 0 perdidos |
 | `jobs/stream.py` | 1–6: esquema, deduplicación con watermark, `latest_per_transaction`, `MERGE` por micro-lote, métricas, alertas | ⬜ |
 | `sql/athena.sql` | 5–6 (streaming) | ⬜ |
 
@@ -58,7 +58,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 
 | Paso | Estado | Evidencia |
 |---|---|---|
-| B.1 `pytest tests/test_producer.py` en verde | ⬜ | captura |
+| B.1 `pytest tests/test_producer.py` en verde | ✅ 8/8 | `pytest_test_producer.txt` |
 | B.2 `run_local.sh stream` en modo availableNow · primera vez | ⬜ | salida |
 | B.2 `run_local.sh stream` en modo availableNow · segunda vez (idempotencia: 0 filas leídas) | ⬜ | salida |
 | B.2 `run_local.sh stream 180` en vivo, con el productor en otra terminal | ⬜ | salida |

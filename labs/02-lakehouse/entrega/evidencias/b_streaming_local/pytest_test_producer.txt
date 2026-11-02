@@ -1,0 +1,18 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\santi\big-data-labs-2026-2\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\santi\big-data-labs-2026-2
+configfile: pyproject.toml
+plugins: Faker-40.43.0, platformdirs-4.13.3, cov-7.1.0
+collecting ... collected 8 items
+
+labs/02-lakehouse/tests/test_producer.py::test_partition_key_mismo_cliente_misma_particion PASSED [ 12%]
+labs/02-lakehouse/tests/test_producer.py::test_partition_key_contracargo_con_su_pago PASSED [ 25%]
+labs/02-lakehouse/tests/test_producer.py::test_partition_key_reparte_la_carga PASSED [ 37%]
+labs/02-lakehouse/tests/test_producer.py::test_kafka_config PASSED       [ 50%]
+labs/02-lakehouse/tests/test_producer.py::test_reintenta_solo_los_fallidos PASSED [ 62%]
+labs/02-lakehouse/tests/test_producer.py::test_sin_fallas_un_solo_intento PASSED [ 75%]
+labs/02-lakehouse/tests/test_producer.py::test_respeta_max_attempts PASSED [ 87%]
+labs/02-lakehouse/tests/test_producer.py::test_backoff_exponencial PASSED [100%]
+
+============================== 8 passed in 0.21s ==============================
