@@ -38,7 +38,40 @@ set -a && source .envs/aws.env && set +a
 aws sts get-caller-identity --query '{cuenta:Account, usuario:Arn}' --output table
 ```
 
-## 2 · Desplegar (~3 min)
+## 2 · Ejecución protegida (recomendada): un solo comando
+
+```bash
+bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh preflight   # verifica todo sin crear nada
+bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh todo        # ~45 min, de punta a punta
+```
+
+`todo` usa los scripts del profesor (`serverless.yml`, `run_aws.sh`) sin modificarlos, en este orden:
+verificación previa → kill switch → deploy → lote 1 → lote 2 → stream → estado de los jobs → Athena → limpieza.
+
+| Salvaguarda | Qué hace | Probada sin desplegar (2026-11-02) |
+|---|---|---|
+| Verificación previa | Aborta sin crear nada si la cuenta no es 809411919665, la rama no es `lab2`, faltan los lotes, los tests no están en verde, falta `STUDENT_ID` o ya existe el stack | ✅ |
+| Desmontaje ante error | Cualquier error, Ctrl+C o señal detiene los jobs de Glue, vacía los buckets, borra el stack, el kill switch y los logs de Glue creados, y verifica que no quede nada | ✅ `probar-error` |
+| Watchdog local (75 min) | Si la ejecución se cuelga o se alarga, la corta y desmonta | ✅ `probar-watchdog` con 1 min |
+| Kill switch en AWS (120 min) | Schedule de EventBridge Scheduler que borra el stack desde AWS aunque este computador se apague. Se borra al terminar | ✅ creado y borrado en las dos pruebas |
+| Athena por CLI | El DDL y las 6 consultas, con resultados y MB escaneados en `evidencias/athena/athena_resultados.md` | se prueba en el deploy |
+
+Recursos que crea el script y no están en la plantilla del profesor: solo el schedule `paytrack-killswitch` y su rol IAM
+`paytrack-killswitch-role` (gratuitos; se borran al terminar o en el desmontaje).
+
+**Si algo falla:** el script desmonta solo y dice en qué línea falló. Se corrige y se vuelve a correr `todo` desde cero.
+Limpieza manual en cualquier momento: `ejecutar_aws.sh desmontar` (idempotente) y `ejecutar_aws.sh verificar`.
+
+📸 Mientras corre: captura de la consola de Glue con los 4 jobs batch en `Succeeded` para los dos lotes y del job
+`paytrack-stream` en `Succeeded` → `evidencias/aws_glue/`. El script también guarda `estado_jobs.txt` y el log completo.
+
+📸 Al final: captura de la consola de Kinesis sin streams y de CloudFormation sin el stack → `evidencias/limpieza/`.
+
+---
+
+## Anexo · Los mismos pasos a mano (sin salvaguardas)
+
+### Desplegar (~3 min)
 
 ```bash
 cd labs/02-lakehouse/infra && serverless deploy --stage dev && cd -
@@ -46,7 +79,7 @@ cd labs/02-lakehouse/infra && serverless deploy --stage dev && cd -
 
 Crea el bucket, los 5 jobs de Glue, el stream de Kinesis (**desde aquí empieza a cobrar**) y el workgroup de Athena.
 
-## 3 · Parte A en AWS: los dos lotes (~15 min)
+### Parte A en AWS: los dos lotes (~15 min)
 
 ```bash
 bash labs/02-lakehouse/run_aws.sh data/batch1 2026-09-29
@@ -56,7 +89,7 @@ bash labs/02-lakehouse/run_aws.sh data/batch2 2026-09-30
 📸 **Captura** de la consola de Glue (*Job run monitoring*) con los 4 jobs batch en `Succeeded` para los dos lotes
 → `evidencias/aws_glue/`.
 
-## 4 · Parte B en AWS: Glue Streaming + Kinesis (~7 min)
+### Parte B en AWS: Glue Streaming + Kinesis (~7 min)
 
 ```bash
 bash labs/02-lakehouse/run_aws.sh stream 300
@@ -65,7 +98,7 @@ bash labs/02-lakehouse/run_aws.sh stream 300
 📸 **Captura** del job `paytrack-stream` en `Succeeded` → `evidencias/aws_glue/`.
 Las validaciones (`✓`) quedan en CloudWatch: `/aws-glue/jobs/output`.
 
-## 5 · Athena: las 6 consultas
+### Athena: las 6 consultas
 
 1. Nombre del bucket:
    ```bash
@@ -82,7 +115,7 @@ Referencia local (Spark sobre `lakehouse-local`): `evidencias/athena/validacion_
 En AWS los números cambian porque el stream genera otros eventos. El TODO 4 debe mostrar los contracargos del
 lote 2: en local fueron 276 por COP 23.933.218,70.
 
-## 6 · Limpieza (obligatoria, el mismo día)
+### Limpieza (obligatoria, el mismo día)
 
 ```bash
 BUCKET=$(aws cloudformation describe-stacks --stack-name paytrack-lakehouse-dev \
