@@ -51,7 +51,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 | Archivo | TODO | Estado |
 |---|---|---|
 | `producer.py` | 1–3: partition key, configuración de Kafka, reintentos en Kinesis | ✅ `test_producer.py` 8/8 · prueba real en Kafka: 100 eventos, 0 perdidos |
-| `jobs/stream.py` | 1–6: esquema, deduplicación con watermark, `latest_per_transaction`, `MERGE` por micro-lote, métricas, alertas | ⬜ |
+| `jobs/stream.py` | 1–6: esquema, deduplicación con watermark, `latest_per_transaction`, `MERGE` por micro-lote, métricas, alertas | ✅ 17 ✓ · 0 ✗ en availableNow y en vivo |
 | `sql/athena.sql` | 5–6 (streaming) | ⬜ |
 
 ### Ejecución local (B.1 a B.3) → `evidencias/b_streaming_local/`
@@ -59,10 +59,10 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 | Paso | Estado | Evidencia |
 |---|---|---|
 | B.1 `pytest tests/test_producer.py` en verde | ✅ 8/8 | `pytest_test_producer.txt` |
-| B.2 `run_local.sh stream` en modo availableNow · primera vez | ⬜ | salida |
-| B.2 `run_local.sh stream` en modo availableNow · segunda vez (idempotencia: 0 filas leídas) | ⬜ | salida |
-| B.2 `run_local.sh stream 180` en vivo, con el productor en otra terminal | ⬜ | salida |
-| B.3 Experimento 1 · Watermark (availableNow vs en vivo) | ⬜ | tabla en el informe |
+| B.2 `run_local.sh stream` en modo availableNow · primera vez | ✅ 12.288 eventos · 17 ✓ · 0 ✗ | `productor_fast_600s.txt`, `stream_availablenow_1.txt` |
+| B.2 `run_local.sh stream` en modo availableNow · segunda vez (idempotencia) | ✅ 0 filas leídas en las 4 consultas · tablas sin cambios | `stream_availablenow_2_idempotencia.txt` |
+| B.2 `run_local.sh stream 180` en vivo, con el productor en paralelo | ✅ 2.487 eventos en vivo · 17 ✓ · 0 ✗ | `productor_en_vivo_120s.txt`, `stream_en_vivo_180s.txt` |
+| B.3 Experimento 1 · Watermark (availableNow vs en vivo) | 🟡 datos: 6 descartadas en availableNow vs 51 en vivo (`metrics`); falta el análisis | tabla en el informe |
 | B.3 Experimento 2 · Carga (20 vs 50 eventos/s) | ⬜ | tabla en el informe |
 | B.3 Experimento 3 · Partition key (constante y `transaction_id`) | ⬜ | `kafka-get-offsets.sh` |
 
