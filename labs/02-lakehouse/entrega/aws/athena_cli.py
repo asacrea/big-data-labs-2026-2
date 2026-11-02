@@ -9,6 +9,7 @@ Uso: python labs/02-lakehouse/entrega/aws/athena_cli.py --bucket <bucket> --out 
 
 import argparse
 import re
+import sys
 import time
 from pathlib import Path
 
@@ -48,6 +49,7 @@ def markdown(rows: list[list[str]]) -> str:
 
 
 def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8")  # la consola de Windows no es UTF-8 por defecto
     parser = argparse.ArgumentParser()
     parser.add_argument("--bucket", required=True)
     parser.add_argument("--out", type=Path, required=True)

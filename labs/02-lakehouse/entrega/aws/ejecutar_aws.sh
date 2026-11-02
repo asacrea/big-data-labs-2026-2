@@ -96,7 +96,7 @@ crear_kill_switch() {
     ]}' >/dev/null
   local when; when=$(date -u -d "+$KILL_MIN minutes" +%Y-%m-%dT%H:%M:%S)
   # IAM tarda unos segundos en propagar el rol recién creado
-  for i in 1 2 3 4 5 6; do
+  for _ in 1 2 3 4 5 6; do
     aws scheduler create-schedule --name "$KS_NAME" --schedule-expression "at($when)" --schedule-expression-timezone UTC \
       --flexible-time-window Mode=OFF --action-after-completion DELETE \
       --target '{"Arn":"arn:aws:scheduler:::aws-sdk:cloudformation:deleteStack","RoleArn":"arn:aws:iam::'"$ACCOUNT"':role/'"$KS_ROLE"'","Input":"{\"StackName\":\"'"$STACK"'\"}"}' \
@@ -117,7 +117,8 @@ borrar_kill_switch() {
 # Antes de borrar los grupos de logs, guarda los de las ejecuciones de Glue que fallaron:
 # son la única evidencia del error y sin ellos no se puede diagnosticar.
 guardar_logs_de_fallos() {
-  local dir="$EV/aws_glue/logs_fallos_$(date +%Y%m%d_%H%M)" job runs
+  local dir job runs
+  dir="$EV/aws_glue/logs_fallos_$(date +%Y%m%d_%H%M)"
   for job in "${JOBS[@]}"; do
     runs=$(aws glue get-job-runs --job-name "paytrack-$job" --max-results 20 \
       --query "JobRuns[?JobRunState=='FAILED'||JobRunState=='ERROR'||JobRunState=='TIMEOUT'].Id" --output text 2>/dev/null)
