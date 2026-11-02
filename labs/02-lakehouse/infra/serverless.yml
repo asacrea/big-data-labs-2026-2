@@ -67,6 +67,21 @@ resources:
             # sobre lakehouse/ (las tablas Delta)? ¿Qué usarías en su lugar?
             # Referencia:
             # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-rule.html
+            #
+            # raw/ es la copia fiel de lo que llegó: se re-procesa durante el primer mes
+            # (STANDARD), luego casi no se lee (STANDARD_IA exige 30 días mínimos) y
+            # después solo sirve para auditoría (GLACIER_IR: lectura en milisegundos si
+            # hay que reconstruir un lote). Se borra a los 10 años, el plazo de
+            # conservación de los libros y soportes contables (art. 60, Código de Comercio).
+            - Id: raw-lifecycle
+              Status: Enabled
+              Prefix: raw/
+              Transitions:
+                - TransitionInDays: 30
+                  StorageClass: STANDARD_IA
+                - TransitionInDays: 90
+                  StorageClass: GLACIER_IR
+              ExpirationInDays: 3650
 
     # ── Glue: catálogo y permisos ────────────────────────────
     GlueDatabase:
