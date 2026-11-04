@@ -16,14 +16,15 @@ El productor envía la misma proporción de eventos tardíos en todos los casos 
 
 ## Experimento 2 · Carga
 
-Alertas nuevas en `gold.fraud_alerts` en cada corrida en vivo (diferencia del total de la tabla antes y después):
+Alertas contadas por las ventanas de cada corrida, no por la diferencia del total de la tabla: las ventanas que quedan
+abiertas al final de una corrida se cierran en la siguiente, así que esa diferencia mezcla corridas.
 
-| Tasa del productor | Eventos | Alertas nuevas | Total de la tabla (antes → después) | Evidencia |
-|---|---|---|---|---|
-| 20 eventos/s | 2.487 | **25** | 157 → 182 | `stream_en_vivo_180s.txt` |
-| 50 eventos/s | 6.195 | **47** | 182 → 229 | `experimento2_stream_en_vivo_rate50.txt` |
+| Tasa del productor | Eventos | Alertas | Aciertos | Precisión | Evidencia |
+|---|---|---|---|---|---|
+| 20 eventos/s | 2.487 | **47** | 38 | 80,85 % | `verificacion_experimentos/alertas_por_ventana_salida.txt` |
+| 50 eventos/s | 6.195 | **375** | 99 | 26,40 % | ídem; ventanas cerradas con `experimento2_cierre_ventanas_rate50.txt` |
 
-La precisión de las alertas (TODO 5 de Athena) se mide en AWS, como pide el enunciado.
+Precisión en AWS (TODO 5 de Athena): 93,75 % a 20/s; acumulado 29,79 % tras la corrida a 50/s; diferencia 110 de 438 = 25,11 %.
 
 ## Experimento 3 · Partition key
 

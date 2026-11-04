@@ -69,11 +69,72 @@ _Pendiente._
 
 ## Experimentos (B.3)
 
-| Experimento | Medición | Resultado |
-|---|---|---|
-| 1 · Watermark | Filas descartadas por watermark en `metrics`: availableNow (`--fast`) vs en vivo | _Pendiente_ |
-| 2 · Carga | Alertas y precisión (TODO 5 de Athena) a 20 y a 50 eventos/s | _Pendiente_ |
-| 3 · Partition key | Reparto por partición (`kafka-get-offsets.sh`) con llave constante y con `transaction_id` | _Pendiente_ |
+### Experimento 1 · Watermark
+
+**Anota las filas *descartadas por watermark* de `metrics` en modo availableNow (`--fast`) y en vivo.**
+
+| Corrida | Eventos | Descartadas en `metrics` | % |
+|---|---|---|---|
+| Local · availableNow (`--fast`, 10 min simulados a 20/s) | 12.288 | **6** | 0,05 % |
+| Local · en vivo a 20/s | 2.487 | **51** (46 + 5 al apagar) | 2,05 % |
+| Local · en vivo a 50/s | 6.195 | **100** (97 + 3 al apagar) | 1,61 % |
+| AWS · en vivo a 20/s | 4.965 | **79** | 1,59 % |
+| AWS · en vivo a 50/s | 12.307 | **132** | 1,07 % |
+
+**¿Por qué son tan distintas si el productor envía la misma proporción de eventos tardíos?**
+Porque el watermark no mide el tiempo real: es el mayor `event_time` visto menos 2 minutos, y solo avanza entre micro-lotes.
+Lo que cambia es cuánto tiempo de evento cabe en cada micro-lote.
+
+- **En vivo**, cada micro-lote cubre unos 10 s. El watermark sigue de cerca al tiempo de evento, así que un pago con más de 2 minutos de retraso llega cuando el umbral ya lo superó. A 20/s llegaron 61 eventos con más de 120 s de retraso y Spark descartó 51. La diferencia es consistente con que Spark filtra con el watermark del lote anterior, que va unos segundos atrás.
+- **Con `--fast`**, los 10 minutos simulados se procesaron en 4 micro-lotes con datos, de unos 4.000 eventos en los tres primeros. El tardío llega junto a eventos de su misma época, y Spark filtra con el watermark del lote anterior: los dos primeros lotes no descartan nada porque ese valor aún es 0.
+
+Se comprobó recalculando evento por evento con los watermarks guardados en el checkpoint: 0 + 0 + 5 + 1 = **6 filas, igual a lo que reportó Spark**.
+Conclusión: `--fast` subestima los descartes, y la cifra representativa de producción es la de la corrida en vivo.
+
+![Salida del experimento 1](../evidencias/capturas/10_exp1_watermark.png)
+
+### Experimento 2 · Carga
+
+**Repite la prueba en vivo con `--rate 50`. ¿Qué pasa con el número de alertas?**
+Crece mucho más que la carga: con 2,5 veces más eventos hay **8 veces más alertas**. Los aciertos crecen como la carga y las falsas alarmas se disparan.
+
+| Local, solo ventanas de cada corrida | Eventos | Alertas | Aciertos | Falsas alarmas | Precisión |
+|---|---|---|---|---|---|
+| 20 eventos/s | 2.487 | 47 | 38 | 9 | 80,85 % |
+| 50 eventos/s | 6.195 | 375 | 99 | 276 | 26,40 % |
+
+Las ventanas de la corrida a 50/s no se habían cerrado al terminar, porque el productor dura 120 s y el watermark va 2 minutos atrás. Se cerraron enviando 60 eventos nuevos, y se contaron solo las ventanas de cada corrida.
+
+**Mide su precisión en AWS con el TODO 5 de Athena, a 20 y a 50 eventos/s.**
+
+| AWS, TODO 5 | Alertas | Aciertos | Precisión |
+|---|---|---|---|
+| Tras la corrida a 20 eventos/s | 32 | 30 | **93,75 %** |
+| Acumulado tras la corrida a 50 eventos/s | 470 | 140 | 29,79 % |
+| Diferencia atribuible a la corrida a 50 eventos/s | 438 | 110 | **25,11 %** |
+
+El 25,11 % es una aproximación: esa diferencia incluye las últimas ventanas de la corrida a 20/s, que se cerraron durante la de 50/s. Las tablas de AWS ya no existen, así que no se puede separar, pero la medición local limpia (26,40 %) da un valor muy parecido.
+
+**Por qué cae la precisión.** La regla (6 o más pagos en 30 s) no cambia, pero la actividad normal sí. Con 500 clientes, un cliente hace en promedio 1,14 pagos cada 30 s a 20/s y 2,85 a 50/s. Si se modela como una distribución de Poisson, la probabilidad de llegar a 6 pagos por azar pasa de 0,12 % a 6,96 %: unas 60 veces más. Las ráfagas de fraude reales solo crecen con la tasa.
+
+![Salida del experimento 2](../evidencias/capturas/11_exp2_carga_alertas.png)
+
+### Experimento 3 · Partition key
+
+**Cambia temporalmente `partition_key` para que devuelva un valor constante, y repite con `transaction_id`. Revisa el reparto con `kafka-get-offsets.sh`.**
+Mismo stream en los tres casos (1.227 eventos, `--seed 7`), en topics de 3 particiones. `customer_id` es nuestra llave, incluida como referencia. La llave se restauró al terminar.
+
+| Llave | p0 | p1 | p2 | Partición más cargada frente al reparto ideal (409) |
+|---|---|---|---|---|
+| Constante | 0 | **1.227** | 0 | +200 % |
+| `transaction_id` | 438 | 397 | 392 | +7 % |
+| `customer_id` | 491 | 341 | 395 | +20 % |
+
+- **Constante:** todo cae en una sola partición, así que no hay paralelismo y los demás consumidores quedan sin trabajo.
+- **`transaction_id`:** es el reparto más parejo, porque casi cada evento tiene una llave distinta.
+- **`customer_id`:** reparte peor porque hay solo 500 llaves y las ráfagas concentran varios pagos en una misma llave. Es lo que se paga por mantener en orden todos los eventos de un cliente.
+
+![Salida del experimento 3](../evidencias/capturas/12_exp3_partition_key.png)
 
 ## Anexos
 

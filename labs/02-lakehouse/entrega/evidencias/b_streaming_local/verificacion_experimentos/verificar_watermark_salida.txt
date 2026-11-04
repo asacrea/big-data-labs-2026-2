@@ -1,0 +1,8 @@
+archivos en versiones 0-6: 21
+filas de la primera corrida: 12288
+lote 0: n=3996 simulado 535s | wm lote=0 tardias<wm_lote=0 | wm anterior=0 tardias<wm_anterior=0
+lote 1: n=3996 simulado 547s | wm lote=1793647257869 tardias<wm_lote=52 | wm anterior=0 tardias<wm_anterior=0
+lote 2: n=3997 simulado 553s | wm lote=1793647457419 tardias<wm_lote=58 | wm anterior=1793647257869 tardias<wm_anterior=5
+lote 3: n=299 simulado 372s | wm lote=1793647647619 tardias<wm_lote=3 | wm anterior=1793647457419 tardias<wm_anterior=1
+en vivo 20/s filas 2487 | retraso>30s: 76 | retraso>120s: 61 | retraso>130s: 59 | pagos retraso>120s: 61
+en vivo 50/s filas 6195 | retraso>30s: 164 | retraso>120s: 115 | retraso>130s: 112 | pagos retraso>120s: 115
