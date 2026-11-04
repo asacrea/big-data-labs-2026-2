@@ -1,15 +1,11 @@
-
-━━━ verificación de la limpieza (01:04:20) ━━━
-  ✓ sin stack paytrack-lakehouse-dev
-  ✓ sin stream de Kinesis paytrack-transactions
-  ✓ sin buckets paytrack-lakehouse-*
-  ✓ sin jobs de Glue paytrack-*
-  ✓ sin schedule paytrack-killswitch
-  ✓ sin rol paytrack-killswitch-role
-  → AWS limpio
-
-$ aws kinesis list-streams
-[]
+$ aws kinesis list-streams --output json
+{
+    "StreamNames": [],
+    "StreamSummaries": []
+}
 $ aws cloudformation describe-stacks --stack-name paytrack-lakehouse-dev
+
 aws: [ERROR]: An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id paytrack-lakehouse-dev does not exist
-$ aws s3 ls | grep paytrack  (sin resultados)
+$ aws glue get-jobs --query "Jobs[?starts_with(Name, 'paytrack-')].Name" --output json
+[]
+$ aws s3 ls | grep paytrack
