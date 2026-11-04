@@ -92,8 +92,8 @@ E = [
     ("kinesis", "q_bronze", [(477, 700), (530, 700)]),
     ("q_bronze", "br_events", [(605, 650), (605, 495)]),
     ("br_events", "q_silver", [(670, 480), (697, 480), (697, 625), (850, 625), (850, 650)]),
-    ("br_events", "q_metrics", [(697, 625), (1050, 625), (1050, 650)]),
-    ("br_events", "q_alerts", [(1050, 625), (1200, 625), (1200, 650)]),
+    ("br_events", "q_metrics", [(670, 480), (697, 480), (697, 625), (1050, 625), (1050, 650)]),
+    ("br_events", "q_alerts", [(670, 480), (697, 480), (697, 625), (1200, 625), (1200, 650)]),
     ("q_silver", "si_transactions", [(950, 650), (950, 495)]),
     ("q_metrics", "go_metrics", [(1140, 650), (1140, 500)]),
     ("q_alerts", "go_alerts", [(1305, 650), (1305, 445), (1300, 445)]),
@@ -115,7 +115,7 @@ def drawio():
     c.append(f'<mxCell id="n" value="{escape(NOTE)}" style="text;html=1;fontSize=12;fontColor={MUTED};align=left;" vertex="1" parent="1"><mxGeometry x="30" y="815" width="1300" height="24" as="geometry"/></mxCell>')
     for i, b in B.items():
         v = escape(b["text"]).replace(chr(10), "&#xa;")
-        st = (f'rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor={b["fill"]};strokeColor={LINE};fontColor={INK};'
+        st = (f'rounded=1;arcSize=6;whiteSpace=wrap;html=0;fillColor={b["fill"]};strokeColor={LINE};fontColor={INK};'
               f'fontSize={b["size"]};fontStyle={1 if b["bold"] else 0};')
         if b["dash"]: st += "dashed=1;"
         if b["top"]: st += "verticalAlign=top;spacingTop=5;"

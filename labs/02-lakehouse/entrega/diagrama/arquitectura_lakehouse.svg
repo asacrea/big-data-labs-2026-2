@@ -150,8 +150,8 @@
 <polyline points="477,700 530,700" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
 <polyline points="605,650 605,495" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
 <polyline points="670,480 697,480 697,625 850,625 850,650" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
-<polyline points="697,625 1050,625 1050,650" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
-<polyline points="1050,625 1200,625 1200,650" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
+<polyline points="670,480 697,480 697,625 1050,625 1050,650" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
+<polyline points="670,480 697,480 697,625 1200,625 1200,650" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
 <polyline points="950,650 950,495" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
 <polyline points="1140,650 1140,500" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
 <polyline points="1305,650 1305,445 1300,445" fill="none" stroke="#3d444d" stroke-width="1.5" marker-end="url(#a)"/>
