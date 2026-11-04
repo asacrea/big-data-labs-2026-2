@@ -93,8 +93,8 @@ Comandos exactos, costos y verificación de la limpieza: [`AWS_PASO_A_PASO.md`](
 
 | Entregable | Estado | Dónde |
 |---|---|---|
-| Diagrama de la arquitectura en draw.io: zonas, tablas por capa, jobs, consultas de streaming y servicios de AWS | ⬜ | `diagrama/` |
-| Informe en PDF (máx. 8 páginas) con las respuestas y los experimentos | 🟡 14 preguntas y experimentos respondidos, 7 páginas; falta el diagrama | `informe/informe_lab2.pdf` |
+| Diagrama de la arquitectura en draw.io: zonas, tablas por capa, jobs, consultas de streaming y servicios de AWS | ✅ | `diagrama/arquitectura_lakehouse.drawio` |
+| Informe en PDF (máx. 8 páginas) con las respuestas y los experimentos | ✅ 14 preguntas, experimentos y diagrama | `informe/informe_lab2.pdf` |
 
 ## Entregables del enunciado (lista literal)
 

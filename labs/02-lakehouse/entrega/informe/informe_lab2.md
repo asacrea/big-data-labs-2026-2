@@ -217,7 +217,12 @@ Mismo stream en los tres casos (1.227 eventos, `--seed 7`), en topics de 3 parti
 
 ![Salida del experimento 3](../evidencias/capturas/12_exp3_partition_key.png)
 
-## Anexos
+## Diagrama de la arquitectura
 
-- **A.** Diagrama de la arquitectura (`entrega/diagrama/`)
-- **B.** Evidencias de ejecución local, AWS, Athena y limpieza (`entrega/evidencias/`)
+Editable en draw.io: `labs/02-lakehouse/entrega/diagrama/arquitectura_lakehouse.drawio`.
+
+![Arquitectura del lakehouse de PayTrack](../diagrama/arquitectura_lakehouse.png)
+
+## Evidencias
+
+Salidas completas de la ejecución local, AWS, Athena y la limpieza, en `labs/02-lakehouse/entrega/evidencias/`.
