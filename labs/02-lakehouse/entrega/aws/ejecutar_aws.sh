@@ -10,6 +10,12 @@
 # Pruebas de las salvaguardas SIN desplegar el stack (crean y borran solo el kill switch):
 #   bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh probar-error              # error → desmontaje
 #   MAX_MIN=1 bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh probar-watchdog # watchdog → desmontaje
+#   bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh probar-fail               # fallo controlado → desmontaje
+#   bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh probar-disparo            # el schedule se ejecuta de verdad
+#
+# Prueba reducida EN AWS, para observar lo que no se puede probar en local (~25 min, ~USD 0.20):
+#   bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh prueba-aws
+#   deploy → lote 1 → stream → logs del stream → Athena → disparo real del kill switch → desmontaje
 #
 # Usa los scripts del profesor (run_aws.sh, serverless.yml) sin modificarlos. Agrega:
 #   1. Verificación previa: cuenta, región, rama, datos, tests y que no exista el stack.
@@ -42,7 +48,8 @@ mkdir -p "$STATE_DIR" "$EV/aws_glue" "$EV/athena" "$EV/limpieza"
 [[ -f .envs/aws.env ]] && { set -a; source .envs/aws.env; set +a; }
 
 ok()   { echo "  ✓ $*"; }
-fail() { echo "  ✗ $*" >&2; exit 1; }
+ARMADO=0  # 1 cuando ya puede haber recursos creados: un fallo debe desmontar
+fail() { echo "  ✗ $*" >&2; [[ $ARMADO == 1 ]] && al_fallar "$LINENO"; exit 1; }
 step() { echo -e "\n━━━ $* ($(date +%T)) ━━━"; }
 
 stack_exists() { aws cloudformation describe-stacks --stack-name "$STACK" >/dev/null 2>&1; }
@@ -94,7 +101,11 @@ crear_kill_switch() {
       {"Effect": "Allow", "Action": ["athena:DeleteWorkGroup", "athena:Get*", "athena:List*"],
        "Resource": "arn:aws:athena:'"$REGION:$ACCOUNT"':workgroup/paytrack-lakehouse-wg"}
     ]}' >/dev/null
-  local when; when=$(date -u -d "+$KILL_MIN minutes" +%Y-%m-%dT%H:%M:%S)
+  crear_schedule "$KILL_MIN"
+}
+
+crear_schedule() {  # crear_schedule <minutos>: programa el borrado del stack
+  local when; when=$(date -u -d "+$1 minutes" +%Y-%m-%dT%H:%M:%S)
   # IAM tarda unos segundos en propagar el rol recién creado
   for _ in 1 2 3 4 5 6; do
     aws scheduler create-schedule --name "$KS_NAME" --schedule-expression "at($when)" --schedule-expression-timezone UTC \
@@ -116,22 +127,23 @@ borrar_kill_switch() {
 # ── 2. Desmontaje (idempotente: se puede correr cuantas veces haga falta) ───
 # Antes de borrar los grupos de logs, guarda los de las ejecuciones de Glue que fallaron:
 # son la única evidencia del error y sin ellos no se puede diagnosticar.
+guardar_logs_de_run() {  # guardar_logs_de_run <job> <run> <carpeta>; nunca interrumpe el desmontaje
+  local job=$1 run=$2 dir=$3 g
+  mkdir -p "$dir" || true
+  for g in /aws-glue/jobs/error /aws-glue/jobs/output /aws-glue/jobs/logs-v2; do
+    aws logs filter-log-events --log-group-name "$g" --log-stream-name-prefix "$run"       --query 'events[].message' --output text 2>/dev/null | tr '	' '
+' > "$dir/${job}_${g##*/}.txt" || true
+  done
+  aws glue get-job-run --job-name "paytrack-$job" --run-id "$run"     --query 'JobRun.[JobRunState,ExecutionTime,ErrorMessage]' --output text > "$dir/${job}_estado.txt" 2>/dev/null || true
+}
+
 guardar_logs_de_fallos() {
-  local dir job runs
+  local dir job runs run
   dir="$EV/aws_glue/logs_fallos_$(date +%Y%m%d_%H%M)"
   for job in "${JOBS[@]}"; do
-    runs=$(aws glue get-job-runs --job-name "paytrack-$job" --max-results 20 \
-      --query "JobRuns[?JobRunState=='FAILED'||JobRunState=='ERROR'||JobRunState=='TIMEOUT'].Id" --output text 2>/dev/null)
+    runs=$(aws glue get-job-runs --job-name "paytrack-$job" --max-results 20       --query "JobRuns[?JobRunState=='FAILED'||JobRunState=='ERROR'||JobRunState=='TIMEOUT'].Id" --output text 2>/dev/null) || true
     [[ -z $runs || $runs == None ]] && continue
-    mkdir -p "$dir"
-    for run in $runs; do
-      for g in /aws-glue/jobs/error /aws-glue/jobs/output; do
-        aws logs filter-log-events --log-group-name "$g" --log-stream-name-prefix "$run" \
-          --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' > "$dir/${job}_${g##*/}.txt"
-      done
-      aws glue get-job-run --job-name "paytrack-$job" --run-id "$run" \
-        --query 'JobRun.[JobRunState,ErrorMessage]' --output text > "$dir/${job}_estado.txt" 2>/dev/null
-    done
+    for run in $runs; do guardar_logs_de_run "$job" "$run" "$dir"; done
     echo "  · logs del fallo de paytrack-$job guardados en $dir"
   done
   return 0
@@ -154,7 +166,7 @@ desmontar() {
   done
   if stack_exists; then
     local bucket deploy_bucket
-    bucket=$(stack_output LakehouseBucket)
+    bucket=$(aws cloudformation describe-stack-resource --stack-name "$STACK"       --logical-resource-id LakehouseBucket --query StackResourceDetail.PhysicalResourceId --output text 2>/dev/null)
     deploy_bucket=$(aws cloudformation describe-stack-resource --stack-name "$STACK" \
       --logical-resource-id ServerlessDeploymentBucket --query StackResourceDetail.PhysicalResourceId --output text 2>/dev/null)
     for b in $bucket $deploy_bucket; do
@@ -196,6 +208,7 @@ verificar() {
 WATCHDOG_PID=""
 al_fallar() {
   local rc=$? linea=$1
+  ARMADO=0
   # Primero desactivar errexit e ignorar señales: nada debe cortar el desmontaje
   set +e; trap - ERR; trap '' INT TERM
   echo -e "\n✗ ERROR en la línea $linea (código $rc): '$BASH_COMMAND'. Se desmonta todo para no gastar." >&2
@@ -205,6 +218,7 @@ al_fallar() {
   exit 1
 }
 al_interrumpir() {
+  ARMADO=0
   set +e; trap - ERR; trap '' INT TERM
   echo -e "\n✗ Ejecución interrumpida (Ctrl+C, señal o watchdog de $MAX_MIN min). Se desmonta todo." >&2
   parar_watchdog
@@ -245,6 +259,7 @@ todo() {
   preflight
   trap 'al_fallar $LINENO' ERR
   trap al_interrumpir INT TERM
+  ARMADO=1
   iniciar_watchdog
   crear_kill_switch
 
@@ -261,9 +276,76 @@ todo() {
   paso uv run python "$LAB/entrega/aws/athena_cli.py" --bucket "$BUCKET" --out "$EV/athena/athena_resultados.md"
 
   parar_watchdog
+  ARMADO=0
   trap - ERR INT TERM
   desmontar
   echo -e "\n✓ Ejecución completa · $(date +%T). Evidencias en $EV/aws_glue y $EV/athena."
+}
+
+# Dispara el kill switch de verdad y comprueba que el stream de Kinesis desaparezca.
+# Se espera DELETE_FAILED solo en los dos buckets: CloudFormation no borra buckets con objetos.
+probar_kill_switch() {
+  local out=$1 estado="" stream="" fallidos
+  step "disparo real del kill switch (en ~2 min)"
+  aws scheduler delete-schedule --name "$KS_NAME"
+  crear_schedule 2
+  for _ in $(seq 1 48); do  # hasta 12 minutos
+    paso sleep 15
+    estado=$(aws cloudformation describe-stacks --stack-name "$STACK" --query 'Stacks[0].StackStatus' --output text 2>/dev/null) || estado=BORRADO
+    stream=$(aws kinesis list-streams --query "StreamNames[?@=='$STREAM']" --output text) || stream=desconocido
+    echo "  · $(date +%T) stack: $estado · stream: ${stream:-borrado}"
+    [[ -z $stream && $estado != DELETE_IN_PROGRESS ]] && break
+  done
+  fallidos=$(aws cloudformation describe-stack-events --stack-name "$STACK"     --query "StackEvents[?ResourceStatus=='DELETE_FAILED'].[LogicalResourceId,ResourceStatusReason]" --output text 2>/dev/null) || fallidos=""
+  { echo "Disparo real del kill switch · $(date '+%Y-%m-%d %H:%M')"; echo "estado final del stack: $estado"
+    echo "stream de Kinesis: ${stream:-borrado}"; echo "recursos con DELETE_FAILED:"; echo "$fallidos"; } | tee "$out"
+  [[ -z $stream ]] || fail "el kill switch no borró el stream de Kinesis"
+  ok "el kill switch borró el stream de Kinesis"
+  if grep -vE '^(LakehouseBucket|ServerlessDeploymentBucket|paytrack-lakehouse-dev)' <<< "$fallidos" | grep -q .; then
+    echo "  ⚠ el kill switch dejó otros recursos: revisar los permisos de su rol ($out)"
+  fi
+}
+
+# Prueba reducida en AWS: observa lo que en local no se puede probar. Si algo falla, desmonta y conserva los logs.
+prueba_aws() {
+  local log dir run
+  log="$EV/aws_glue/prueba_$(date +%Y%m%d_%H%M).txt"
+  dir="$EV/aws_glue/prueba_logs_$(date +%Y%m%d_%H%M)"
+  exec > >(tee -a "$log") 2>&1
+  echo "Lab 2 · prueba reducida en AWS · $(date '+%Y-%m-%d %H:%M') · log: $log"
+  MAX_MIN=45
+  preflight
+  trap 'al_fallar $LINENO' ERR
+  trap al_interrumpir INT TERM
+  ARMADO=1
+  iniciar_watchdog
+  crear_kill_switch
+
+  step "deploy"
+  pushd "$LAB/infra" >/dev/null; paso serverless deploy --stage dev; popd >/dev/null
+  BUCKET=$(stack_output LakehouseBucket); ok "bucket $BUCKET"
+
+  step "Parte A · lote 1"; paso bash "$LAB/run_aws.sh" data/batch1 2026-09-29
+  step "Parte B · stream"; paso bash "$LAB/run_aws.sh" stream 300
+  step "estado de los jobs"; estado_jobs
+
+  step "logs del stream"
+  paso sleep 30  # CloudWatch tarda unos segundos en recibir los últimos eventos
+  run=$(aws glue get-job-runs --job-name paytrack-stream --max-results 1 --query 'JobRuns[0].Id' --output text)
+  guardar_logs_de_run stream "$run" "$dir"
+  grep -hE "Columnas del conector|no agregó|Stream listo|^✗" "$dir"/stream_*.txt | sort -u || true
+
+  step "Athena: DDL y las 6 consultas"
+  paso uv run python "$LAB/entrega/aws/athena_cli.py" --bucket "$BUCKET" --out "$EV/athena/prueba_athena_resultados.md"
+
+  probar_kill_switch "$dir/kill_switch.txt"
+
+  parar_watchdog
+  ARMADO=0
+  trap - ERR INT TERM
+  desmontar
+  echo -e "
+✓ Prueba reducida completa · $(date +%T). Evidencias en $dir y $log."
 }
 
 # Pruebas: mismo manejo de errores y señales que 'todo', pero sin stack
@@ -271,12 +353,28 @@ probar() {
   preflight
   trap 'al_fallar $LINENO' ERR
   trap al_interrumpir INT TERM
+  ARMADO=1
   iniciar_watchdog
   crear_kill_switch
   aws scheduler get-schedule --name "$KS_NAME" --query '{hora:ScheduleExpression,objetivo:Target.Arn,entrada:Target.Input}' --output table
   if [[ $1 == error ]]; then
     step "simulando un error en un paso"
     paso false
+  elif [[ $1 == fail ]]; then
+    step "simulando un fallo controlado (fail) con recursos ya creados"
+    fail "fallo simulado"
+  elif [[ $1 == disparo ]]; then
+    # Gratis y sin stack: DeleteStack sobre un stack inexistente no hace nada, pero prueba que el
+    # schedule se ejecuta con su rol. Al ejecutarse, AWS lo borra (--action-after-completion DELETE).
+    step "disparando el schedule de verdad, sin stack"
+    aws scheduler delete-schedule --name "$KS_NAME"
+    crear_schedule 2
+    for _ in $(seq 1 28); do
+      paso sleep 15
+      aws scheduler get-schedule --name "$KS_NAME" >/dev/null 2>&1 || { ok "el schedule se ejecutó y AWS lo borró ($(date +%T))"; break; }
+    done
+    aws scheduler get-schedule --name "$KS_NAME" >/dev/null 2>&1 && fail "el schedule no se ejecutó en 7 minutos"
+    parar_watchdog; ARMADO=0; trap - ERR INT TERM; desmontar; return 0
   else
     step "simulando un paso colgado: el watchdog debe cortarlo a los $MAX_MIN min"
     paso sleep $((MAX_MIN * 60 + 120))
@@ -287,9 +385,12 @@ probar() {
 case "${1:-}" in
   preflight) preflight ;;
   probar-error)    probar error ;;
+  probar-fail)     probar fail ;;
+  probar-disparo)  probar disparo ;;
   probar-watchdog) probar watchdog ;;
   todo)      todo ;;
+  prueba-aws) prueba_aws ;;
   desmontar) desmontar ;;
   verificar) verificar ;;
-  *) echo "uso: $0 preflight | todo | desmontar | verificar | probar-error | probar-watchdog" >&2; exit 2 ;;
+  *) echo "uso: $0 preflight | todo | desmontar | verificar | prueba-aws | probar-error | probar-fail | probar-disparo | probar-watchdog" >&2; exit 2 ;;
 esac

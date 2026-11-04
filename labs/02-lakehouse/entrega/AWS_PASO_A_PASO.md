@@ -69,6 +69,16 @@ Limpieza manual en cualquier momento: `ejecutar_aws.sh desmontar` (idempotente) 
 
 ---
 
+## 3 · Prueba reducida en AWS (`prueba-aws`)
+
+```bash
+bash labs/02-lakehouse/entrega/aws/ejecutar_aws.sh prueba-aws
+```
+
+Deploy → lote 1 → stream → logs del stream (columnas reales de Kinesis) → Athena (DDL y 6 consultas) → disparo real del kill switch → desmontaje.
+Tope del watchdog: 45 min. Se espera `DELETE_FAILED` solo en los dos buckets, porque CloudFormation no borra buckets con objetos; el desmontaje los vacía y termina.
+Evidencias: `evidencias/aws_glue/prueba_*` y `evidencias/athena/prueba_athena_resultados.md`.
+
 ## Anexo · Los mismos pasos a mano (sin salvaguardas)
 
 ### Desplegar (~3 min)
