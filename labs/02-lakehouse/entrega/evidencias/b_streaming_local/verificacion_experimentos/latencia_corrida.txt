@@ -1,0 +1,5 @@
+inicio UTC 2026-11-04 06:58:46
+productor arranca UTC 2026-11-04 06:59:46
+✓ 4917 eventos enviados en 240s (chargeback: 99, payment: 4818) · 0 perdidos
+productor termina UTC 2026-11-04 07:03:48
+stream exit=0

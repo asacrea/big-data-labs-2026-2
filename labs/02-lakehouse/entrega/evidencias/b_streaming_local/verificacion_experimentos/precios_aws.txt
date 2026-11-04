@@ -1,0 +1,22 @@
+== Kinesis
+0.015        USD/ShardHour      Storage-ShardHour                          | $0.015 per provisioned shard-hour
+0.02         USD/ShardHour      Extended-ShardHour                         | $0.020 per extended shard-hour
+1.4e-08      USD/PutRequest     PutRequestPayloadUnits                     | $0.014 per 1 million payload units
+== Glue
+0.44         USD/DPU-Hour       USE1-Column-Statistics-DPU-Hour            | $0.44 per Data Processing Unit-Hour for AWS Glue Catalog Statistics
+0.364        USD/DPU-Hour       USE1-ETL-M-DPU-Hour-Gen2                   | $0.364 per Data Processing Unit-Hour for AWS Glue ETL Memory-Optimized Job Run G
+0.44         USD/DPU-Hour       USE1-Crawler-DPU-Hour                      | $0.44 per Data Processing Unit-Hour for AWS Glue crawler
+0.52         USD/M-DPU-Hour     USE1-ETL-M-DPU-Hour                        | $0.52 per Memory optimized Data Processing Unit-Hour for AWS Glue ETL Memory-Opt
+0.44         USD/DPU-Hour       USE1-Optimization-DPU-Hour                 | $0.44 per Data Processing Unit-Hour for optimizing Iceberg tables with compactio
+0.44         USD/M-DPU-Hour     USE1-ETL-MemOptimized-DPU-Hour             | $0.44 per Memory optimized Data Processing Unit-Hour for AWS Glue for Ray job
+0.44         USD/DPU-Hour       USE1-ETL-DPU-Hour                          | $0.44 per Data Processing Unit-Hour for AWS Glue ETL job
+0.44         USD/DPU-Hour       USE1-DEVED-DPU-Hour                        | $0.44 per Data Processing Unit-Hour for AWS Glue development endpoints
+0.44         USD/DPU-Hour       USE1-Materialized-View-Refresh-DPU-Hour    | $0.44 per DPU-Hour for Materialized-View-Refresh-DPU-Hour in US East (N. Virgini
+0.44         USD/DPU-Hour       USE1-zeroETL-Lakehouse-Compute-DPU-Hour    | $0.44 per AWS Glue DPU Hour for compute to process zero-ETL data written to Amaz
+0.308        USD/DPU-Hour       USE1-ETL-DPU-Hour-Gen2                     | $0.308 per Data Processing Unit-Hour for AWS Glue ETL Job Run Glue 6.0+
+== Athena
+5            USD/Terabytes      USE1-DataScannedInTB                       | 5.00 USD per Terabytes for DataScannedInTB in US East (N. Virginia)
+== S3
+0.022        USD/GB-Mo          TimedStorage-ByteHrs                       | $0.022 per GB - next 450 TB / month of storage used
+0.021        USD/GB-Mo          TimedStorage-ByteHrs                       | $0.021 per GB - storage used / month over 500 TB
+0.023        USD/GB-Mo          TimedStorage-ByteHrs                       | $0.023 per GB - first 50 TB / month of storage used

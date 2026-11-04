@@ -6,8 +6,8 @@
 
 Este archivo es el índice de nuestra entrega. Sigue la misma estructura del enunciado:
 **Parte A · Batch**, **Parte B · Streaming**, **Ejecución en AWS** (las dos partes) y el informe.
-Los archivos dados (`jobs/common.py`, `run_local.sh`, `run_aws.sh`, `tests/`) y las validaciones de
-cada job no se modifican.
+Los archivos dados (`run_local.sh`, `run_aws.sh`, `tests/`) y las validaciones de cada job no se modificaron.
+Única excepción: `jobs/common.py`, porque Glue 5.0 no entrega la columna `__src_timestamp` (explicado en el informe).
 
 Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia · ⬜ pendiente
 
@@ -24,8 +24,8 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 | `jobs/silver.py` | 1–5: deduplicación, tipado, calidad, `MERGE`, PII | ✅ Luis · validaciones en verde en los 2 lotes |
 | `jobs/gold.py` | 1–3: tres tablas de negocio | ✅ Luis · validaciones en verde en los 2 lotes |
 | `jobs/audit.py` | 1–2: time travel | ✅ Luis · validaciones en verde en los 2 lotes |
-| `sql/athena.sql` | 1–4 (batch) | 🟡 probadas en local con Spark y Trino, resultados idénticos (`evidencias/athena/validacion_local_*.txt`); falta correrlas en Athena |
-| `infra/serverless.yml` | ciclo de vida de la zona raw | ✅ `raw/`: STANDARD_IA a 30 días, GLACIER_IR a 90, expira a los 10 años · YAML válido; se prueba con el deploy |
+| `sql/athena.sql` | 1–4 (batch) | ✅ corridas en Athena (`evidencias/athena/athena_resultados.md`); también probadas en local con Spark y Trino |
+| `infra/serverless.yml` | ciclo de vida de la zona raw | ✅ `raw/`: STANDARD_IA a 30 días, GLACIER_IR a 90, expira a los 10 años · desplegado en AWS |
 
 ### Ejecución local (A.0 y A.1) → `evidencias/a_batch_local/`
 
@@ -38,7 +38,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 | Lote 2 · primera ejecución | ✅ 38 ✓ · 0 ✗ · 1.882 insertadas, 276 contracargos (COP 23.933.218,70) | `lote2_ejecucion1.txt` |
 | Lote 2 · segunda ejecución (idempotencia) | ✅ 38 ✓ · 0 ✗ · auditoría: 0 insertadas, 0 actualizadas | `lote2_ejecucion2.txt` |
 
-### Preguntas del informe: 1 a 6 (Bronze, Silver, MERGE, Time travel, PII, Consumo) ⬜
+### Preguntas del informe: 1 a 6 (Bronze, Silver, MERGE, Time travel, PII, Consumo) ✅ `informe/informe_lab2.md`
 
 ---
 
@@ -52,7 +52,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 |---|---|---|
 | `producer.py` | 1–3: partition key, configuración de Kafka, reintentos en Kinesis | ✅ `test_producer.py` 8/8 · prueba real en Kafka: 100 eventos, 0 perdidos |
 | `jobs/stream.py` | 1–6: esquema, deduplicación con watermark, `latest_per_transaction`, `MERGE` por micro-lote, métricas, alertas | ✅ 17 ✓ · 0 ✗ en availableNow y en vivo |
-| `sql/athena.sql` | 5–6 (streaming) | 🟡 probadas en local con Spark y Trino (precisión local 79,48 %); falta correrlas en Athena |
+| `sql/athena.sql` | 5–6 (streaming) | ✅ corridas en Athena: 93,75 % a 20/s y ~25,11 % a 50/s |
 
 ### Ejecución local (B.1 a B.3) → `evidencias/b_streaming_local/`
 
@@ -66,7 +66,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 | B.3 Experimento 2 · Carga (20 vs 50 eventos/s) | ✅ local: 47 alertas (80,85 %) a 20/s y 375 (26,40 %) a 50/s · AWS: 93,75 % y ~25,11 % · respondido en el informe | `experimentos_resumen.md` |
 | B.3 Experimento 3 · Partition key (constante y `transaction_id`) | ✅ constante 0/1.227/0; `transaction_id` 438/397/392; `customer_id` 491/341/395 · respondido en el informe | `experimento3_partition_key.txt` |
 
-### Preguntas del informe: 7 a 14 (Garantías, Watermark, Latencia, Precisión, Estado final, Partition key, Batch y streaming, Costos) ⬜
+### Preguntas del informe: 7 a 14 (Garantías, Watermark, Latencia, Precisión, Estado final, Partition key, Batch y streaming, Costos) ✅ `informe/informe_lab2.md`
 
 ---
 
@@ -75,17 +75,17 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 Todo el mismo día, cuando las dos partes estén en verde en local. Kinesis cobra por hora mientras exista.
 Comandos exactos, costos y verificación de la limpieza: [`AWS_PASO_A_PASO.md`](AWS_PASO_A_PASO.md).
 
-**Prueba reducida (2026-11-03):** deploy, lote 1 (4 jobs), `paytrack-stream` (17 ✓, 4.918 eventos), Athena (DDL y 6 consultas), kill switch disparado (borró Kinesis) y desmontaje con AWS limpio: `aws_glue/prueba_*`, `athena/prueba_athena_resultados.md`. Falta la corrida completa: lote 2, stream a 20 y a 50 eventos/s y capturas.
+**Corrida completa: 2026-11-04.** Antes hubo una corrida fallida en el stream (2026-11-02) y una prueba reducida (2026-11-03): `aws_glue/ejecucion_20261102_1633.txt` y `aws_glue/prueba_*`.
 
 | Paso | Estado | Evidencia |
 |---|---|---|
 | Instalar Serverless Framework v3 | ✅ 3.40.0 · `serverless print` resuelve el stack sin errores | |
-| Copiar `.envs/aws.env.example` a `.envs/aws.env` con las credenciales (nunca se sube) | ⬜ | |
-| `serverless deploy --stage dev` | 🟡 1.ª ejecución (2026-11-02): deploy ✅, Parte A ✅ (8 jobs `SUCCEEDED`), stream ✗ `KeyError: '__src_timestamp'` en `jobs/common.py` (archivo dado) → desmontaje automático, AWS limpio. Corregido; falta repetir | `aws_glue/ejecucion_20261102_1633.txt` |
-| Parte A: `run_aws.sh` lote 1 y lote 2 · 4 jobs batch en `Succeeded` | ⬜ | capturas |
-| Parte B: `run_aws.sh stream 300` · job `paytrack-stream` en `Succeeded` | ⬜ | captura |
-| Athena: 6 consultas con resultados y MB escaneados | ⬜ | capturas |
-| Limpieza: bucket vacío, `serverless remove` y **ningún stream de Kinesis** | ⬜ | capturas |
+| Crear `.envs/aws.env` con `STUDENT_ID`; credenciales de la AWS CLI (nunca se sube) | ✅ | |
+| `serverless deploy --stage dev` | ✅ | `aws_glue/ejecucion_20261104_0008.txt` |
+| Parte A: `run_aws.sh` lote 1 y lote 2 · 4 jobs batch en `Succeeded` | ✅ 8 jobs `SUCCEEDED`, salida de AWS CLI (sin captura de la consola) | `capturas/02_glue_10_jobs_succeeded.png` |
+| Parte B: `run_aws.sh stream 300` · job `paytrack-stream` en `Succeeded` | ✅ a 20 y a 50 eventos/s, salida de AWS CLI y log de CloudWatch | `capturas/02`, `03` y `04` |
+| Athena: 6 consultas con resultados y MB escaneados | ✅ por CLI, en las dos pasadas | `athena/athena_resultados*.md` |
+| Limpieza: bucket vacío, stack borrado y **ningún stream de Kinesis** | ✅ verificado por CLI | `limpieza/recursos_eliminados.png` |
 
 ---
 
@@ -94,7 +94,7 @@ Comandos exactos, costos y verificación de la limpieza: [`AWS_PASO_A_PASO.md`](
 | Entregable | Estado | Dónde |
 |---|---|---|
 | Diagrama de la arquitectura en draw.io: zonas, tablas por capa, jobs, consultas de streaming y servicios de AWS | ⬜ | `diagrama/` |
-| Informe en PDF (máx. 8 páginas) con las respuestas y los experimentos | ⬜ borrador con las 14 preguntas | `informe/informe_lab2.md` |
+| Informe en PDF (máx. 8 páginas) con las respuestas y los experimentos | 🟡 14 preguntas y experimentos respondidos, 7 páginas; falta el diagrama | `informe/informe_lab2.pdf` |
 
 ## Entregables del enunciado (lista literal)
 
