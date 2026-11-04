@@ -67,7 +67,7 @@ SELECT merchant_id,
        MAX(merchant_name) AS merchant_name,
        SUM(CASE WHEN status = 'approved' THEN amount_cop ELSE 0 END) AS approved_cop,
        COUNT(*) AS num_transactions,
-       ROUND(100.0 * SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) / COUNT(*), 2) AS approval_rate_pct
+       ROUND(100.0E0 * SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) / COUNT(*), 2) AS approval_rate_pct
 FROM paytrack_lakehouse.silver_transactions
 WHERE year = '2026' AND month = '09'
 GROUP BY merchant_id
@@ -114,7 +114,7 @@ ORDER BY monto_revertido_cop DESC;
 -- (bronze_transaction_events). Reporta alertas, aciertos y % de precisión.
 SELECT COUNT(*) AS alertas,
        SUM(acierto) AS aciertos,
-       ROUND(100.0 * SUM(acierto) / COUNT(*), 2) AS precision_pct
+       ROUND(100.0E0 * SUM(acierto) / COUNT(*), 2) AS precision_pct
 FROM (
     SELECT a.customer_id,
            a.window_start,

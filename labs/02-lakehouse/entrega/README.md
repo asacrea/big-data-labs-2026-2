@@ -24,7 +24,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 | `jobs/silver.py` | 1–5: deduplicación, tipado, calidad, `MERGE`, PII | ✅ Luis · validaciones en verde en los 2 lotes |
 | `jobs/gold.py` | 1–3: tres tablas de negocio | ✅ Luis · validaciones en verde en los 2 lotes |
 | `jobs/audit.py` | 1–2: time travel | ✅ Luis · validaciones en verde en los 2 lotes |
-| `sql/athena.sql` | 1–4 (batch) | 🟡 escritas y probadas en local con Spark (`evidencias/athena/validacion_local_spark.txt`); falta correrlas en Athena |
+| `sql/athena.sql` | 1–4 (batch) | 🟡 probadas en local con Spark y Trino, resultados idénticos (`evidencias/athena/validacion_local_*.txt`); falta correrlas en Athena |
 | `infra/serverless.yml` | ciclo de vida de la zona raw | ✅ `raw/`: STANDARD_IA a 30 días, GLACIER_IR a 90, expira a los 10 años · YAML válido; se prueba con el deploy |
 
 ### Ejecución local (A.0 y A.1) → `evidencias/a_batch_local/`
@@ -52,7 +52,7 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 |---|---|---|
 | `producer.py` | 1–3: partition key, configuración de Kafka, reintentos en Kinesis | ✅ `test_producer.py` 8/8 · prueba real en Kafka: 100 eventos, 0 perdidos |
 | `jobs/stream.py` | 1–6: esquema, deduplicación con watermark, `latest_per_transaction`, `MERGE` por micro-lote, métricas, alertas | ✅ 17 ✓ · 0 ✗ en availableNow y en vivo |
-| `sql/athena.sql` | 5–6 (streaming) | 🟡 escritas y probadas en local (precisión local 79,48 %); falta correrlas en Athena |
+| `sql/athena.sql` | 5–6 (streaming) | 🟡 probadas en local con Spark y Trino (precisión local 79,48 %); falta correrlas en Athena |
 
 ### Ejecución local (B.1 a B.3) → `evidencias/b_streaming_local/`
 
