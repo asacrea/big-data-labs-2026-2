@@ -132,8 +132,7 @@ guardar_logs_de_run() {  # guardar_logs_de_run <job> <run> <carpeta>; nunca inte
   local job=$1 run=$2 dir=$3 g
   mkdir -p "$dir" || true
   for g in /aws-glue/jobs/error /aws-glue/jobs/output /aws-glue/jobs/logs-v2; do
-    aws logs filter-log-events --log-group-name "$g" --log-stream-name-prefix "$run"       --query 'events[].message' --output text 2>/dev/null | tr '	' '
-' > "$dir/${job}_${g##*/}.txt" || true
+    aws logs filter-log-events --log-group-name "$g" --log-stream-name-prefix "$run"       --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' > "$dir/${job}_${g##*/}.txt" || true
   done
   aws glue get-job-run --job-name "paytrack-$job" --run-id "$run"     --query 'JobRun.[JobRunState,ExecutionTime,ErrorMessage]' --output text > "$dir/${job}_estado.txt" 2>/dev/null || true
 }
@@ -267,8 +266,7 @@ stream_a_50() {
   local run_id estado
   run_id=$(aws glue start-job-run --job-name paytrack-stream --arguments '{"--RUN_SECONDS":"300"}' --query JobRunId --output text)
   echo "  · paytrack-stream lanzado ($run_id)"
-  paso uv run python "$LAB/producer.py" --sink kinesis --rate 50 --duration 240 2>&1 | tr '' '
-' | tail -1
+  paso uv run python "$LAB/producer.py" --sink kinesis --rate 50 --duration 240
   while true; do
     estado=$(aws glue get-job-run --job-name paytrack-stream --run-id "$run_id" --query JobRun.JobRunState --output text)
     case "$estado" in
@@ -340,7 +338,7 @@ probar_kill_switch() {
     echo "stream de Kinesis: ${stream:-borrado}"; echo "recursos con DELETE_FAILED:"; echo "$fallidos"; } | tee "$out"
   [[ -z $stream ]] || fail "el kill switch no borró el stream de Kinesis"
   ok "el kill switch borró el stream de Kinesis"
-  if grep -vE '^(LakehouseBucket|ServerlessDeploymentBucket|paytrack-lakehouse-dev)' <<< "$fallidos" | grep -q .; then
+  if grep -vE '^(LakehouseBucket|ServerlessDeploymentBucket|paytrack-lakehouse-dev)\b' <<< "$fallidos" | grep -q .; then
     echo "  ⚠ el kill switch dejó otros recursos: revisar los permisos de su rol ($out)"
   fi
 }
@@ -380,8 +378,7 @@ prueba_aws() {
   ARMADO=0
   trap - ERR INT TERM
   desmontar
-  echo -e "
-✓ Prueba reducida completa · $(date +%T). Evidencias en $dir y $log."
+  echo -e "\n✓ Prueba reducida completa · $(date +%T). Evidencias en $dir y $log."
 }
 
 # Pruebas: mismo manejo de errores y señales que 'todo', pero sin stack
