@@ -94,8 +94,12 @@ def read_events(spark: SparkSession, source: str, stream: str, bootstrap: str, s
             "maxFetchRecordsPerShard": "2000",
         },
     )
-    src = "__src_timestamp"
-    arrival = F.timestamp_millis(src) if dict(df.dtypes)[src] in ("bigint", "int") else F.col(src).cast("timestamp")
+    # El conector de Glue 5.0 nombra esta columna "$add$record_timestamp$_temporary$" (la documentación
+    # dice "__src_timestamp"): se acepta cualquiera de las dos.
+    src = next((c for c in ("__src_timestamp", "$add$record_timestamp$_temporary$") if c in df.columns), None)
+    if src is None:
+        raise AssertionError(f"✗ el conector de Kinesis no entregó la hora de llegada; columnas: {df.columns}")
+    arrival = F.timestamp_millis(F.col(src)) if dict(df.dtypes)[src] in ("bigint", "int") else F.col(src).cast("timestamp")
     return df.withColumn("arrival_ts", arrival).drop(src)
 
 

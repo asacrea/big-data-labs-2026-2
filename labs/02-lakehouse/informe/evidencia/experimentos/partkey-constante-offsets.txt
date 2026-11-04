@@ -1,0 +1,3 @@
+paytrack.exp.constante:0:0
+paytrack.exp.constante:1:1227
+paytrack.exp.constante:2:0

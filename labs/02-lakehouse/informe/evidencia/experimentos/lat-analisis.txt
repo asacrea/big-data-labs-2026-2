@@ -1,0 +1,6 @@
+RESULT modo=latency alertas=36 aciertos=31 precision=86.11
++-----+---------+-----+
+|min_s|mediana_s|max_s|
++-----+---------+-----+
+|133.5|    155.8|171.8|
++-----+---------+-----+

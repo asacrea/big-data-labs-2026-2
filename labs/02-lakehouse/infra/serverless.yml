@@ -15,6 +15,8 @@ provider:
   stage: ${opt:stage, 'dev'}
 
 custom:
+  # AWS Academy Learner Lab no permite crear roles de IAM: los jobs usan el LabRole existente
+  roleArn: arn:aws:iam::${aws:accountId}:role/LabRole
   bucketName: paytrack-lakehouse-${env:STUDENT_ID}-${aws:accountId}
   glueJobArgs:
     "--BASE": s3://${self:custom.bucketName}
@@ -58,17 +60,21 @@ resources:
               Status: Enabled
               Prefix: athena-results/
               ExpirationInDays: 7
-            # TODO: define la política de ciclo de vida de la zona raw/.
-            #   ¿Cuánto tiempo se re-procesa un lote? ¿Cuándo pasarlo a una clase más
-            #   barata (STANDARD_IA, GLACIER_IR)? ¿Se debe borrar alguna vez? (auditoría)
-            #   Usa Transitions (TransitionInDays + StorageClass) y/o ExpirationInDays.
-            #
-            # Pregunta para el informe: ¿por qué NO debes poner una regla de expiración
-            # sobre lakehouse/ (las tablas Delta)? ¿Qué usarías en su lugar?
-            # Referencia:
-            # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-rule.html
+            # raw/ es la fuente de verdad para re-procesar y auditar un lote: se enfría con el
+            # tiempo (se re-procesa casi siempre en los primeros días) pero nunca se borra.
+            # No hay regla de expiración sobre lakehouse/: borraría archivos de datos que el
+            # _delta_log todavía referencia y corrompería las tablas Delta (para limpiar versiones
+            # viejas se usa VACUUM, que sí respeta el log).
+            - Id: cool-down-raw
+              Status: Enabled
+              Prefix: raw/
+              Transitions:
+                - StorageClass: STANDARD_IA
+                  TransitionInDays: 30
+                - StorageClass: GLACIER_IR
+                  TransitionInDays: 90
 
-    # ── Glue: catálogo y permisos ────────────────────────────
+    # ── Glue: catálogo ───────────────────────────────────────
     GlueDatabase:
       Type: AWS::Glue::Database
       Properties:
@@ -77,43 +83,12 @@ resources:
           Name: paytrack_lakehouse
           Description: Tablas Delta del lakehouse de PayTrack
 
-    GlueRole:
-      Type: AWS::IAM::Role
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service: glue.amazonaws.com
-              Action: sts:AssumeRole
-        ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
-        Policies:
-          - PolicyName: lakehouse-access
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: Allow
-                  Action: [s3:GetObject, s3:PutObject, s3:DeleteObject, s3:ListBucket]
-                  Resource:
-                    - arn:aws:s3:::${self:custom.bucketName}
-                    - arn:aws:s3:::${self:custom.bucketName}/*
-                - Effect: Allow
-                  Action:
-                    - kinesis:DescribeStream
-                    - kinesis:DescribeStreamSummary
-                    - kinesis:GetRecords
-                    - kinesis:GetShardIterator
-                    - kinesis:ListShards
-                  Resource: !GetAtt TransactionStream.Arn
-
     # ── Glue: un job por capa ────────────────────────────────
     BronzeJob:
       Type: AWS::Glue::Job
       Properties:
         Name: paytrack-bronze
-        Role: !GetAtt GlueRole.Arn
+        Role: ${self:custom.roleArn}
         GlueVersion: "5.0"
         WorkerType: G.1X
         NumberOfWorkers: 2
@@ -128,7 +103,7 @@ resources:
       Type: AWS::Glue::Job
       Properties:
         Name: paytrack-silver
-        Role: !GetAtt GlueRole.Arn
+        Role: ${self:custom.roleArn}
         GlueVersion: "5.0"
         WorkerType: G.1X
         NumberOfWorkers: 2
@@ -143,7 +118,7 @@ resources:
       Type: AWS::Glue::Job
       Properties:
         Name: paytrack-gold
-        Role: !GetAtt GlueRole.Arn
+        Role: ${self:custom.roleArn}
         GlueVersion: "5.0"
         WorkerType: G.1X
         NumberOfWorkers: 2
@@ -158,7 +133,7 @@ resources:
       Type: AWS::Glue::Job
       Properties:
         Name: paytrack-audit
-        Role: !GetAtt GlueRole.Arn
+        Role: ${self:custom.roleArn}
         GlueVersion: "5.0"
         WorkerType: G.1X
         NumberOfWorkers: 2
@@ -184,7 +159,7 @@ resources:
       Type: AWS::Glue::Job
       Properties:
         Name: paytrack-stream
-        Role: !GetAtt GlueRole.Arn
+        Role: ${self:custom.roleArn}
         GlueVersion: "5.0"
         WorkerType: G.1X
         NumberOfWorkers: 2

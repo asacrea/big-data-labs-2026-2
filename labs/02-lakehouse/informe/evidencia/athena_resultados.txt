@@ -1,0 +1,55 @@
+DDL SUCCEEDED 
+DDL SUCCEEDED 
+DDL SUCCEEDED 
+DDL SUCCEEDED 
+DDL SUCCEEDED 
+DDL SUCCEEDED 
+DDL SUCCEEDED 
+DDL SUCCEEDED 
+
+##### CONSULTA 1: SUCCEEDED · escaneado 0.003 MB · 904 ms
+merchant_id | merchant_name | approved_cop | num_transactions | approval_rate_pct
+M001 | Éxito Laureles | 154716411.65 | 1988 | 99.14
+M003 | Claro Tienda | 149101253.38 | 1971 | 99.04
+M007 | TuBodega.com | 149091519.37 | 1924 | 98.8
+M002 | Rappi Colombia | 145336455.57 | 1896 | 98.73
+M006 | Falabella CO | 144702459.21 | 1966 | 99.03
+
+##### CONSULTA 2: SUCCEEDED · escaneado 0.092 MB · 1370 ms
+merchant_id | merchant_name | approved_cop | num_transactions | approval_rate_pct
+M001 | Éxito Laureles | 154399490.86 | 1988 | 98.74
+M003 | Claro Tienda | 148343041.38 | 1971 | 98.48
+M007 | TuBodega.com | 146830610.23 | 1924 | 98.23
+M002 | Rappi Colombia | 144755224.14 | 1896 | 98.15
+M006 | Falabella CO | 144002242.22 | 1966 | 98.63
+
+##### CONSULTA 3: SUCCEEDED · escaneado 0.000 MB · 1705 ms
+segment | week_start | num_events
+high_value | 2026-09-07 | 6
+mass | 2026-09-07 | 10
+premium | 2026-09-07 | 6
+
+##### CONSULTA 4: SUCCEEDED · escaneado 0.282 MB · 2526 ms
+merchant_category | num_chargebacks | reversed_cop
+retail | 72 | 7186780.68
+telco | 31 | 2843591.37
+grocery | 43 | 2580134.32
+delivery | 40 | 2494253.68
+streaming | 39 | 2295025.92
+transport | 24 | 1714339.59
+travel | 27 | 1598728.54
+
+##### CONSULTA 5: SUCCEEDED · escaneado 0.111 MB · 2011 ms
+alerts | hits | precision_pct
+89 | 68 | 76.4
+
+##### CONSULTA 6: SUCCEEDED · escaneado 0.198 MB · 2671 ms
+day | merchant_id | fast_payments | silver_payments | difference
+2026-11-03 | M001 | 845 | 1208 | 363
+2026-11-03 | M002 | 754 | 1107 | 353
+2026-11-03 | M003 | 819 | 1209 | 390
+2026-11-03 | M004 | 786 | 1132 | 346
+2026-11-03 | M005 | 784 | 1139 | 355
+2026-11-03 | M006 | 799 | 1168 | 369
+2026-11-03 | M007 | 862 | 1227 | 365
+2026-11-03 | M008 | 806 | 1139 | 333

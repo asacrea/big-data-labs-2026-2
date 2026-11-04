@@ -1,0 +1,14 @@
+== customer
+paytrack.exp.customer:0:489
+paytrack.exp.customer:1:344
+paytrack.exp.customer:2:394
+== constante
+paytrack.exp.constante:0:0
+paytrack.exp.constante:1:1227
+paytrack.exp.constante:2:0
+== transaction
+paytrack.exp.transaction:0:429
+paytrack.exp.transaction:1:397
+paytrack.exp.transaction:2:401
+?? labs/02-lakehouse/informe/
+?? labs/02-lakehouse/sql/.~lock.athena.sql#

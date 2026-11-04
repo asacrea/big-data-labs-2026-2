@@ -1,0 +1,1 @@
+RESULT modo=precision20 alertas=163 aciertos=127 precision=77.91

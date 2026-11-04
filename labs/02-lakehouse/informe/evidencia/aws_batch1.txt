@@ -1,0 +1,21 @@
+Bucket: paytrack-lakehouse-velez-173162110965
+━━━ subiendo jobs ━━━
+━━━ ingest ━━━
+✓ transactions: 30600 registros → s3://paytrack-lakehouse-velez-173162110965/raw/transactions/ingest_date=2026-09-29/part-0000.json
+✓ fraud_events: 125 registros → s3://paytrack-lakehouse-velez-173162110965/raw/fraud_events/ingest_date=2026-09-29/part-0000.json
+✓ customers: 500 registros → s3://paytrack-lakehouse-velez-173162110965/raw/customers/ingest_date=2026-09-29/part-0000.json
+✓ merchants: 8 registros → s3://paytrack-lakehouse-velez-173162110965/raw/merchants/ingest_date=2026-09-29/part-0000.json
+
+━━━ bronze ━━━
+........... ✓ SUCCEEDED
+
+━━━ silver ━━━
+....... ✓ SUCCEEDED
+
+━━━ gold ━━━
+...... ✓ SUCCEEDED
+
+━━━ audit ━━━
+..... ✓ SUCCEEDED
+
+Pipeline completo para el lote 2026-09-29

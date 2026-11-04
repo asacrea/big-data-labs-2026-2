@@ -15,6 +15,8 @@ Completa los TODO y valida tu lógica con:
 
 import argparse
 import json
+import re
+from datetime import date
 from pathlib import Path
 
 DATASETS = ["transactions", "fraud_events", "customers", "merchants"]
@@ -27,7 +29,10 @@ DATASETS = ["transactions", "fraud_events", "customers", "merchants"]
 # Ejemplo: raw_prefix("transactions", "2026-09-30") → "raw/transactions/ingest_date=2026-09-30/"
 # Si la fecha no es una fecha válida en formato YYYY-MM-DD, lanza ValueError.
 def raw_prefix(dataset: str, ingest_date: str) -> str:
-    raise NotImplementedError("TODO 1: raw_prefix")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", ingest_date):
+        raise ValueError(f"ingest_date debe tener formato YYYY-MM-DD, recibí {ingest_date!r}")
+    date.fromisoformat(ingest_date)  # rechaza fechas inexistentes como 2026-13-01
+    return f"raw/{dataset}/ingest_date={ingest_date}/"
 
 
 # ── TODO 2: formato JSON Lines ───────────────────────────────────────────────
@@ -35,7 +40,7 @@ def raw_prefix(dataset: str, ingest_date: str) -> str:
 # Athena esperan JSON Lines: un objeto JSON por línea, sin corchetes ni comas
 # entre registros. Convierte la lista a ese formato, conservando las tildes.
 def to_json_lines(records: list[dict]) -> str:
-    raise NotImplementedError("TODO 2: to_json_lines")
+    return "\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n"
 
 
 # ── Dado ─────────────────────────────────────────────────────────────────────

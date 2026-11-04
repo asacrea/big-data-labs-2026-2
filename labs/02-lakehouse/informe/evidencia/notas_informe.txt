@@ -1,0 +1,41 @@
++-----------+----------------+-----+
+|ingest_date|       dq_reason|count|
++-----------+----------------+-----+
+| 2026-09-29|  invalid_amount| 1180|
+| 2026-09-29|missing_customer|  589|
+| 2026-09-30|  invalid_amount|   77|
+| 2026-09-30|missing_customer|   40|
++-----------+----------------+-----+
+0 WRITE {}
+1 MERGE {'numTargetRowsInserted': '28231', 'numTargetRowsUpdated': '0', 'numTargetRowsCopied': '0'}
+2 MERGE {'numTargetRowsInserted': '0', 'numTargetRowsUpdated': '0', 'numTargetRowsCopied': '28231'}
+3 MERGE {'numTargetRowsInserted': '1883', 'numTargetRowsUpdated': '276', 'numTargetRowsCopied': '27955'}
+4 MERGE {'numTargetRowsInserted': '0', 'numTargetRowsUpdated': '0', 'numTargetRowsCopied': '30114'}
+5 MERGE {'numTargetRowsInserted': '3782', 'numTargetRowsUpdated': '82', 'numTargetRowsCopied': '30032'}
+6 MERGE {'numTargetRowsInserted': '3797', 'numTargetRowsUpdated': '69', 'numTargetRowsCopied': '33827'}
+7 MERGE {'numTargetRowsInserted': '3804', 'numTargetRowsUpdated': '73', 'numTargetRowsCopied': '37620'}
+8 MERGE {'numTargetRowsInserted': '299', 'numTargetRowsUpdated': '9', 'numTargetRowsCopied': '41488'}
+9 MERGE {'numTargetRowsInserted': '2286', 'numTargetRowsUpdated': '48', 'numTargetRowsCopied': '30066'}
+10 MERGE {'numTargetRowsInserted': '74', 'numTargetRowsUpdated': '3', 'numTargetRowsCopied': '30111'}
+11 MERGE {'numTargetRowsInserted': '193', 'numTargetRowsUpdated': '2', 'numTargetRowsCopied': '30186'}
+12 MERGE {'numTargetRowsInserted': '197', 'numTargetRowsUpdated': '4', 'numTargetRowsCopied': '30377'}
+13 MERGE {'numTargetRowsInserted': '199', 'numTargetRowsUpdated': '3', 'numTargetRowsCopied': '30575'}
+14 MERGE {'numTargetRowsInserted': '192', 'numTargetRowsUpdated': '3', 'numTargetRowsCopied': '16187'}
+15 MERGE {'numTargetRowsInserted': '185', 'numTargetRowsUpdated': '7', 'numTargetRowsCopied': '30962'}
+16 MERGE {'numTargetRowsInserted': '185', 'numTargetRowsUpdated': '9', 'numTargetRowsCopied': '31145'}
+17 MERGE {'numTargetRowsInserted': '189', 'numTargetRowsUpdated': '5', 'numTargetRowsCopied': '31334'}
+18 MERGE {'numTargetRowsInserted': '193', 'numTargetRowsUpdated': '1', 'numTargetRowsCopied': '31527'}
+19 MERGE {'numTargetRowsInserted': '192', 'numTargetRowsUpdated': '7', 'numTargetRowsCopied': '31714'}
+20 MERGE {'numTargetRowsInserted': '189', 'numTargetRowsUpdated': '5', 'numTargetRowsCopied': '31908'}
+21 MERGE {'numTargetRowsInserted': '194', 'numTargetRowsUpdated': '5', 'numTargetRowsCopied': '32097'}
+22 MERGE {'numTargetRowsInserted': '113', 'numTargetRowsUpdated': '2', 'numTargetRowsCopied': '32294'}
+
+== Athena (consola, workgroup paytrack-lakehouse-wg) · datos analizados ==
+Consulta 1 (gold, septiembre)      2.89 KB
+Consulta 2 (silver, septiembre)    93.94 KB   (~32x más que Gold)
+Consulta 3 (fraude semanal)        0.34 KB
+Consulta 4 (contracargos)          289.13 KB
+Consulta 5 (precisión alertas)     113.57 KB  -> 89 alertas, 68 aciertos, 76.4 %
+Consulta 6 (rápida vs batch)       203.20 KB  -> diferencia 333-390 pagos por comercio
+Nota: Gold no se recalculó tras el streaming; por eso las consultas 1 y 2 difieren.
+Incidencia: Glue 5.0 nombra la columna de llegada de Kinesis '$add$record_timestamp$_temporary$' (common.py esperaba __src_timestamp); 2 corridas Failed de paytrack-stream antes del arreglo.

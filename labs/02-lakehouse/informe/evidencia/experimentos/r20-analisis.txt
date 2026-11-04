@@ -1,0 +1,1 @@
+    print(f"RESULT alertas_live={n} filas_unicas={tot} aciertos={hits} precision={100*hits/tot:.2f}")
