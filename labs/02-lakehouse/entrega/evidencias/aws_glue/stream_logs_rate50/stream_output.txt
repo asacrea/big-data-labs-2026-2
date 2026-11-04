@@ -1,0 +1,58 @@
+✓ silver.transactions existe (corre antes el batch del lote 1)
+Modo en vivo: micro-lotes cada 10 s durante 300 s
+
+/usr/lib/spark/python/lib/pyspark.zip/pyspark/sql/dataframe.py:147: UserWarning: DataFrame constructor is internal. Do not directly use it.
+
+Columnas del conector de Kinesis: [('event_id', 'string'), ('event_type', 'string'), ('event_time', 'string'), ('transaction_id', 'string'), ('customer_id', 'string'), ('merchant_id', 'string'), ('merchant_name', 'string'), ('merchant_category', 'string'), ('amount_cop', 'double'), ('payment_method', 'string'), ('status', 'string'), ('is_fraud', 'boolean'), ('timestamp', 'string'), ('city', 'string'), ('$add$record_timestamp$_temporary$', 'timestamp')]
+⚠ el conector no agregó __src_timestamp; se usa $add$record_timestamp$_temporary$
+
+  bronze   micro-lotes:  29 · filas leídas:  12307 · descartadas por watermark: 0
+
+
+  silver   micro-lotes:  24 · filas leídas:  12307 · descartadas por watermark: 0
+
+  metrics  micro-lotes:  27 · filas leídas:  12307 · descartadas por watermark: 132
+
+  alerts   micro-lotes:  28 · filas leídas:  12307 · descartadas por watermark: 152
+
+  silver   micro-lotes:   2 · filas leídas:      0 · descartadas por watermark: 0
+
+  metrics  micro-lotes:   2 · filas leídas:      0 · descartadas por watermark: 0
+
+  alerts   micro-lotes:   2 · filas leídas:      0 · descartadas por watermark: 0
+
+✓ bronze.transaction_events: 17272 eventos
+
+✓ bronze: el esquema parsea todos los campos (sin NULL inesperados)
+
+✓ deduplicate_events: deja un evento por event_id
+
+✓ latest_per_transaction: una fila por transaction_id
+
+✓ silver: sin transaction_id duplicados
+
+✓ silver: llegaron todas las transacciones del stream (también las tardías)
+
+✓ silver: cada transacción quedó con el status de su último evento
+
+✓ silver: ningún contracargo fue revertido por un reenvío
+
+✓ metrics: 111 ventanas emitidas
+
+✓ metrics: una fila por ventana y comercio
+
+✓ metrics: ventanas de 1 minuto
+
+✓ metrics: no cuenta pagos repetidos
+
+✓ metrics: tasas y montos en rango
+
+✓ alerts: una fila por ventana y cliente
+
+✓ alerts: todas tienen 6 o más pagos
+
+✓ alerts: ventanas de 30 segundos
+
+
+Stream listo: 46641 transacciones en silver, 111 ventanas de métricas, 470 alertas
+

@@ -1,0 +1,152 @@
+Lab 2 en AWS · 2026-11-04 00:08 · log: labs/02-lakehouse/entrega/evidencias/aws_glue/ejecucion_20261104_0008.txt
+
+━━━ verificación previa (00:08:40) ━━━
+  ✓ rama lab2
+  ✓ STUDENT_ID=ortizvelez
+  ✓ cuenta 809411919665, región us-east-1
+  ✓ lotes en data/batch1 y data/batch2
+  ✓ tests en verde
+  ✓ serverless Framework Core: 3.40.0
+  ✓ no existe el stack paytrack-lakehouse-dev
+  ✓ no existe el stream paytrack-transactions
+  ✓ grupos de logs de Glue previos: 0
+
+━━━ kill switch en AWS (borra el stack en 120 min si nadie lo hace antes) (00:08:54) ━━━
+  ✓ schedule paytrack-killswitch: borra paytrack-lakehouse-dev a las 2026-11-04T07:08:58 UTC
+
+━━━ deploy (00:09:12) ━━━
+
+Deploying paytrack-lakehouse to stage dev (us-east-1)
+
+✔ Service deployed to stack paytrack-lakehouse-dev (76s)
+
+  ✓ bucket paytrack-lakehouse-ortizvelez-809411919665
+
+━━━ Parte A · lote 1 (00:10:37) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+━━━ ingest ━━━
+✓ transactions: 30600 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/transactions/ingest_date=2026-09-29/part-0000.json
+✓ fraud_events: 114 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/fraud_events/ingest_date=2026-09-29/part-0000.json
+✓ customers: 500 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/customers/ingest_date=2026-09-29/part-0000.json
+✓ merchants: 8 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/merchants/ingest_date=2026-09-29/part-0000.json
+
+━━━ bronze ━━━
+.......... ✓ SUCCEEDED
+
+━━━ silver ━━━
+....... ✓ SUCCEEDED
+
+━━━ gold ━━━
+......... ✓ SUCCEEDED
+
+━━━ audit ━━━
+.... ✓ SUCCEEDED
+
+Pipeline completo para el lote 2026-09-29
+
+━━━ Parte A · lote 2 (00:19:38) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+━━━ ingest ━━━
+✓ transactions: 2316 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/transactions/ingest_date=2026-09-30/part-0000.json
+✓ fraud_events: 10 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/fraud_events/ingest_date=2026-09-30/part-0000.json
+✓ customers: 500 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/customers/ingest_date=2026-09-30/part-0000.json
+✓ merchants: 8 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/merchants/ingest_date=2026-09-30/part-0000.json
+
+━━━ bronze ━━━
+....... ✓ SUCCEEDED
+
+━━━ silver ━━━
+......... ✓ SUCCEEDED
+
+━━━ gold ━━━
+........ ✓ SUCCEEDED
+
+━━━ audit ━━━
+..... ✓ SUCCEEDED
+
+Pipeline completo para el lote 2026-09-30
+
+━━━ Parte B · stream (00:29:02) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+
+━━━ stream ━━━
+Job paytrack-stream lanzado (jr_9a24a6209069a2518aa2cebdac7be63c0e77b7d2d02c64e49e38433e66f3d254). Glue tarda ~1 min en arrancar; Kinesis guarda
+los eventos mientras tanto y el job los lee desde el más antiguo.
+  enviados: 20  enviados: 40  enviados: 60  enviados: 80  enviados: 100  enviados: 120  enviados: 140  enviados: 160  enviados: 180  enviados: 200  enviados: 227  enviados: 247  enviados: 267  enviados: 287  enviados: 307  enviados: 327  enviados: 347  enviados: 367  enviados: 387  enviados: 412  enviados: 432  enviados: 452  enviados: 472  enviados: 492  enviados: 512  enviados: 532  enviados: 552  enviados: 572  enviados: 592  enviados: 612  enviados: 632  enviados: 652  enviados: 672  enviados: 692  enviados: 712  enviados: 732  enviados: 752  enviados: 772  enviados: 792  enviados: 812  enviados: 832  enviados: 852  enviados: 872  enviados: 892  enviados: 912  enviados: 932  enviados: 952  enviados: 972  enviados: 992  enviados: 1019  enviados: 1039  enviados: 1059  enviados: 1086  enviados: 1106  enviados: 1126  enviados: 1146  enviados: 1166  enviados: 1186  enviados: 1206  enviados: 1231  enviados: 1251  enviados: 1271  enviados: 1291  enviados: 1311  enviados: 1331  enviados: 1351  enviados: 1371  enviados: 1391  enviados: 1411  enviados: 1431  enviados: 1451  enviados: 1471  enviados: 1491  enviados: 1517  enviados: 1537  enviados: 1557  enviados: 1589  enviados: 1615  enviados: 1635  enviados: 1655  enviados: 1675  enviados: 1695  enviados: 1715  enviados: 1735  enviados: 1755  enviados: 1775  enviados: 1795  enviados: 1815  enviados: 1835  enviados: 1855  enviados: 1882  enviados: 1902  enviados: 1922  enviados: 1942  enviados: 1962  enviados: 1982  enviados: 2002  enviados: 2022  enviados: 2042  enviados: 2062  enviados: 2082  enviados: 2102  enviados: 2122  enviados: 2142  enviados: 2162  enviados: 2182  enviados: 2207  enviados: 2227  enviados: 2247  enviados: 2267  enviados: 2287  enviados: 2307  enviados: 2327  enviados: 2352  enviados: 2372  enviados: 2392  enviados: 2412  enviados: 2437  enviados: 2457  enviados: 2477  enviados: 2497  enviados: 2522  enviados: 2542  enviados: 2562  enviados: 2582  enviados: 2602  enviados: 2622  enviados: 2642  enviados: 2662  enviados: 2682  enviados: 2702  enviados: 2728  enviados: 2748  enviados: 2768  enviados: 2788  enviados: 2808  enviados: 2828  enviados: 2848  enviados: 2868  enviados: 2895  enviados: 2921  enviados: 2941  enviados: 2961  enviados: 2981  enviados: 3001  enviados: 3021  enviados: 3041  enviados: 3061  enviados: 3081  enviados: 3101  enviados: 3121  enviados: 3141  enviados: 3161  enviados: 3181  enviados: 3201  enviados: 3221  enviados: 3241  enviados: 3261  enviados: 3281  enviados: 3301  enviados: 3326  enviados: 3357  enviados: 3377  enviados: 3397  enviados: 3417  enviados: 3437  enviados: 3457  enviados: 3477  enviados: 3497  enviados: 3517  enviados: 3543  enviados: 3563  enviados: 3583  enviados: 3603  enviados: 3623  enviados: 3643  enviados: 3668  enviados: 3688  enviados: 3708  enviados: 3728  enviados: 3748  enviados: 3768  enviados: 3788  enviados: 3808  enviados: 3828  enviados: 3855  enviados: 3875  enviados: 3895  enviados: 3915  enviados: 3935  enviados: 3955  enviados: 3975  enviados: 3995  enviados: 4015  enviados: 4035  enviados: 4055  enviados: 4075  enviados: 4095  enviados: 4115  enviados: 4135  enviados: 4155  enviados: 4175  enviados: 4195  enviados: 4215  enviados: 4235  enviados: 4255  enviados: 4275  enviados: 4295  enviados: 4315  enviados: 4335  enviados: 4355  enviados: 4375  enviados: 4395  enviados: 4415  enviados: 4435  enviados: 4455  enviados: 4475  enviados: 4495  enviados: 4515  enviados: 4535  enviados: 4555  enviados: 4581  enviados: 4601  enviados: 4621  enviados: 4641  enviados: 4661  enviados: 4681  enviados: 4701  enviados: 4721  enviados: 4741  enviados: 4767  enviados: 4787  enviados: 4812  enviados: 4832  enviados: 4852  enviados: 4872  enviados: 4899  enviados: 4919  enviados: 4939  enviados: 4965
+✓ 4965 eventos enviados en 240s (chargeback: 86, payment: 4879) · 0 perdidos
+Esperando a que el job termine (corre 300 s y luego valida)
+........ ✓ SUCCEEDED
+
+━━━ logs del stream a 20 eventos/s (00:35:53) ━━━
+Columnas del conector de Kinesis: [('event_id', 'string'), ('event_type', 'string'), ('event_time', 'string'), ('transaction_id', 'string'), ('customer_id', 'string'), ('merchant_id', 'string'), ('merchant_name', 'string'), ('merchant_category', 'string'), ('amount_cop', 'double'), ('payment_method', 'string'), ('status', 'string'), ('is_fraud', 'boolean'), ('timestamp', 'string'), ('city', 'string'), ('$add$record_timestamp$_temporary$', 'timestamp')]
+Stream listo: 34859 transacciones en silver, 40 ventanas de métricas, 32 alertas
+⚠ el conector no agregó __src_timestamp; se usa $add$record_timestamp$_temporary$
+
+━━━ Athena (stream a 20 eventos/s) (00:37:38) ━━━
+  ✓ 8 tablas Delta registradas
+  ✓ TODO 1: 5 filas · 0.0033 MB escaneados (3301 bytes)
+  ✓ TODO 2: 5 filas · 0.0962 MB escaneados (96151 bytes)
+  ✓ TODO 3: 3 filas · 0.0004 MB escaneados (351 bytes)
+  ✓ TODO 4: 7 filas · 0.2365 MB escaneados (236480 bytes)
+  ✓ TODO 5 (streaming): 1 filas · 0.0761 MB escaneados (76118 bytes)
+  ✓ TODO 6 (streaming): 8 filas · 0.1067 MB escaneados (106672 bytes)
+  → labs\02-lakehouse\entrega\evidencias\athena\athena_resultados.md
+
+━━━ Parte B · stream a 50 eventos/s (00:38:13) ━━━
+  · paytrack-stream lanzado (jr_28ebbeeb0bb49e34f7f66b678985d61fdf17ebb63caa17e87d9076363a50bfc3)
+  enviados: 57  enviados: 107  enviados: 162  enviados: 212  enviados: 262  enviados: 312  enviados: 362  enviados: 418  enviados: 468  enviados: 518  enviados: 575  enviados: 625  enviados: 675  enviados: 725  enviados: 775  enviados: 825  enviados: 875  enviados: 930  enviados: 980  enviados: 1030  enviados: 1080  enviados: 1130  enviados: 1180  enviados: 1230  enviados: 1287  enviados: 1337  enviados: 1387  enviados: 1437  enviados: 1487  enviados: 1537  enviados: 1592  enviados: 1642  enviados: 1692  enviados: 1742  enviados: 1799  enviados: 1849  enviados: 1899  enviados: 1949  enviados: 1999  enviados: 2049  enviados: 2099  enviados: 2149  enviados: 2199  enviados: 2254  enviados: 2304  enviados: 2354  enviados: 2404  enviados: 2454  enviados: 2504  enviados: 2561  enviados: 2611  enviados: 2661  enviados: 2711  enviados: 2761  enviados: 2817  enviados: 2867  enviados: 2917  enviados: 2967  enviados: 3017  enviados: 3067  enviados: 3117  enviados: 3167  enviados: 3217  enviados: 3267  enviados: 3327  enviados: 3383  enviados: 3438  enviados: 3488  enviados: 3538  enviados: 3588  enviados: 3638  enviados: 3694  enviados: 3749  enviados: 3799  enviados: 3849  enviados: 3899  enviados: 3949  enviados: 3999  enviados: 4049  enviados: 4099  enviados: 4149  enviados: 4199  enviados: 4249  enviados: 4299  enviados: 4349  enviados: 4399  enviados: 4449  enviados: 4499  enviados: 4549  enviados: 4599  enviados: 4649  enviados: 4699  enviados: 4749  enviados: 4799  enviados: 4854  enviados: 4904  enviados: 4959  enviados: 5016  enviados: 5066  enviados: 5123  enviados: 5173  enviados: 5223  enviados: 5273  enviados: 5323  enviados: 5373  enviados: 5423  enviados: 5473  enviados: 5529  enviados: 5579  enviados: 5629  enviados: 5679  enviados: 5734  enviados: 5784  enviados: 5834  enviados: 5891  enviados: 5941  enviados: 5991  enviados: 6041  enviados: 6091  enviados: 6141  enviados: 6191  enviados: 6241  enviados: 6291  enviados: 6348  enviados: 6398  enviados: 6448  enviados: 6498  enviados: 6548  enviados: 6598  enviados: 6648  enviados: 6698  enviados: 6748  enviados: 6798  enviados: 6848  enviados: 6898  enviados: 6948  enviados: 6998  enviados: 7048  enviados: 7105  enviados: 7155  enviados: 7205  enviados: 7255  enviados: 7311  enviados: 7361  enviados: 7411  enviados: 7461  enviados: 7511  enviados: 7567  enviados: 7617  enviados: 7667  enviados: 7717  enviados: 7767  enviados: 7817  enviados: 7867  enviados: 7924  enviados: 7974  enviados: 8024  enviados: 8074  enviados: 8124  enviados: 8174  enviados: 8224  enviados: 8280  enviados: 8330  enviados: 8380  enviados: 8430  enviados: 8480  enviados: 8530  enviados: 8580  enviados: 8630  enviados: 8686  enviados: 8736  enviados: 8786  enviados: 8842  enviados: 8899  enviados: 8949  enviados: 9006  enviados: 9056  enviados: 9106  enviados: 9156  enviados: 9213  enviados: 9263  enviados: 9313  enviados: 9368  enviados: 9418  enviados: 9468  enviados: 9518  enviados: 9568  enviados: 9618  enviados: 9668  enviados: 9718  enviados: 9774  enviados: 9824  enviados: 9874  enviados: 9924  enviados: 9974  enviados: 10024  enviados: 10074  enviados: 10124  enviados: 10174  enviados: 10231  enviados: 10281  enviados: 10337  enviados: 10387  enviados: 10437  enviados: 10493  enviados: 10543  enviados: 10593  enviados: 10643  enviados: 10699  enviados: 10754  enviados: 10804  enviados: 10854  enviados: 10904  enviados: 10954  enviados: 11004  enviados: 11060  enviados: 11110  enviados: 11160  enviados: 11221  enviados: 11271  enviados: 11321  enviados: 11371  enviados: 11421  enviados: 11471  enviados: 11528  enviados: 11583  enviados: 11633  enviados: 11695  enviados: 11745  enviados: 11795  enviados: 11845  enviados: 11895  enviados: 11951  enviados: 12001  enviados: 12051  enviados: 12107  enviados: 12157  enviados: 12207  enviados: 12257  enviados: 12307
+✓ 12307 eventos enviados en 240s (chargeback: 193, payment: 12114) · 0 perdidos
+  ✓ paytrack-stream a 50 eventos/s: SUCCEEDED
+
+━━━ logs del stream a 50 eventos/s (00:45:11) ━━━
+Columnas del conector de Kinesis: [('event_id', 'string'), ('event_type', 'string'), ('event_time', 'string'), ('transaction_id', 'string'), ('customer_id', 'string'), ('merchant_id', 'string'), ('merchant_name', 'string'), ('merchant_category', 'string'), ('amount_cop', 'double'), ('payment_method', 'string'), ('status', 'string'), ('is_fraud', 'boolean'), ('timestamp', 'string'), ('city', 'string'), ('$add$record_timestamp$_temporary$', 'timestamp')]
+Stream listo: 46641 transacciones en silver, 111 ventanas de métricas, 470 alertas
+⚠ el conector no agregó __src_timestamp; se usa $add$record_timestamp$_temporary$
+
+━━━ Athena (acumulado con el stream a 50 eventos/s) (00:46:55) ━━━
+  ✓ 8 tablas Delta registradas
+  ✓ TODO 1: 5 filas · 0.0033 MB escaneados (3301 bytes)
+  ✓ TODO 2: 5 filas · 0.0963 MB escaneados (96325 bytes)
+  ✓ TODO 3: 3 filas · 0.0004 MB escaneados (351 bytes)
+  ✓ TODO 4: 7 filas · 0.3917 MB escaneados (391716 bytes)
+  ✓ TODO 5 (streaming): 1 filas · 0.2235 MB escaneados (223501 bytes)
+  ✓ TODO 6 (streaming): 8 filas · 0.3661 MB escaneados (366130 bytes)
+  → labs\02-lakehouse\entrega\evidencias\athena\athena_resultados_acumulado_rate50.md
+
+━━━ estado de los jobs (00:47:28) ━━━
+paytrack-bronze	SUCCEEDED	2026-11-04T00:10:53.003000-05:00	151	2026-09-29
+paytrack-silver	SUCCEEDED	2026-11-04T00:13:46.220000-05:00	109	2026-09-29
+paytrack-gold	SUCCEEDED	2026-11-04T00:15:47.848000-05:00	144	2026-09-29
+paytrack-audit	SUCCEEDED	2026-11-04T00:18:25.283000-05:00	63	2026-09-29
+paytrack-bronze	SUCCEEDED	2026-11-04T00:19:53.201000-05:00	104	2026-09-30
+paytrack-silver	SUCCEEDED	2026-11-04T00:21:58.465000-05:00	134	2026-09-30
+paytrack-gold	SUCCEEDED	2026-11-04T00:24:35.999000-05:00	165	2026-09-30
+paytrack-audit	SUCCEEDED	2026-11-04T00:27:32.885000-05:00	82	2026-09-30
+paytrack-stream	SUCCEEDED	2026-11-04T00:29:11.290000-05:00	388	None
+paytrack-stream	SUCCEEDED	2026-11-04T00:38:15.447000-05:00	402	None
+
+━━━ PAUSA de 10 min: toma ahora las capturas de Glue (jobs en Succeeded) (00:47:38) ━━━
+
+━━━ desmontaje (00:57:38) ━━━
+  · bucket paytrack-lakehouse-ortizvelez-809411919665 vaciado
+  · bucket paytrack-lakehouse-dev-serverlessdeploymentbucket-1jut2yfegoa8 vaciado
+  · borrando el stack paytrack-lakehouse-dev (puede tardar unos minutos)
+  · schedule paytrack-killswitch borrado
+  · rol paytrack-killswitch-role borrado
+  · log group /aws-glue/jobs/error borrado
+  · log group /aws-glue/jobs/logs-v2 borrado
+  · log group /aws-glue/jobs/output borrado
+
+━━━ verificación de la limpieza (01:00:09) ━━━
+  ✓ sin stack paytrack-lakehouse-dev
+  ✓ sin stream de Kinesis paytrack-transactions
+  ✓ sin buckets paytrack-lakehouse-*
+  ✓ sin jobs de Glue paytrack-*
+  ✓ sin schedule paytrack-killswitch
+  ✓ sin rol paytrack-killswitch-role
+  → AWS limpio
+
+✓ Ejecución completa · 01:00:28. Evidencias en labs/02-lakehouse/entrega/evidencias/aws_glue y labs/02-lakehouse/entrega/evidencias/athena.

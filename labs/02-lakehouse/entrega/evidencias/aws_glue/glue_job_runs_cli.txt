@@ -1,0 +1,12 @@
+Salida directa de AWS CLI (aws glue get-job-runs) · cuenta 809411919665 · us-east-1 · 2026-11-04 00:49:21
+JOB                ESTADO     INICIO                      FIN                              SEG INGEST_DATE
+paytrack-bronze    SUCCEEDED  2026-11-04T00:19:53         2026-11-04T00:21:41              104 2026-09-30
+paytrack-bronze    SUCCEEDED  2026-11-04T00:10:53         2026-11-04T00:13:37              151 2026-09-29
+paytrack-silver    SUCCEEDED  2026-11-04T00:21:58         2026-11-04T00:24:22              134 2026-09-30
+paytrack-silver    SUCCEEDED  2026-11-04T00:13:46         2026-11-04T00:15:39              109 2026-09-29
+paytrack-gold      SUCCEEDED  2026-11-04T00:24:35         2026-11-04T00:27:26              165 2026-09-30
+paytrack-gold      SUCCEEDED  2026-11-04T00:15:47         2026-11-04T00:18:16              144 2026-09-29
+paytrack-audit     SUCCEEDED  2026-11-04T00:27:32         2026-11-04T00:29:00               82 2026-09-30
+paytrack-audit     SUCCEEDED  2026-11-04T00:18:25         2026-11-04T00:19:32               63 2026-09-29
+paytrack-stream    SUCCEEDED  2026-11-04T00:38:15         2026-11-04T00:45:04              402 None
+paytrack-stream    SUCCEEDED  2026-11-04T00:29:11         2026-11-04T00:35:43              388 None
