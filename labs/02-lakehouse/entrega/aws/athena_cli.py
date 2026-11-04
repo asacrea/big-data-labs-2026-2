@@ -20,8 +20,8 @@ WORKGROUP, DATABASE = "paytrack-lakehouse-wg", "paytrack_lakehouse"
 athena = boto3.client("athena")
 
 
-def run(query: str) -> tuple[list[list[str]], float]:
-    """Ejecuta una consulta y devuelve (filas con encabezado, MB escaneados)."""
+def run(query: str) -> tuple[list[list[str]], int]:
+    """Ejecuta una consulta y devuelve (filas con encabezado, bytes escaneados)."""
     qid = athena.start_query_execution(QueryString=query, WorkGroup=WORKGROUP,
                                        QueryExecutionContext={"Database": DATABASE})["QueryExecutionId"]
     while True:
@@ -32,11 +32,11 @@ def run(query: str) -> tuple[list[list[str]], float]:
         time.sleep(1)
     if state != "SUCCEEDED":
         raise SystemExit(f"✗ Athena {state}: {ex['Status'].get('StateChangeReason', '')}\n{query[:300]}")
-    mb = ex["Statistics"].get("DataScannedInBytes", 0) / 1e6
+    scanned = ex["Statistics"].get("DataScannedInBytes", 0)
     rows = []
     for page in athena.get_paginator("get_query_results").paginate(QueryExecutionId=qid):
         rows += [[c.get("VarCharValue", "") for c in r["Data"]] for r in page["ResultSet"]["Rows"]]
-    return rows, mb
+    return rows, scanned
 
 
 def markdown(rows: list[list[str]]) -> str:
@@ -44,7 +44,7 @@ def markdown(rows: list[list[str]]) -> str:
         return "_(sin filas)_"
     head, *body = rows
     lines = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
-    lines += ["| " + " | ".join(r) + " |" for r in body] or ["| " + " | ".join("" for _ in head) + " |"]
+    lines += ["| " + " | ".join(r) + " |" for r in body]
     return "\n".join(lines)
 
 
@@ -64,9 +64,10 @@ def main() -> None:
     parts = re.split(r"-- ── (TODO \d[^─]*)─+\n", sql)[1:]
     for name, body in zip(parts[::2], parts[1::2]):
         query = "\n".join(l for l in body.splitlines() if not l.startswith("--")).strip().rstrip(";")
-        rows, mb = run(query)
-        print(f"  ✓ {name.strip()}: {len(rows) - 1} filas · {mb:.2f} MB escaneados")
-        out += [f"## {name.strip()} · {mb:.2f} MB escaneados", "", markdown(rows), ""]
+        rows, scanned = run(query)
+        stats = f"{scanned / 1e6:.4f} MB escaneados ({scanned} bytes)"
+        print(f"  ✓ {name.strip()}: {len(rows) - 1} filas · {stats}")
+        out += [f"## {name.strip()} · {stats}", "", markdown(rows), ""]
     args.out.write_text("\n".join(out), encoding="utf-8")
     print(f"  → {args.out}")
 

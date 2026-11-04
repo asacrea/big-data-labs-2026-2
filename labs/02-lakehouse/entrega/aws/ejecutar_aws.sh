@@ -33,6 +33,7 @@ STACK=paytrack-lakehouse-dev
 STREAM=paytrack-transactions
 JOBS=(bronze silver gold audit stream)
 MAX_MIN=${MAX_MIN:-75}   # tope local de toda la ejecución (minutos)
+PAUSA_MIN=${PAUSA_MIN:-10}  # pausa antes de desmontar para las capturas de Glue
 KILL_MIN=120         # el kill switch en AWS borra el stack a los 120 min del deploy
 KS_NAME=paytrack-killswitch
 KS_ROLE=paytrack-killswitch-role
@@ -91,9 +92,9 @@ crear_kill_switch() {
        "Resource": "arn:aws:cloudformation:'"$REGION:$ACCOUNT"':stack/'"$STACK"'/*"},
       {"Effect": "Allow", "Action": ["kinesis:DeleteStream", "kinesis:Describe*", "kinesis:List*"],
        "Resource": "arn:aws:kinesis:'"$REGION:$ACCOUNT"':stream/'"$STREAM"'"},
-      {"Effect": "Allow", "Action": ["glue:DeleteJob", "glue:DeleteDatabase", "glue:DeleteTable", "glue:BatchDeleteTable", "glue:Get*"],
+      {"Effect": "Allow", "Action": ["glue:DeleteJob", "glue:DeleteDatabase", "glue:DeleteTable", "glue:BatchDeleteTable", "glue:DeleteUserDefinedFunction", "glue:Get*"],
        "Resource": ["arn:aws:glue:'"$REGION:$ACCOUNT"':catalog", "arn:aws:glue:'"$REGION:$ACCOUNT"':database/paytrack_lakehouse",
-                    "arn:aws:glue:'"$REGION:$ACCOUNT"':table/paytrack_lakehouse/*", "arn:aws:glue:'"$REGION:$ACCOUNT"':job/paytrack-*"]},
+                    "arn:aws:glue:'"$REGION:$ACCOUNT"':table/paytrack_lakehouse/*", "arn:aws:glue:'"$REGION:$ACCOUNT"':userDefinedFunction/paytrack_lakehouse/*", "arn:aws:glue:'"$REGION:$ACCOUNT"':job/paytrack-*"]},
       {"Effect": "Allow", "Action": ["iam:DeleteRole", "iam:DeleteRolePolicy", "iam:DetachRolePolicy", "iam:Get*", "iam:List*"],
        "Resource": "arn:aws:iam::'"$ACCOUNT"':role/'"$STACK"'-*"},
       {"Effect": "Allow", "Action": ["s3:DeleteBucket", "s3:DeleteBucketPolicy", "s3:Get*", "s3:List*"],
@@ -135,6 +136,16 @@ guardar_logs_de_run() {  # guardar_logs_de_run <job> <run> <carpeta>; nunca inte
 ' > "$dir/${job}_${g##*/}.txt" || true
   done
   aws glue get-job-run --job-name "paytrack-$job" --run-id "$run"     --query 'JobRun.[JobRunState,ExecutionTime,ErrorMessage]' --output text > "$dir/${job}_estado.txt" 2>/dev/null || true
+}
+
+# Logs de un stream exitoso: las validaciones. El de errores (13 MB de avisos de Spark) no se conserva.
+guardar_logs_stream() {
+  local dir=$1 run
+  paso sleep 30  # CloudWatch tarda unos segundos en recibir los últimos eventos
+  run=$(aws glue get-job-runs --job-name paytrack-stream --max-results 1 --query 'JobRuns[0].Id' --output text)
+  guardar_logs_de_run stream "$run" "$dir"
+  rm -f "$dir/stream_error.txt" "$dir/stream_logs-v2.txt"
+  grep -hE "Columnas del conector|no agregó|Stream listo|^✗" "$dir"/stream_*.txt | sort -u || true
 }
 
 guardar_logs_de_fallos() {
@@ -252,6 +263,22 @@ estado_jobs() {  # evidencia en texto: estado final de cada ejecución de Glue
   cat "$EV/aws_glue/estado_jobs.txt"
 }
 
+stream_a_50() {
+  local run_id estado
+  run_id=$(aws glue start-job-run --job-name paytrack-stream --arguments '{"--RUN_SECONDS":"300"}' --query JobRunId --output text)
+  echo "  · paytrack-stream lanzado ($run_id)"
+  paso uv run python "$LAB/producer.py" --sink kinesis --rate 50 --duration 240 2>&1 | tr '' '
+' | tail -1
+  while true; do
+    estado=$(aws glue get-job-run --job-name paytrack-stream --run-id "$run_id" --query JobRun.JobRunState --output text)
+    case "$estado" in
+      STARTING|RUNNING|WAITING|STOPPING) paso sleep 15 ;;
+      SUCCEEDED) ok "paytrack-stream a 50 eventos/s: $estado"; return 0 ;;
+      *) fail "paytrack-stream a 50 eventos/s: $estado" ;;
+    esac
+  done
+}
+
 todo() {
   local log; log="$EV/aws_glue/ejecucion_$(date +%Y%m%d_%H%M).txt"
   exec > >(tee -a "$log") 2>&1
@@ -270,10 +297,22 @@ todo() {
   step "Parte A · lote 1";  paso bash "$LAB/run_aws.sh" data/batch1 2026-09-29
   step "Parte A · lote 2";  paso bash "$LAB/run_aws.sh" data/batch2 2026-09-30
   step "Parte B · stream";  paso bash "$LAB/run_aws.sh" stream 300
+  step "logs del stream a 20 eventos/s"; guardar_logs_stream "$EV/aws_glue/stream_logs_rate20"
+
+  step "Athena (stream a 20 eventos/s)"
+  paso uv run python "$LAB/entrega/aws/athena_cli.py" --bucket "$BUCKET" --out "$EV/athena/athena_resultados.md"
+
+  # Experimento 2 del README: precisión también a 50 eventos/s. run_aws.sh tiene fija la tasa de 20.
+  # Las alertas se acumulan: la precisión a 50 sale de la diferencia entre los dos TODO 5.
+  step "Parte B · stream a 50 eventos/s"; stream_a_50
+  step "logs del stream a 50 eventos/s"; guardar_logs_stream "$EV/aws_glue/stream_logs_rate50"
+  step "Athena (acumulado con el stream a 50 eventos/s)"
+  paso uv run python "$LAB/entrega/aws/athena_cli.py" --bucket "$BUCKET" --out "$EV/athena/athena_resultados_acumulado_rate50.md"
   step "estado de los jobs"; estado_jobs
 
-  step "Athena"
-  paso uv run python "$LAB/entrega/aws/athena_cli.py" --bucket "$BUCKET" --out "$EV/athena/athena_resultados.md"
+  # El desmontaje borra los jobs y su historial: las capturas de Glue se toman antes.
+  step "PAUSA de $PAUSA_MIN min: toma ahora las capturas de Glue (jobs en Succeeded)"
+  paso sleep $((PAUSA_MIN * 60))
 
   parar_watchdog
   ARMADO=0
@@ -308,7 +347,7 @@ probar_kill_switch() {
 
 # Prueba reducida en AWS: observa lo que en local no se puede probar. Si algo falla, desmonta y conserva los logs.
 prueba_aws() {
-  local log dir run
+  local log dir
   log="$EV/aws_glue/prueba_$(date +%Y%m%d_%H%M).txt"
   dir="$EV/aws_glue/prueba_logs_$(date +%Y%m%d_%H%M)"
   exec > >(tee -a "$log") 2>&1
@@ -330,10 +369,7 @@ prueba_aws() {
   step "estado de los jobs"; estado_jobs
 
   step "logs del stream"
-  paso sleep 30  # CloudWatch tarda unos segundos en recibir los últimos eventos
-  run=$(aws glue get-job-runs --job-name paytrack-stream --max-results 1 --query 'JobRuns[0].Id' --output text)
-  guardar_logs_de_run stream "$run" "$dir"
-  grep -hE "Columnas del conector|no agregó|Stream listo|^✗" "$dir"/stream_*.txt | sort -u || true
+  guardar_logs_stream "$dir"
 
   step "Athena: DDL y las 6 consultas"
   paso uv run python "$LAB/entrega/aws/athena_cli.py" --bucket "$BUCKET" --out "$EV/athena/prueba_athena_resultados.md"

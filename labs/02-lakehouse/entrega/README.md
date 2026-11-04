@@ -75,6 +75,8 @@ Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia 
 Todo el mismo día, cuando las dos partes estén en verde en local. Kinesis cobra por hora mientras exista.
 Comandos exactos, costos y verificación de la limpieza: [`AWS_PASO_A_PASO.md`](AWS_PASO_A_PASO.md).
 
+**Prueba reducida (2026-11-03):** deploy, lote 1 (4 jobs), `paytrack-stream` (17 ✓, 4.918 eventos), Athena (DDL y 6 consultas), kill switch disparado (borró Kinesis) y desmontaje con AWS limpio: `aws_glue/prueba_*`, `athena/prueba_athena_resultados.md`. Falta la corrida completa: lote 2, stream a 20 y a 50 eventos/s y capturas.
+
 | Paso | Estado | Evidencia |
 |---|---|---|
 | Instalar Serverless Framework v3 | ✅ 3.40.0 · `serverless print` resuelve el stack sin errores | |
