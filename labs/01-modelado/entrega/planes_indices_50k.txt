@@ -1,0 +1,388 @@
+SET
+=== 1. Línea base: con los tres índices ===
+                                                                   QUERY PLAN                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1340.56..1340.76 rows=80 width=290) (actual time=8.483..8.484 rows=7 loops=1)
+   Sort Key: (sum(f.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=521
+   ->  HashAggregate  (cost=1336.83..1338.03 rows=80 width=290) (actual time=8.457..8.461 rows=7 loops=1)
+         Group Key: m.category
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=518
+         ->  Hash Join  (cost=14.77..1213.41 rows=16457 width=226) (actual time=3.343..6.900 rows=16262 loops=1)
+               Hash Cond: (f.merchant_key = m.merchant_key)
+               Buffers: shared hit=518
+               ->  Hash Join  (cost=2.97..1156.12 rows=16457 width=12) (actual time=3.330..5.633 rows=16262 loops=1)
+                     Hash Cond: (f.date_key = d.date_key)
+                     Buffers: shared hit=517
+                     ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=49920 width=16) (actual time=0.003..3.253 rows=49920 loops=1)
+                           Filter: is_approved
+                           Rows Removed by Filter: 80
+                           Buffers: shared hit=516
+                     ->  Hash  (cost=2.59..2.59 rows=30 width=4) (actual time=0.015..0.016 rows=30 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=30 width=4) (actual time=0.005..0.007 rows=30 loops=1)
+                                 Filter: (full_date >= (CURRENT_DATE - 30))
+                                 Rows Removed by Filter: 61
+                                 Buffers: shared hit=1
+               ->  Hash  (cost=10.80..10.80 rows=80 width=222) (actual time=0.006..0.006 rows=8 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on dim_merchant m  (cost=0.00..10.80 rows=80 width=222) (actual time=0.002..0.002 rows=8 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=341
+ Planning Time: 0.969 ms
+ Execution Time: 8.577 ms
+(34 rows)
+
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1540.70..1540.71 rows=3 width=54) (actual time=10.471..10.472 rows=3 loops=1)
+   Sort Key: (round(((100.0 * (sum(CASE WHEN f.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=522
+   ->  HashAggregate  (cost=1540.61..1540.68 rows=3 width=54) (actual time=10.465..10.467 rows=3 loops=1)
+         Group Key: c.segment
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=522
+         ->  Hash Join  (cost=17.25..1165.61 rows=50000 width=7) (actual time=0.065..6.604 rows=50000 loops=1)
+               Hash Cond: (f.customer_key = c.customer_key)
+               Buffers: shared hit=522
+               ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=50000 width=5) (actual time=0.001..1.720 rows=50000 loops=1)
+                     Buffers: shared hit=516
+               ->  Hash  (cost=11.00..11.00 rows=500 width=10) (actual time=0.060..0.060 rows=500 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 30kB
+                     Buffers: shared hit=6
+                     ->  Seq Scan on dim_customer c  (cost=0.00..11.00 rows=500 width=10) (actual time=0.002..0.026 rows=500 loops=1)
+                           Buffers: shared hit=6
+ Planning:
+   Buffers: shared hit=58
+ Planning Time: 0.231 ms
+ Execution Time: 10.491 ms
+(22 rows)
+
+                                                                           QUERY PLAN                                                                           
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=397.86..398.16 rows=120 width=44) (actual time=1.344..1.349 rows=162 loops=1)
+   Sort Key: d.day_of_week, t.hour
+   Sort Method: quicksort  Memory: 33kB
+   Buffers: shared hit=72
+   ->  HashAggregate  (cost=392.22..393.72 rows=120 width=44) (actual time=1.294..1.311 rows=162 loops=1)
+         Group Key: d.day_of_week, t.hour
+         Batches: 1  Memory Usage: 96kB
+         Buffers: shared hit=69
+         ->  Hash Join  (cost=41.69..353.82 rows=3840 width=12) (actual time=0.165..0.953 rows=3696 loops=1)
+               Hash Cond: (f.time_key = t.time_key)
+               Buffers: shared hit=69
+               ->  Nested Loop  (cost=0.29..302.31 rows=3840 width=14) (actual time=0.013..0.493 rows=3696 loops=1)
+                     Buffers: shared hit=60
+                     ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=7 width=6) (actual time=0.004..0.005 rows=7 loops=1)
+                           Filter: (full_date >= (CURRENT_DATE - 7))
+                           Rows Removed by Filter: 84
+                           Buffers: shared hit=1
+                     ->  Index Scan using ix_fact_date on fact_transactions f  (cost=0.29..37.33 rows=549 width=16) (actual time=0.003..0.042 rows=528 loops=7)
+                           Index Cond: (date_key = d.date_key)
+                           Filter: is_approved
+                           Rows Removed by Filter: 1
+                           Buffers: shared hit=59
+               ->  Hash  (cost=23.40..23.40 rows=1440 width=6) (actual time=0.146..0.146 rows=1440 loops=1)
+                     Buckets: 2048  Batches: 1  Memory Usage: 73kB
+                     Buffers: shared hit=9
+                     ->  Seq Scan on dim_time t  (cost=0.00..23.40 rows=1440 width=6) (actual time=0.001..0.062 rows=1440 loops=1)
+                           Buffers: shared hit=9
+ Planning:
+   Buffers: shared hit=50
+ Planning Time: 0.217 ms
+ Execution Time: 1.399 ms
+(31 rows)
+
+=== 2. Sin ix_fact_date: Q1 y Q3 ===
+BEGIN
+DROP INDEX
+                                                                   QUERY PLAN                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1340.56..1340.76 rows=80 width=290) (actual time=7.888..7.890 rows=7 loops=1)
+   Sort Key: (sum(f.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=518
+   ->  HashAggregate  (cost=1336.83..1338.03 rows=80 width=290) (actual time=7.881..7.884 rows=7 loops=1)
+         Group Key: m.category
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=518
+         ->  Hash Join  (cost=14.77..1213.41 rows=16457 width=226) (actual time=3.177..6.484 rows=16262 loops=1)
+               Hash Cond: (f.merchant_key = m.merchant_key)
+               Buffers: shared hit=518
+               ->  Hash Join  (cost=2.97..1156.12 rows=16457 width=12) (actual time=3.167..5.301 rows=16262 loops=1)
+                     Hash Cond: (f.date_key = d.date_key)
+                     Buffers: shared hit=517
+                     ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=49920 width=16) (actual time=0.002..2.803 rows=49920 loops=1)
+                           Filter: is_approved
+                           Rows Removed by Filter: 80
+                           Buffers: shared hit=516
+                     ->  Hash  (cost=2.59..2.59 rows=30 width=4) (actual time=0.010..0.010 rows=30 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=30 width=4) (actual time=0.004..0.006 rows=30 loops=1)
+                                 Filter: (full_date >= (CURRENT_DATE - 30))
+                                 Rows Removed by Filter: 61
+                                 Buffers: shared hit=1
+               ->  Hash  (cost=10.80..10.80 rows=80 width=222) (actual time=0.004..0.005 rows=8 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on dim_merchant m  (cost=0.00..10.80 rows=80 width=222) (actual time=0.001..0.002 rows=8 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=11
+ Planning Time: 0.126 ms
+ Execution Time: 7.920 ms
+(34 rows)
+
+                                                                   QUERY PLAN                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1251.39..1251.69 rows=120 width=44) (actual time=5.293..5.297 rows=162 loops=1)
+   Sort Key: d.day_of_week, t.hour
+   Sort Method: quicksort  Memory: 33kB
+   Buffers: shared hit=526
+   ->  HashAggregate  (cost=1245.74..1247.24 rows=120 width=44) (actual time=5.254..5.270 rows=162 loops=1)
+         Group Key: d.day_of_week, t.hour
+         Batches: 1  Memory Usage: 96kB
+         Buffers: shared hit=526
+         ->  Hash Join  (cost=44.08..1207.34 rows=3840 width=12) (actual time=4.194..4.924 rows=3696 loops=1)
+               Hash Cond: (f.time_key = t.time_key)
+               Buffers: shared hit=526
+               ->  Hash Join  (cost=2.68..1155.83 rows=3840 width=14) (actual time=4.049..4.503 rows=3696 loops=1)
+                     Hash Cond: (f.date_key = d.date_key)
+                     Buffers: shared hit=517
+                     ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=49920 width=16) (actual time=0.002..2.561 rows=49920 loops=1)
+                           Filter: is_approved
+                           Rows Removed by Filter: 80
+                           Buffers: shared hit=516
+                     ->  Hash  (cost=2.59..2.59 rows=7 width=6) (actual time=0.008..0.008 rows=7 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=7 width=6) (actual time=0.004..0.004 rows=7 loops=1)
+                                 Filter: (full_date >= (CURRENT_DATE - 7))
+                                 Rows Removed by Filter: 84
+                                 Buffers: shared hit=1
+               ->  Hash  (cost=23.40..23.40 rows=1440 width=6) (actual time=0.137..0.137 rows=1440 loops=1)
+                     Buckets: 2048  Batches: 1  Memory Usage: 73kB
+                     Buffers: shared hit=9
+                     ->  Seq Scan on dim_time t  (cost=0.00..23.40 rows=1440 width=6) (actual time=0.002..0.058 rows=1440 loops=1)
+                           Buffers: shared hit=9
+ Planning:
+   Buffers: shared hit=10
+ Planning Time: 0.103 ms
+ Execution Time: 5.335 ms
+(34 rows)
+
+ROLLBACK
+=== 3. Sin ix_fact_merchant: Q1 ===
+BEGIN
+DROP INDEX
+                                                                   QUERY PLAN                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1340.56..1340.76 rows=80 width=290) (actual time=7.201..7.202 rows=7 loops=1)
+   Sort Key: (sum(f.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=518
+   ->  HashAggregate  (cost=1336.83..1338.03 rows=80 width=290) (actual time=7.195..7.197 rows=7 loops=1)
+         Group Key: m.category
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=518
+         ->  Hash Join  (cost=14.77..1213.41 rows=16457 width=226) (actual time=2.832..5.858 rows=16262 loops=1)
+               Hash Cond: (f.merchant_key = m.merchant_key)
+               Buffers: shared hit=518
+               ->  Hash Join  (cost=2.97..1156.12 rows=16457 width=12) (actual time=2.823..4.769 rows=16262 loops=1)
+                     Hash Cond: (f.date_key = d.date_key)
+                     Buffers: shared hit=517
+                     ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=49920 width=16) (actual time=0.002..2.484 rows=49920 loops=1)
+                           Filter: is_approved
+                           Rows Removed by Filter: 80
+                           Buffers: shared hit=516
+                     ->  Hash  (cost=2.59..2.59 rows=30 width=4) (actual time=0.008..0.008 rows=30 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=30 width=4) (actual time=0.003..0.004 rows=30 loops=1)
+                                 Filter: (full_date >= (CURRENT_DATE - 30))
+                                 Rows Removed by Filter: 61
+                                 Buffers: shared hit=1
+               ->  Hash  (cost=10.80..10.80 rows=80 width=222) (actual time=0.004..0.004 rows=8 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on dim_merchant m  (cost=0.00..10.80 rows=80 width=222) (actual time=0.001..0.001 rows=8 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=23
+ Planning Time: 0.128 ms
+ Execution Time: 7.226 ms
+(34 rows)
+
+ROLLBACK
+=== 4. Sin ix_fact_customer: Q2 ===
+BEGIN
+DROP INDEX
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1540.70..1540.71 rows=3 width=54) (actual time=9.115..9.116 rows=3 loops=1)
+   Sort Key: (round(((100.0 * (sum(CASE WHEN f.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=522
+   ->  HashAggregate  (cost=1540.61..1540.68 rows=3 width=54) (actual time=9.110..9.111 rows=3 loops=1)
+         Group Key: c.segment
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=522
+         ->  Hash Join  (cost=17.25..1165.61 rows=50000 width=7) (actual time=0.062..5.746 rows=50000 loops=1)
+               Hash Cond: (f.customer_key = c.customer_key)
+               Buffers: shared hit=522
+               ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=50000 width=5) (actual time=0.001..1.516 rows=50000 loops=1)
+                     Buffers: shared hit=516
+               ->  Hash  (cost=11.00..11.00 rows=500 width=10) (actual time=0.058..0.058 rows=500 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 30kB
+                     Buffers: shared hit=6
+                     ->  Seq Scan on dim_customer c  (cost=0.00..11.00 rows=500 width=10) (actual time=0.001..0.023 rows=500 loops=1)
+                           Buffers: shared hit=6
+ Planning:
+   Buffers: shared hit=25
+ Planning Time: 0.102 ms
+ Execution Time: 9.147 ms
+(22 rows)
+
+ROLLBACK
+=== 5. Q2 obligada a usar índices (enable_seqscan = off) ===
+BEGIN
+SET
+                                                                            QUERY PLAN                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=3632.74..3632.75 rows=3 width=54) (actual time=12.788..12.789 rows=3 loops=1)
+   Sort Key: (round(((100.0 * (sum(CASE WHEN f.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=45599
+   ->  HashAggregate  (cost=3632.65..3632.72 rows=3 width=54) (actual time=12.784..12.785 rows=3 loops=1)
+         Group Key: c.segment
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=45599
+         ->  Hash Join  (cost=39.31..3257.65 rows=50000 width=7) (actual time=0.075..9.809 rows=50000 loops=1)
+               Hash Cond: (f.customer_key = c.customer_key)
+               Buffers: shared hit=45599
+               ->  Index Scan using ix_fact_customer on fact_transactions f  (cost=0.29..3086.26 rows=50000 width=5) (actual time=0.012..5.737 rows=50000 loops=1)
+                     Buffers: shared hit=45590
+               ->  Hash  (cost=32.77..32.77 rows=500 width=10) (actual time=0.060..0.060 rows=500 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 30kB
+                     Buffers: shared hit=9
+                     ->  Index Scan using dim_customer_pkey on dim_customer c  (cost=0.27..32.77 rows=500 width=10) (actual time=0.005..0.033 rows=500 loops=1)
+                           Buffers: shared hit=9
+ Planning:
+   Buffers: shared hit=31
+ Planning Time: 0.116 ms
+ Execution Time: 12.813 ms
+(22 rows)
+
+ROLLBACK
+=== 6. Q1 obligada a buscar día por día en ix_fact_date ===
+BEGIN
+SET
+SET
+                                                                           QUERY PLAN                                                                            
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1709.23..1709.43 rows=80 width=290) (actual time=4.929..4.930 rows=7 loops=1)
+   Sort Key: (sum(f.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=275
+   ->  HashAggregate  (cost=1705.50..1706.70 rows=80 width=290) (actual time=4.923..4.925 rows=7 loops=1)
+         Group Key: m.category
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=275
+         ->  Nested Loop  (cost=0.44..1582.07 rows=16457 width=226) (actual time=0.019..3.719 rows=16262 loops=1)
+               Buffers: shared hit=275
+               ->  Nested Loop  (cost=0.29..1172.22 rows=16457 width=12) (actual time=0.013..1.690 rows=16262 loops=1)
+                     Buffers: shared hit=259
+                     ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=30 width=4) (actual time=0.006..0.008 rows=30 loops=1)
+                           Filter: (full_date >= (CURRENT_DATE - 30))
+                           Rows Removed by Filter: 61
+                           Buffers: shared hit=1
+                     ->  Index Scan using ix_fact_date on fact_transactions f  (cost=0.29..33.50 rows=549 width=16) (actual time=0.002..0.034 rows=542 loops=30)
+                           Index Cond: (date_key = d.date_key)
+                           Filter: is_approved
+                           Rows Removed by Filter: 1
+                           Buffers: shared hit=258
+               ->  Memoize  (cost=0.15..0.17 rows=1 width=222) (actual time=0.000..0.000 rows=1 loops=16262)
+                     Cache Key: f.merchant_key
+                     Cache Mode: logical
+                     Hits: 16254  Misses: 8  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                     Buffers: shared hit=16
+                     ->  Index Scan using dim_merchant_pkey on dim_merchant m  (cost=0.14..0.16 rows=1 width=222) (actual time=0.001..0.001 rows=1 loops=8)
+                           Index Cond: (merchant_key = f.merchant_key)
+                           Buffers: shared hit=16
+ Planning Time: 0.070 ms
+ Execution Time: 4.969 ms
+(31 rows)
+
+ROLLBACK
+=== 7. Q1 y Q2 con random_page_cost = 1.1 (valor para SSD) ===
+BEGIN
+SET
+                                                                           QUERY PLAN                                                                            
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=843.37..843.57 rows=80 width=290) (actual time=3.881..3.881 rows=7 loops=1)
+   Sort Key: (sum(f.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=260
+   ->  HashAggregate  (cost=839.64..840.84 rows=80 width=290) (actual time=3.876..3.878 rows=7 loops=1)
+         Group Key: m.category
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=260
+         ->  Hash Join  (cost=12.09..716.21 rows=16457 width=226) (actual time=0.014..2.659 rows=16262 loops=1)
+               Hash Cond: (f.merchant_key = m.merchant_key)
+               Buffers: shared hit=260
+               ->  Nested Loop  (cost=0.29..658.92 rows=16457 width=12) (actual time=0.007..1.662 rows=16262 loops=1)
+                     Buffers: shared hit=259
+                     ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=30 width=4) (actual time=0.003..0.005 rows=30 loops=1)
+                           Filter: (full_date >= (CURRENT_DATE - 30))
+                           Rows Removed by Filter: 61
+                           Buffers: shared hit=1
+                     ->  Index Scan using ix_fact_date on fact_transactions f  (cost=0.29..16.39 rows=549 width=16) (actual time=0.001..0.033 rows=542 loops=30)
+                           Index Cond: (date_key = d.date_key)
+                           Filter: is_approved
+                           Rows Removed by Filter: 1
+                           Buffers: shared hit=258
+               ->  Hash  (cost=10.80..10.80 rows=80 width=222) (actual time=0.004..0.004 rows=8 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on dim_merchant m  (cost=0.00..10.80 rows=80 width=222) (actual time=0.001..0.001 rows=8 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=4
+ Planning Time: 0.072 ms
+ Execution Time: 3.904 ms
+(31 rows)
+
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1540.70..1540.71 rows=3 width=54) (actual time=8.068..8.068 rows=3 loops=1)
+   Sort Key: (round(((100.0 * (sum(CASE WHEN f.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=522
+   ->  HashAggregate  (cost=1540.61..1540.68 rows=3 width=54) (actual time=8.064..8.065 rows=3 loops=1)
+         Group Key: c.segment
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=522
+         ->  Hash Join  (cost=17.25..1165.61 rows=50000 width=7) (actual time=0.052..5.096 rows=50000 loops=1)
+               Hash Cond: (f.customer_key = c.customer_key)
+               Buffers: shared hit=522
+               ->  Seq Scan on fact_transactions f  (cost=0.00..1016.00 rows=50000 width=5) (actual time=0.001..1.316 rows=50000 loops=1)
+                     Buffers: shared hit=516
+               ->  Hash  (cost=11.00..11.00 rows=500 width=10) (actual time=0.048..0.048 rows=500 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 30kB
+                     Buffers: shared hit=6
+                     ->  Seq Scan on dim_customer c  (cost=0.00..11.00 rows=500 width=10) (actual time=0.001..0.021 rows=500 loops=1)
+                           Buffers: shared hit=6
+ Planning:
+   Buffers: shared hit=12
+ Planning Time: 0.075 ms
+ Execution Time: 8.092 ms
+(22 rows)
+
+ROLLBACK
