@@ -67,6 +67,14 @@ resources:
             # sobre lakehouse/ (las tablas Delta)? ¿Qué usarías en su lugar?
             # Referencia:
             # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-rule.html
+            - Id: archive-raw
+              Status: Enabled
+              Prefix: raw/
+              Transitions:
+                - TransitionInDays: 90
+                  StorageClass: STANDARD_IA
+                - TransitionInDays: 365
+                  StorageClass: GLACIER_IR
 
     # ── Glue: catálogo y permisos ────────────────────────────
     GlueDatabase:

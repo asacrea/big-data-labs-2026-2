@@ -15,6 +15,7 @@ Completa los TODO y valida tu lógica con:
 
 import argparse
 import json
+from datetime import date
 from pathlib import Path
 
 DATASETS = ["transactions", "fraud_events", "customers", "merchants"]
@@ -27,7 +28,9 @@ DATASETS = ["transactions", "fraud_events", "customers", "merchants"]
 # Ejemplo: raw_prefix("transactions", "2026-09-30") → "raw/transactions/ingest_date=2026-09-30/"
 # Si la fecha no es una fecha válida en formato YYYY-MM-DD, lanza ValueError.
 def raw_prefix(dataset: str, ingest_date: str) -> str:
-    raise NotImplementedError("TODO 1: raw_prefix")
+    if date.fromisoformat(ingest_date).isoformat() != ingest_date:
+        raise ValueError("La fecha debe tener formato YYYY-MM-DD")
+    return f"raw/{dataset}/ingest_date={ingest_date}/"
 
 
 # ── TODO 2: formato JSON Lines ───────────────────────────────────────────────
@@ -35,7 +38,7 @@ def raw_prefix(dataset: str, ingest_date: str) -> str:
 # Athena esperan JSON Lines: un objeto JSON por línea, sin corchetes ni comas
 # entre registros. Convierte la lista a ese formato, conservando las tildes.
 def to_json_lines(records: list[dict]) -> str:
-    raise NotImplementedError("TODO 2: to_json_lines")
+    return "\n".join(json.dumps(record, ensure_ascii=False) for record in records)
 
 
 # ── Dado ─────────────────────────────────────────────────────────────────────
@@ -54,7 +57,7 @@ def write(base: str, key: str, body: str) -> None:
 
 def ingest(batch_dir: Path, ingest_date: str, base: str) -> None:
     for dataset in DATASETS:
-        records = json.loads((batch_dir / f"{dataset}.json").read_text())
+        records = json.loads((batch_dir / f"{dataset}.json").read_text(encoding="utf-8"))
         key = f"{raw_prefix(dataset, ingest_date)}part-0000.json"
         write(base.rstrip("/"), key, to_json_lines(records))
         print(f"✓ {dataset}: {len(records)} registros → {base.rstrip('/')}/{key}")

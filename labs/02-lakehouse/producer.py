@@ -50,7 +50,7 @@ PAYMENT_METHODS = ["credit_card", "debit_card", "nequi", "daviplata", "pse"]
 #     contracargos de sus pagos) lleguen a la misma partición, en orden
 #   - la carga se reparta entre particiones (no uses un valor constante)
 def partition_key(event: dict) -> str:
-    raise NotImplementedError("TODO 1: partition_key")
+    return event["customer_id"]
 
 
 # ── TODO 2: configuración del productor de Kafka ─────────────────────────────
@@ -60,7 +60,7 @@ def partition_key(event: dict) -> str:
 # eventos dentro de una partición.
 # Pista: busca "acks" y "enable.idempotence" en la documentación de Kafka.
 def kafka_config(bootstrap: str) -> dict:
-    raise NotImplementedError("TODO 2: kafka_config")
+    return {"bootstrap.servers": bootstrap, "acks": "all", "enable.idempotence": True}
 
 
 # ── TODO 3: reintentos en Kinesis ────────────────────────────────────────────
@@ -75,7 +75,16 @@ def kafka_config(bootstrap: str) -> dict:
 # quedaron sin enviar después del último intento.
 def put_with_retries(kinesis, stream: str, records: list[dict],
                      max_attempts: int = 4, base_delay: float = 0.2) -> int:
-    raise NotImplementedError("TODO 3: put_with_retries")
+    pending = records
+    for attempt in range(max_attempts):
+        if not pending:
+            break
+        response = kinesis.put_records(StreamName=stream, Records=pending)
+        pending = [record for record, result in zip(pending, response["Records"])
+                   if "ErrorCode" in result]
+        if pending and attempt + 1 < max_attempts:
+            time.sleep(base_delay * 2 ** attempt)
+    return len(pending)
 
 
 # ── Dado: generación de eventos ──────────────────────────────────────────────
@@ -89,9 +98,11 @@ class EventSource:
 
     def __init__(self, batch_dir: Path, seed: int | None = None):
         self.rng = random.Random(seed)
-        self.customers = [c["customer_id"] for c in json.loads((batch_dir / "customers.json").read_text())]
-        self.merchants = json.loads((batch_dir / "merchants.json").read_text())
-        valid = [t for t in json.loads((batch_dir / "transactions.json").read_text())
+        self.customers = [c["customer_id"] for c in
+                          json.loads((batch_dir / "customers.json").read_text(encoding="utf-8"))]
+        self.merchants = json.loads((batch_dir / "merchants.json").read_text(encoding="utf-8"))
+        transactions = json.loads((batch_dir / "transactions.json").read_text(encoding="utf-8"))
+        valid = [t for t in transactions
                  if t["status"] == "approved" and t["customer_id"]
                  and isinstance(t["amount_cop"], (int, float)) and 0 < t["amount_cop"] < 1e8]
         self.approved = list({t["transaction_id"]: t for t in valid}.values())  # pagos que se pueden contracargar
@@ -214,6 +225,8 @@ def produce(sink, source: EventSource, rate: int, duration: int, fast: bool) -> 
             time.sleep(max(0.0, 1 - (time.time() - tick)))
     by_type = ", ".join(f"{k}: {v}" for k, v in sorted(counts.items()))
     failed = sink.close()
+    if failed:
+        raise SystemExit(f"✗ {failed} eventos sin confirmar tras los reintentos")
     print(f"\n✓ {sent} eventos enviados en {time.time() - start:.0f}s ({by_type}) · {failed} perdidos")
 
 

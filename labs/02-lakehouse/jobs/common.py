@@ -94,9 +94,16 @@ def read_events(spark: SparkSession, source: str, stream: str, bootstrap: str, s
             "maxFetchRecordsPerShard": "2000",
         },
     )
-    src = "__src_timestamp"
-    arrival = F.timestamp_millis(src) if dict(df.dtypes)[src] in ("bigint", "int") else F.col(src).cast("timestamp")
-    return df.withColumn("arrival_ts", arrival).drop(src)
+    types = dict(df.dtypes)
+    # Glue 5 puede exponer el timestamp con este nombre interno en lugar del
+    # nombre documentado; ambos representan la llegada al stream.
+    temporary = "$add$record_timestamp$_temporary$"
+    src = next((name for name in ("__src_timestamp", temporary) if name in types), None)
+    if src is None:
+        raise ValueError("Kinesis no devolvió el timestamp de llegada solicitado")
+    column = F.col(f"`{src}`")
+    arrival = F.timestamp_millis(column) if types[src] in ("bigint", "int") else column.cast("timestamp")
+    return df.withColumn("arrival_ts", arrival).drop("__src_timestamp", temporary)
 
 
 def check(condition: bool, message: str) -> None:

@@ -1,0 +1,39 @@
+
+Deploying paytrack-lakehouse to stage dev (us-east-1)
+
+✔ Service deployed to stack paytrack-lakehouse-dev (78s)
+
+Ingestando batch1 en S3
+Glue bronze iniciado: jr_439e2543c4a73f23d85153284f74f0babbbc0d6c68e625a982f306e142727da4
+Glue bronze: RUNNING
+Glue bronze: SUCCEEDED
+Glue silver iniciado: jr_424d3aab99fb06758c087e52b805633fd9836bfbf3c6fec15263bb3f17badf0b
+Glue silver: RUNNING
+Glue silver: SUCCEEDED
+Cuarentena 2026-09-29: 1760 filas idénticas en local y AWS
+Glue gold iniciado: jr_5cd81ccd5621e5e4c63943b4b6bb2af419374d9d45e40a53ab05a33e23991d68
+Glue gold: RUNNING
+Glue gold: SUCCEEDED
+Glue audit iniciado: jr_6e2b6f66565e4601f9e399e000365a81edab74a27ef86eb57eab83b2a6c8c46c
+Glue audit: RUNNING
+Glue audit: SUCCEEDED
+Ingestando batch2 en S3
+Glue bronze iniciado: jr_5ac5ceb40a4ed7f597cfed51584c3478f72abce84ab8b399f5127ca3e258e069
+Glue bronze: RUNNING
+Glue bronze: SUCCEEDED
+Glue silver iniciado: jr_261a4ddf65495c38f3205a8f999ff7af66a173f12044c5be473c8cfe52abaab6
+Glue silver: RUNNING
+Glue silver: SUCCEEDED
+Cuarentena 2026-09-30: 117 filas idénticas en local y AWS
+Glue gold iniciado: jr_ee3623324fdd9018d34cfb38c6659bed7782827b722ec053da24ce62e08e3386
+Glue gold: RUNNING
+Glue gold: SUCCEEDED
+Glue audit iniciado: jr_9a730cde098200e4e40c001da1afe85925e2963d37b48c2636aff7add3ee9c10
+Glue audit: RUNNING
+Glue audit: SUCCEEDED
+Athena consulta 1: 3363 bytes escaneados
+Athena consulta 2: 101703 bytes escaneados
+Athena consulta 3: 336 bytes escaneados
+Athena consulta 4: 173343 bytes escaneados
+Glue stream iniciado: jr_0483f101f871a196e68fa8b7af3d8803d9cf8a87037a65c8f5562ed48218ee6a
+Enviando eventos a Kinesis durante 240 s a 20 eventos/s

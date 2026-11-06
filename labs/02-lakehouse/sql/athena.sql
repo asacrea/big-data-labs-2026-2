@@ -46,22 +46,53 @@ TBLPROPERTIES ('table_type' = 'DELTA');
 -- de aprobación del mes, usando gold_daily_merchant_summary.
 -- Ojo: no promedies approval_rate_pct diaria; calcula la del mes.
 -- Filtra por las columnas de partición.
+SELECT merchant_id, merchant_name, merchant_category,
+       SUM(approved_cop) AS approved_cop,
+       ROUND(100.0 * SUM(num_approved) / SUM(num_transactions), 2) AS approval_rate_pct
+FROM paytrack_lakehouse.gold_daily_merchant_summary
+WHERE year = '2026' AND month = '09'
+GROUP BY merchant_id, merchant_name, merchant_category
+ORDER BY approved_cop DESC, merchant_id
+LIMIT 5;
 
 
 -- ── TODO 2 ──────────────────────────────────────────────────
 -- La misma pregunta del TODO 1, pero calculada desde silver_transactions.
 -- Compara resultados y MB escaneados con el TODO 1.
+SELECT merchant_id, merchant_name, merchant_category,
+       SUM(CASE WHEN status = 'approved' THEN amount_cop ELSE 0 END) AS approved_cop,
+       ROUND(100.0 * COUNT_IF(status = 'approved') / COUNT(*), 2) AS approval_rate_pct
+FROM paytrack_lakehouse.silver_transactions
+WHERE year = '2026' AND month = '09'
+GROUP BY merchant_id, merchant_name, merchant_category
+ORDER BY approved_cop DESC, merchant_id
+LIMIT 5;
 
 
 -- ── TODO 3 ──────────────────────────────────────────────────
 -- Para cada segmento de cliente: la semana con más eventos de fraude y
 -- cuántos eventos tuvo (gold_fraud_weekly_report).
 -- Pista: funciones de ventana (ROW_NUMBER ... OVER (PARTITION BY ...)).
+WITH weekly AS (
+    SELECT segment, week_start, SUM(num_events) AS num_events
+    FROM paytrack_lakehouse.gold_fraud_weekly_report
+    GROUP BY segment, week_start
+), ranked AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY segment ORDER BY num_events DESC, week_start) AS rn
+    FROM weekly
+)
+SELECT segment, week_start, num_events FROM ranked WHERE rn = 1;
 
 
 -- ── TODO 4 ──────────────────────────────────────────────────
 -- Impacto de los contracargos del último lote: número de transacciones y
 -- monto revertido por categoría de comercio (gold_status_changes + silver_transactions).
+SELECT t.merchant_category, COUNT(*) AS num_chargebacks, SUM(c.amount_cop) AS reverted_cop
+FROM paytrack_lakehouse.gold_status_changes c
+JOIN paytrack_lakehouse.silver_transactions t ON c.transaction_id = t.transaction_id
+WHERE c.new_status = 'chargeback'
+GROUP BY t.merchant_category
+ORDER BY reverted_cop DESC;
 
 
 -- ── TODO 5 (streaming) ──────────────────────────────────────
@@ -70,6 +101,18 @@ TBLPROPERTIES ('table_type' = 'DELTA');
 -- esa ventana? Una alerta es un acierto si alguno de los pagos del cliente con
 -- event_time dentro de [window_start, window_end) tiene is_fraud = true
 -- (bronze_transaction_events). Reporta alertas, aciertos y % de precisión.
+WITH matches AS (
+    SELECT a.customer_id, a.window_start, a.window_end,
+           MAX(CASE WHEN e.is_fraud = true THEN 1 ELSE 0 END) AS hit
+    FROM paytrack_lakehouse.gold_fraud_alerts a
+    LEFT JOIN paytrack_lakehouse.bronze_transaction_events e
+      ON e.customer_id = a.customer_id AND e.event_type = 'payment'
+     AND e.event_time >= a.window_start AND e.event_time < a.window_end
+    GROUP BY a.customer_id, a.window_start, a.window_end
+)
+SELECT COUNT(*) AS alerts, COALESCE(SUM(hit), 0) AS hits,
+       ROUND(100.0 * SUM(hit) / NULLIF(COUNT(*), 0), 2) AS precision_pct
+FROM matches;
 
 
 -- ── TODO 6 (streaming) ──────────────────────────────────────
@@ -78,4 +121,19 @@ TBLPROPERTIES ('table_type' = 'DELTA');
 -- ventanas) con el número de transacciones del stream en silver_transactions
 -- (las que tienen transaction_id con prefijo 'TXNS'). Muestra la diferencia.
 -- ¿De dónde sale? (pista: watermark y ventanas que aún no se cierran)
+WITH fast AS (
+    SELECT CAST(window_start AS DATE) AS day, merchant_id, SUM(num_payments) AS fast_payments
+    FROM paytrack_lakehouse.gold_merchant_minute_metrics
+    GROUP BY 1, 2
+), batch AS (
+    SELECT CAST(event_ts AS DATE) AS day, merchant_id, COUNT(*) AS silver_payments
+    FROM paytrack_lakehouse.silver_transactions
+    WHERE transaction_id LIKE 'TXNS%'
+    GROUP BY 1, 2
+)
+SELECT COALESCE(f.day, b.day) AS day, COALESCE(f.merchant_id, b.merchant_id) AS merchant_id,
+       COALESCE(f.fast_payments, 0) AS fast_payments, COALESCE(b.silver_payments, 0) AS silver_payments,
+       COALESCE(f.fast_payments, 0) - COALESCE(b.silver_payments, 0) AS difference
+FROM fast f FULL OUTER JOIN batch b ON f.day = b.day AND f.merchant_id = b.merchant_id
+ORDER BY 1, 2;
 

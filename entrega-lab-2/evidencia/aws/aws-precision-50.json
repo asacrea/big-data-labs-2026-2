@@ -1,0 +1,18 @@
+{
+  "rate": 50,
+  "window_start_at_or_after_utc": "2026-11-04 19:25:49.846",
+  "query_id": "7f702c33-845a-4233-abe4-c9b5f566d98d",
+  "bytes_scanned": 218837,
+  "rows": [
+    [
+      "alerts",
+      "hits",
+      "precision_pct"
+    ],
+    [
+      "345",
+      "59",
+      "17.1"
+    ]
+  ]
+}

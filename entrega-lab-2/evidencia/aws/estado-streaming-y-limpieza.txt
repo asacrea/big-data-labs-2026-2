@@ -1,0 +1,26 @@
+Glue stream iniciado: jr_f75d5daa519e840d519e95f9ee55fb335b399d81e116f926d1c0910061d55a75
+Enviando eventos a Kinesis durante 240 s a 20 eventos/s
+Glue stream: RUNNING
+Glue stream: SUCCEEDED
+Athena consulta 1: 3363 bytes escaneados
+Athena consulta 2: 101862 bytes escaneados
+Athena consulta 3: 336 bytes escaneados
+Athena consulta 4: 260704 bytes escaneados
+Athena consulta 5: 93214 bytes escaneados
+Athena consulta 6: 148340 bytes escaneados
+Athena precisión 20 eventos/s: ['25', '25', '100.0']
+Glue stream iniciado: jr_1c2df626d93c5852d956d0c71a314bca4291784c92f88a0c853a651d1e54f7c3
+Enviando eventos a Kinesis durante 240 s a 50 eventos/s
+Glue stream: RUNNING
+Glue stream: SUCCEEDED
+Athena consulta 1: 3363 bytes escaneados
+Athena consulta 2: 102062 bytes escaneados
+Athena consulta 3: 336 bytes escaneados
+Athena consulta 4: 414776 bytes escaneados
+Athena consulta 5: 222603 bytes escaneados
+Athena consulta 6: 404717 bytes escaneados
+Athena precisión 50 eventos/s: ['345', '59', '17.1']
+Removing paytrack-lakehouse from stage dev (us-east-1)
+
+✔ Service paytrack-lakehouse has been successfully removed (24s)
+Limpieza verificada: el stream de Kinesis ya no existe.

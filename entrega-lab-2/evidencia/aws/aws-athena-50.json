@@ -1,0 +1,301 @@
+[
+  {
+    "statement": 1,
+    "query_id": "b08ee8ad-879b-4396-b5cb-7d78f5e6e271",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 2,
+    "query_id": "b3fc2f98-0f5f-49a8-a3ee-b2881f176e7b",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 3,
+    "query_id": "f5efc4ab-39dd-42bb-9ff5-3bb890fad81a",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 4,
+    "query_id": "0f500303-6265-43d3-b145-bf97471ba297",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 5,
+    "query_id": "d115cf75-01ea-413c-a7e3-c9e1ad8a9add",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 6,
+    "query_id": "d2bc0a06-a8d3-42a4-9065-610fd8a4b2f7",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 7,
+    "query_id": "adb9a99b-66ba-4891-a588-6d7bc377e098",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 8,
+    "query_id": "67374a64-e6bc-463f-b511-348ed756401f",
+    "bytes_scanned": 0
+  },
+  {
+    "statement": 9,
+    "query_id": "64862805-746f-494c-bd6a-6bc0c7fd8d9e",
+    "bytes_scanned": 3363,
+    "rows": [
+      [
+        "merchant_id",
+        "merchant_name",
+        "merchant_category",
+        "approved_cop",
+        "approval_rate_pct"
+      ],
+      [
+        "M001",
+        "Éxito Laureles",
+        "retail",
+        "146241324.33",
+        "99.25"
+      ],
+      [
+        "M006",
+        "Falabella CO",
+        "retail",
+        "145661803.20",
+        "98.58"
+      ],
+      [
+        "M008",
+        "Uber CO",
+        "transport",
+        "141643259.02",
+        "99.4"
+      ],
+      [
+        "M002",
+        "Rappi Colombia",
+        "delivery",
+        "141605308.63",
+        "99.02"
+      ],
+      [
+        "M003",
+        "Claro Tienda",
+        "telco",
+        "141401871.71",
+        "99.32"
+      ]
+    ]
+  },
+  {
+    "statement": 10,
+    "query_id": "6f1bce15-1e20-4ed8-ab3f-53116dad180b",
+    "bytes_scanned": 102062,
+    "rows": [
+      [
+        "merchant_id",
+        "merchant_name",
+        "merchant_category",
+        "approved_cop",
+        "approval_rate_pct"
+      ],
+      [
+        "M006",
+        "Falabella CO",
+        "retail",
+        "144669619.00",
+        "97.79"
+      ],
+      [
+        "M001",
+        "Éxito Laureles",
+        "retail",
+        "144289466.62",
+        "97.61"
+      ],
+      [
+        "M003",
+        "Claro Tienda",
+        "telco",
+        "140558233.13",
+        "98.64"
+      ],
+      [
+        "M002",
+        "Rappi Colombia",
+        "delivery",
+        "140244955.86",
+        "97.88"
+      ],
+      [
+        "M008",
+        "Uber CO",
+        "transport",
+        "139396471.49",
+        "97.79"
+      ]
+    ]
+  },
+  {
+    "statement": 11,
+    "query_id": "725cd6f3-62c4-4446-be06-e1e09a9699fc",
+    "bytes_scanned": 336,
+    "rows": [
+      [
+        "segment",
+        "week_start",
+        "num_events"
+      ],
+      [
+        "high_value",
+        "2026-08-24",
+        "6"
+      ],
+      [
+        "mass",
+        "2026-09-21",
+        "12"
+      ],
+      [
+        "premium",
+        "2026-09-28",
+        "7"
+      ]
+    ]
+  },
+  {
+    "statement": 12,
+    "query_id": "44be57e4-e089-4328-9124-cec876515e3c",
+    "bytes_scanned": 414776,
+    "rows": [
+      [
+        "merchant_category",
+        "num_chargebacks",
+        "reverted_cop"
+      ],
+      [
+        "retail",
+        "62",
+        "3962234.07"
+      ],
+      [
+        "grocery",
+        "40",
+        "3777460.49"
+      ],
+      [
+        "delivery",
+        "32",
+        "3300595.37"
+      ],
+      [
+        "travel",
+        "41",
+        "2351107.67"
+      ],
+      [
+        "telco",
+        "38",
+        "2327234.80"
+      ],
+      [
+        "streaming",
+        "37",
+        "2200921.24"
+      ],
+      [
+        "transport",
+        "26",
+        "2140008.69"
+      ]
+    ]
+  },
+  {
+    "statement": 13,
+    "query_id": "903466c2-0c0c-4428-ae4e-e982cf5c7e01",
+    "bytes_scanned": 222603,
+    "rows": [
+      [
+        "alerts",
+        "hits",
+        "precision_pct"
+      ],
+      [
+        "432",
+        "131",
+        "30.32"
+      ]
+    ]
+  },
+  {
+    "statement": 14,
+    "query_id": "18691be4-ac0c-4afb-a7e3-9f23d10e13fb",
+    "bytes_scanned": 404717,
+    "rows": [
+      [
+        "day",
+        "merchant_id",
+        "fast_payments",
+        "silver_payments",
+        "difference"
+      ],
+      [
+        "2026-11-04",
+        "M001",
+        "1273",
+        "2290",
+        "-1017"
+      ],
+      [
+        "2026-11-04",
+        "M002",
+        "1290",
+        "2324",
+        "-1034"
+      ],
+      [
+        "2026-11-04",
+        "M003",
+        "1244",
+        "2319",
+        "-1075"
+      ],
+      [
+        "2026-11-04",
+        "M004",
+        "1212",
+        "2181",
+        "-969"
+      ],
+      [
+        "2026-11-04",
+        "M005",
+        "1206",
+        "2236",
+        "-1030"
+      ],
+      [
+        "2026-11-04",
+        "M006",
+        "1250",
+        "2330",
+        "-1080"
+      ],
+      [
+        "2026-11-04",
+        "M007",
+        "1311",
+        "2340",
+        "-1029"
+      ],
+      [
+        "2026-11-04",
+        "M008",
+        "1294",
+        "2294",
+        "-1000"
+      ]
+    ]
+  }
+]
