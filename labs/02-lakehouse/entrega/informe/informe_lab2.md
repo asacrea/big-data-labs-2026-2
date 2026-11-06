@@ -6,6 +6,12 @@
 
 Las preguntas son las del enunciado. Evidencias: `labs/02-lakehouse/entrega/evidencias/`. Salvo que se indique lo contrario, las cifras locales vienen de `lakehouse-local`, que acumula varias corridas; las de AWS, de la corrida completa del 2026-11-04.
 
+## Tests
+
+Los dos archivos de tests en verde: **15 de 15** (`test_ingest.py` 7, `test_producer.py` 8).
+
+![Salida de pytest](../evidencias/capturas/01_pytest_dos_archivos.png)
+
 ## Parte A · Batch
 
 **1. Bronze.** ¿Por qué Bronze lee todo como texto? ¿Qué problema evita `replaceWhere` frente a `append`? Muéstralo con lo que pasó en tu prueba de idempotencia.
@@ -217,6 +223,8 @@ Mismo stream en los tres casos (1.227 eventos, `--seed 7`), en topics de 3 parti
 
 ![Salida del experimento 3](../evidencias/capturas/12_exp3_partition_key.png)
 
+<div style="break-before:page"></div>
+
 ## Diagrama de la arquitectura
 
 Editable en draw.io: `labs/02-lakehouse/entrega/diagrama/arquitectura_lakehouse.drawio`.
@@ -226,3 +234,5 @@ Editable en draw.io: `labs/02-lakehouse/entrega/diagrama/arquitectura_lakehouse.
 ## Evidencias
 
 Salidas completas de la ejecución local, AWS, Athena y la limpieza, en `labs/02-lakehouse/entrega/evidencias/`.
+
+Se declara el uso de IA Claude para la revisión, y acompañamiento en la redacción y corrección del trabajo. Análisis y estructura son propiedad intelectual de los responsables de este informe.
