@@ -1,0 +1,126 @@
+"""
+Job Gold: silver → gold (Delta, una tabla por pregunta de negocio).
+
+Las tablas Gold se recalculan completas desde Silver en cada ejecución y se
+consultan desde Athena (ver sql/athena.sql).
+
+Argumentos: --BASE <s3://bucket | carpeta local>
+"""
+
+from __future__ import annotations
+
+from common import check, get_spark, parse_args, read_table, table_path
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
+
+args = parse_args(["BASE"])
+BASE = args["BASE"].rstrip("/")
+spark = get_spark("paytrack-gold")
+
+txn = read_table(spark, table_path(BASE, "silver", "transactions"))
+merchants = read_table(spark, table_path(BASE, "silver", "merchants"))
+customers = read_table(spark, table_path(BASE, "silver", "customers"))
+fraud = read_table(spark, table_path(BASE, "silver", "fraud_events"))
+
+
+# ── TODO 1: daily_merchant_summary ───────────────────────────────────────────
+# Una fila por DÍA y COMERCIO, para el dashboard de operaciones:
+#   day                     fecha de la transacción (date)
+#   merchant_id, merchant_name, merchant_category
+#   num_transactions        número de transacciones (todos los estados)
+#   approved_cop            suma de amount_cop de las aprobadas
+#   chargeback_cop          suma de amount_cop de los contracargos (0 si no hay)
+#   approval_rate_pct       % de transacciones aprobadas, 2 decimales
+#   year, month             columnas de partición ("YYYY", "MM")
+def daily_merchant_summary() -> DataFrame:
+    # Solo las columnas necesarias de txn: evita columnas ambiguas al unir con merchants
+    t = txn.select("merchant_id", "event_ts", "status", "amount_cop").withColumn("day", F.to_date("event_ts"))
+    m = merchants.select("merchant_id", "merchant_name", "merchant_category")
+    is_approved = F.col("status") == "approved"
+    return (
+        t.join(m, "merchant_id", "left")  # left: ninguna transacción se pierde aunque falte el comercio
+        .groupBy("day", "merchant_id", "merchant_name", "merchant_category")
+        .agg(
+            F.count("*").alias("num_transactions"),
+            F.coalesce(F.sum(F.when(is_approved, F.col("amount_cop"))), F.lit(0)).alias("approved_cop"),
+            F.coalesce(F.sum(F.when(F.col("status") == "chargeback", F.col("amount_cop"))), F.lit(0))
+            .alias("chargeback_cop"),
+            F.round(100 * F.sum(F.when(is_approved, 1).otherwise(0)) / F.count("*"), 2).alias("approval_rate_pct"),
+        )
+        .withColumn("year", F.date_format("day", "yyyy"))
+        .withColumn("month", F.date_format("day", "MM"))
+    )
+
+
+# ── TODO 2: fraud_weekly_report ──────────────────────────────────────────────
+# Una fila por SEMANA, PATRÓN de fraude y SEGMENTO de cliente:
+#   week_start              lunes de la semana del evento (date)
+#   pattern, segment
+#   num_events              número de eventos de fraude
+#   avg_risk_score          risk score promedio
+#   total_cop               monto total de las transacciones involucradas
+# Solo cuentan los eventos cuya transacción está en silver.transactions.
+def fraud_weekly_report() -> DataFrame:
+    f = fraud.select("transaction_id", "pattern", "risk_score", "detected_at")
+    t = txn.select("transaction_id", "customer_id", "amount_cop")
+    c = customers.select("customer_id", "segment")
+    return (
+        f.join(t, "transaction_id")  # inner: solo eventos cuya transacción está en silver
+        .join(c, "customer_id", "left")
+        .withColumn("week_start", F.to_date(F.date_trunc("week", "detected_at")))  # 'week' trunca al lunes
+        .groupBy("week_start", "pattern", "segment")
+        .agg(
+            F.count("*").alias("num_events"),
+            F.avg("risk_score").alias("avg_risk_score"),
+            F.sum("amount_cop").alias("total_cop"),
+        )
+    )
+
+
+# ── TODO 3: hourly_volume ────────────────────────────────────────────────────
+# Una fila por HORA del día (0-23) con las transacciones APROBADAS:
+#   hour, num_transactions, total_cop, avg_cop (2 decimales)
+def hourly_volume() -> DataFrame:
+    return (
+        txn.filter(F.col("status") == "approved")
+        .groupBy(F.hour("event_ts").alias("hour"))
+        .agg(
+            F.count("*").alias("num_transactions"),
+            F.sum("amount_cop").alias("total_cop"),
+            F.round(F.avg("amount_cop"), 2).alias("avg_cop"),
+        )
+        .orderBy("hour")
+    )
+
+
+# ── Ejecución y validación (dadas) ───────────────────────────────────────────
+
+def save(df: DataFrame, name: str, partition_by: list[str] | None = None) -> DataFrame:
+    writer = df.write.format("delta").mode("overwrite").option("overwriteSchema", True)
+    if partition_by:
+        writer = writer.partitionBy(*partition_by)
+    writer.save(table_path(BASE, "gold", name))
+    return read_table(spark, table_path(BASE, "gold", name))
+
+
+daily = save(daily_merchant_summary(), "daily_merchant_summary", ["year", "month"])
+weekly = save(fraud_weekly_report(), "fraud_weekly_report")
+hourly = save(hourly_volume(), "hourly_volume")
+
+total = lambda df, col: df.agg(F.sum(col)).first()[0]  # noqa: E731
+approved = txn.filter("status = 'approved'")
+
+check(daily.count() == daily.select("day", "merchant_id").distinct().count(), "daily: una fila por día y comercio")
+check(total(daily, "num_transactions") == txn.count(), "daily: cuadra el número de transacciones con silver")
+check(total(daily, "approved_cop") == total(approved, "amount_cop"), "daily: cuadra el monto aprobado")
+check(total(daily, "chargeback_cop") == (total(txn.filter("status = 'chargeback'"), "amount_cop") or 0),
+      "daily: cuadra el monto en contracargos")
+check(daily.filter((F.length("year") != 4) | (F.length("month") != 2)).count() == 0, "daily: particiones bien formadas")
+check(weekly.count() == weekly.select("week_start", "pattern", "segment").distinct().count(),
+      "weekly: una fila por semana, patrón y segmento")
+check(total(weekly, "num_events") == fraud.join(txn, "transaction_id").count(), "weekly: cuadra el número de eventos")
+check(weekly.filter(F.dayofweek("week_start") != 2).count() == 0, "weekly: las semanas empiezan en lunes")
+check(hourly.count() == 24, "hourly: 24 horas")
+check(total(hourly, "num_transactions") == approved.count(), "hourly: cuadra con las aprobadas de silver")
+
+print("\nGold listo")

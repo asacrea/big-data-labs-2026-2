@@ -1,0 +1,230 @@
+# ================================================================
+# Lab 2 · Infraestructura del lakehouse de PayTrack
+#   S3 (raw + lakehouse Delta) · 4 jobs de Glue 5.0 · catálogo · Athena
+#   Streaming: Kinesis Data Streams · 1 job de Glue Streaming (Spark Structured Streaming)
+#
+# Despliegue:  serverless deploy --stage dev
+# Limpieza:    ver README (vaciar el bucket y luego serverless remove)
+# ================================================================
+service: paytrack-lakehouse
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  region: ${env:AWS_DEFAULT_REGION, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+
+custom:
+  bucketName: paytrack-lakehouse-${env:STUDENT_ID}-${aws:accountId}
+  glueJobArgs:
+    "--BASE": s3://${self:custom.bucketName}
+    "--INGEST_DATE": "none"
+    "--datalake-formats": delta
+    "--conf": "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog"
+    "--extra-py-files": s3://${self:custom.bucketName}/scripts/common.py
+    "--enable-continuous-cloudwatch-log": "true"
+  streamName: paytrack-transactions
+  # El job de streaming recibe los mismos argumentos más los del stream
+  streamJobArgs:
+    "--BASE": s3://${self:custom.bucketName}
+    "--SOURCE": kinesis
+    "--STREAM": arn:aws:kinesis:${aws:region}:${aws:accountId}:stream/${self:custom.streamName}
+    "--BOOTSTRAP": "none"
+    "--RUN_SECONDS": "300"
+    "--datalake-formats": delta
+    "--conf": "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog"
+    "--extra-py-files": s3://${self:custom.bucketName}/scripts/common.py
+    "--enable-continuous-cloudwatch-log": "true"
+
+resources:
+  Resources:
+    # ── S3 ───────────────────────────────────────────────────
+    LakehouseBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        LifecycleConfiguration:
+          Rules:
+            - Id: expire-athena-results
+              Status: Enabled
+              Prefix: athena-results/
+              ExpirationInDays: 7
+            # Zona raw: copia fiel de cada lote, fuente para re-procesar y auditar.
+            #   0-30 días   STANDARD     se re-procesa con frecuencia (fallas, cambios de lógica)
+            #   30-90 días  STANDARD_IA  acceso ocasional (30 días es el mínimo que exige IA)
+            #   +90 días    GLACIER_IR   archivo barato, se lee en milisegundos si hay una auditoría
+            #   Sin expiración: los soportes de transacciones financieras deben conservarse
+            #   años (retención regulatoria); borrar raw elimina la única copia original.
+            - Id: raw-tiering
+              Status: Enabled
+              Prefix: raw/
+              Transitions:
+                - TransitionInDays: 30
+                  StorageClass: STANDARD_IA
+                - TransitionInDays: 90
+                  StorageClass: GLACIER_IR
+            # TODO (resuelto arriba): define la política de ciclo de vida de la zona raw/.
+            #   ¿Cuánto tiempo se re-procesa un lote? ¿Cuándo pasarlo a una clase más
+            #   barata (STANDARD_IA, GLACIER_IR)? ¿Se debe borrar alguna vez? (auditoría)
+            #   Usa Transitions (TransitionInDays + StorageClass) y/o ExpirationInDays.
+            #
+            # Pregunta para el informe: ¿por qué NO debes poner una regla de expiración
+            # sobre lakehouse/ (las tablas Delta)? ¿Qué usarías en su lugar?
+            # Referencia:
+            # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-rule.html
+
+    # ── Glue: catálogo y permisos ────────────────────────────
+    GlueDatabase:
+      Type: AWS::Glue::Database
+      Properties:
+        CatalogId: !Ref AWS::AccountId
+        DatabaseInput:
+          Name: paytrack_lakehouse
+          Description: Tablas Delta del lakehouse de PayTrack
+
+    GlueRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: glue.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        Policies:
+          - PolicyName: lakehouse-access
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action: [s3:GetObject, s3:PutObject, s3:DeleteObject, s3:ListBucket]
+                  Resource:
+                    - arn:aws:s3:::${self:custom.bucketName}
+                    - arn:aws:s3:::${self:custom.bucketName}/*
+                - Effect: Allow
+                  Action:
+                    - kinesis:DescribeStream
+                    - kinesis:DescribeStreamSummary
+                    - kinesis:GetRecords
+                    - kinesis:GetShardIterator
+                    - kinesis:ListShards
+                  Resource: !GetAtt TransactionStream.Arn
+
+    # ── Glue: un job por capa ────────────────────────────────
+    BronzeJob:
+      Type: AWS::Glue::Job
+      Properties:
+        Name: paytrack-bronze
+        Role: !GetAtt GlueRole.Arn
+        GlueVersion: "5.0"
+        WorkerType: G.1X
+        NumberOfWorkers: 2
+        Timeout: 15
+        Command:
+          Name: glueetl
+          PythonVersion: "3"
+          ScriptLocation: s3://${self:custom.bucketName}/scripts/bronze.py
+        DefaultArguments: ${self:custom.glueJobArgs}
+
+    SilverJob:
+      Type: AWS::Glue::Job
+      Properties:
+        Name: paytrack-silver
+        Role: !GetAtt GlueRole.Arn
+        GlueVersion: "5.0"
+        WorkerType: G.1X
+        NumberOfWorkers: 2
+        Timeout: 15
+        Command:
+          Name: glueetl
+          PythonVersion: "3"
+          ScriptLocation: s3://${self:custom.bucketName}/scripts/silver.py
+        DefaultArguments: ${self:custom.glueJobArgs}
+
+    GoldJob:
+      Type: AWS::Glue::Job
+      Properties:
+        Name: paytrack-gold
+        Role: !GetAtt GlueRole.Arn
+        GlueVersion: "5.0"
+        WorkerType: G.1X
+        NumberOfWorkers: 2
+        Timeout: 15
+        Command:
+          Name: glueetl
+          PythonVersion: "3"
+          ScriptLocation: s3://${self:custom.bucketName}/scripts/gold.py
+        DefaultArguments: ${self:custom.glueJobArgs}
+
+    AuditJob:
+      Type: AWS::Glue::Job
+      Properties:
+        Name: paytrack-audit
+        Role: !GetAtt GlueRole.Arn
+        GlueVersion: "5.0"
+        WorkerType: G.1X
+        NumberOfWorkers: 2
+        Timeout: 15
+        Command:
+          Name: glueetl
+          PythonVersion: "3"
+          ScriptLocation: s3://${self:custom.bucketName}/scripts/audit.py
+        DefaultArguments: ${self:custom.glueJobArgs}
+
+    # ── Streaming ────────────────────────────────────────────
+    # Kinesis cobra por shard-hora aunque no le llegue nada: elimínalo al terminar.
+    TransactionStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${self:custom.streamName}
+        ShardCount: 2
+        RetentionPeriodHours: 24
+        StreamModeDetails:
+          StreamMode: PROVISIONED
+
+    StreamJob:
+      Type: AWS::Glue::Job
+      Properties:
+        Name: paytrack-stream
+        Role: !GetAtt GlueRole.Arn
+        GlueVersion: "5.0"
+        WorkerType: G.1X
+        NumberOfWorkers: 2
+        Timeout: 20  # minutos: tope de seguridad por si el job no se detiene solo
+        Command:
+          Name: gluestreaming
+          PythonVersion: "3"
+          ScriptLocation: s3://${self:custom.bucketName}/scripts/stream.py
+        DefaultArguments: ${self:custom.streamJobArgs}
+
+    # ── Athena ───────────────────────────────────────────────
+    AthenaWorkGroup:
+      Type: AWS::Athena::WorkGroup
+      Properties:
+        Name: paytrack-lakehouse-wg
+        RecursiveDeleteOption: true
+        WorkGroupConfiguration:
+          EnforceWorkGroupConfiguration: true
+          PublishCloudWatchMetricsEnabled: true
+          EngineVersion:
+            SelectedEngineVersion: Athena engine version 3
+          ResultConfiguration:
+            OutputLocation: s3://${self:custom.bucketName}/athena-results/
+
+  Outputs:
+    LakehouseBucket:
+      Value: !Ref LakehouseBucket
+    TransactionStream:
+      Value: !Ref TransactionStream

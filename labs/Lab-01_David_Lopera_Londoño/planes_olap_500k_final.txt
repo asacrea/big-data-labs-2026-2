@@ -1,0 +1,94 @@
+﻿                                                                                  QUERY PLAN                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9632.48..9632.50 rows=7 width=80) (actual time=127.842..137.754 rows=7 loops=1)
+   Sort Key: (sum(f.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   ->  Finalize GroupAggregate  (cost=9630.50..9632.38 rows=7 width=80) (actual time=127.695..137.629 rows=7 loops=1)
+         Group Key: m.category
+         ->  Gather Merge  (cost=9630.50..9632.14 rows=14 width=80) (actual time=127.671..137.588 rows=21 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Sort  (cost=8630.48..8630.50 rows=7 width=80) (actual time=115.636..115.649 rows=7 loops=3)
+                     Sort Key: m.category
+                     Sort Method: quicksort  Memory: 26kB
+                     Worker 0:  Sort Method: quicksort  Memory: 26kB
+                     Worker 1:  Sort Method: quicksort  Memory: 26kB
+                     ->  Partial HashAggregate  (cost=8630.30..8630.38 rows=7 width=80) (actual time=115.487..115.505 rows=7 loops=3)
+                           Group Key: m.category
+                           Batches: 1  Memory Usage: 24kB
+                           Worker 0:  Batches: 1  Memory Usage: 24kB
+                           Worker 1:  Batches: 1  Memory Usage: 24kB
+                           ->  Hash Join  (cost=4.16..8098.71 rows=70878 width=16) (actual time=42.921..90.794 rows=56801 loops=3)
+                                 Hash Cond: (f.merchant_key = m.merchant_key)
+                                 ->  Hash Join  (cost=2.98..7812.91 rows=70878 width=12) (actual time=42.555..75.447 rows=56801 loops=3)
+                                       Hash Cond: (f.date_key = d.date_key)
+                                       ->  Parallel Seq Scan on fact_transactions f  (cost=0.00..7238.33 rows=208062 width=16) (actual time=0.020..48.989 rows=166475 loops=3)
+                                             Filter: is_approved
+                                             Rows Removed by Filter: 191
+                                       ->  Hash  (cost=2.59..2.59 rows=31 width=4) (actual time=0.064..0.066 rows=31 loops=3)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                                             ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=31 width=4) (actual time=0.038..0.043 rows=31 loops=3)
+                                                   Filter: (full_date >= (CURRENT_DATE - 30))
+                                                   Rows Removed by Filter: 60
+                                 ->  Hash  (cost=1.08..1.08 rows=8 width=12) (actual time=0.084..0.086 rows=8 loops=3)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                       ->  Seq Scan on dim_merchant m  (cost=0.00..1.08 rows=8 width=12) (actual time=0.047..0.049 rows=8 loops=3)
+ Planning Time: 7.471 ms
+ Execution Time: 138.401 ms
+(35 rows)
+
+                                                                               QUERY PLAN                                                                               
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=10370.51..10370.52 rows=3 width=54) (actual time=129.751..139.746 rows=3 loops=1)
+   Sort Key: (round(((100.0 * (sum(CASE WHEN f.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   ->  Finalize GroupAggregate  (cost=10369.67..10370.48 rows=3 width=54) (actual time=129.702..139.703 rows=3 loops=1)
+         Group Key: c.segment
+         ->  Gather Merge  (cost=10369.67..10370.37 rows=6 width=22) (actual time=129.682..139.678 rows=9 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Sort  (cost=9369.65..9369.66 rows=3 width=22) (actual time=117.995..117.998 rows=3 loops=3)
+                     Sort Key: c.segment
+                     Sort Method: quicksort  Memory: 25kB
+                     Worker 0:  Sort Method: quicksort  Memory: 25kB
+                     Worker 1:  Sort Method: quicksort  Memory: 25kB
+                     ->  Partial HashAggregate  (cost=9369.59..9369.62 rows=3 width=22) (actual time=117.862..117.866 rows=3 loops=3)
+                           Group Key: c.segment
+                           Batches: 1  Memory Usage: 24kB
+                           Worker 0:  Batches: 1  Memory Usage: 24kB
+                           Worker 1:  Batches: 1  Memory Usage: 24kB
+                           ->  Hash Join  (cost=17.25..7807.10 rows=208333 width=7) (actual time=0.621..75.384 rows=166667 loops=3)
+                                 Hash Cond: (f.customer_key = c.customer_key)
+                                 ->  Parallel Seq Scan on fact_transactions f  (cost=0.00..7238.33 rows=208333 width=5) (actual time=0.036..23.783 rows=166667 loops=3)
+                                 ->  Hash  (cost=11.00..11.00 rows=500 width=10) (actual time=0.364..0.365 rows=500 loops=3)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 30kB
+                                       ->  Seq Scan on dim_customer c  (cost=0.00..11.00 rows=500 width=10) (actual time=0.051..0.228 rows=500 loops=3)
+ Planning Time: 2.814 ms
+ Execution Time: 140.051 ms
+(26 rows)
+
+                                                                             QUERY PLAN                                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=3747.84..3748.14 rows=120 width=44) (actual time=49.270..49.289 rows=168 loops=1)
+   Sort Key: d.day_of_week, t.hour
+   Sort Method: quicksort  Memory: 34kB
+   ->  HashAggregate  (cost=3742.19..3743.69 rows=120 width=44) (actual time=48.735..48.869 rows=168 loops=1)
+         Group Key: d.day_of_week, t.hour
+         Batches: 1  Memory Usage: 160kB
+         ->  Hash Join  (cost=41.82..3303.20 rows=43899 width=12) (actual time=0.942..33.479 rows=42833 loops=1)
+               Hash Cond: (f.time_key = t.time_key)
+               ->  Nested Loop  (cost=0.42..3146.23 rows=43899 width=14) (actual time=0.109..21.217 rows=42833 loops=1)
+                     ->  Seq Scan on dim_date d  (cost=0.00..2.59 rows=8 width=6) (actual time=0.023..0.060 rows=8 loops=1)
+                           Filter: (full_date >= (CURRENT_DATE - 7))
+                           Rows Removed by Filter: 83
+                     ->  Index Scan using idx_fact_date on fact_transactions f  (cost=0.42..338.08 rows=5487 width=16) (actual time=0.025..1.940 rows=5354 loops=8)
+                           Index Cond: (date_key = d.date_key)
+                           Filter: is_approved
+                           Rows Removed by Filter: 6
+               ->  Hash  (cost=23.40..23.40 rows=1440 width=6) (actual time=0.784..0.786 rows=1440 loops=1)
+                     Buckets: 2048  Batches: 1  Memory Usage: 73kB
+                     ->  Seq Scan on dim_time t  (cost=0.00..23.40 rows=1440 width=6) (actual time=0.010..0.287 rows=1440 loops=1)
+ Planning Time: 2.122 ms
+ Execution Time: 49.888 ms
+(21 rows)
+

@@ -1,0 +1,80 @@
+﻿                                                                            QUERY PLAN                                                                            
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=11669.94..11669.96 rows=7 width=80) (actual time=129.072..136.763 rows=7 loops=1)
+   Sort Key: (sum(t.amount_cop)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   ->  Finalize GroupAggregate  (cost=11667.96..11669.84 rows=7 width=80) (actual time=128.864..136.592 rows=7 loops=1)
+         Group Key: m.category
+         ->  Gather Merge  (cost=11667.96..11669.60 rows=14 width=80) (actual time=128.834..136.532 rows=21 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Sort  (cost=10667.94..10667.96 rows=7 width=80) (actual time=114.536..114.540 rows=7 loops=3)
+                     Sort Key: m.category
+                     Sort Method: quicksort  Memory: 26kB
+                     Worker 0:  Sort Method: quicksort  Memory: 26kB
+                     Worker 1:  Sort Method: quicksort  Memory: 26kB
+                     ->  Partial HashAggregate  (cost=10667.75..10667.84 rows=7 width=80) (actual time=114.306..114.315 rows=7 loops=3)
+                           Group Key: m.category
+                           Batches: 1  Memory Usage: 24kB
+                           Worker 0:  Batches: 1  Memory Usage: 24kB
+                           Worker 1:  Batches: 1  Memory Usage: 24kB
+                           ->  Hash Join  (cost=1.18..10135.06 rows=71026 width=16) (actual time=0.317..88.384 rows=56801 loops=3)
+                                 Hash Cond: ((t.merchant_id)::text = (m.merchant_id)::text)
+                                 ->  Parallel Seq Scan on transactions t  (cost=0.00..9848.67 rows=71026 width=13) (actual time=0.030..66.206 rows=56801 loops=3)
+                                       Filter: (((status)::text = 'approved'::text) AND (created_at >= (CURRENT_DATE - 30)))
+                                       Rows Removed by Filter: 109866
+                                 ->  Hash  (cost=1.08..1.08 rows=8 width=13) (actual time=0.084..0.084 rows=8 loops=3)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                       ->  Seq Scan on merchants m  (cost=0.00..1.08 rows=8 width=13) (actual time=0.041..0.043 rows=8 loops=3)
+ Planning Time: 8.335 ms
+ Execution Time: 137.291 ms
+(28 rows)
+
+                                                                            QUERY PLAN                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=10899.51..10899.52 rows=3 width=54) (actual time=131.001..138.237 rows=3 loops=1)
+   Sort Key: (round(((100.0 * (sum(CASE WHEN t.is_fraud THEN 1 ELSE 0 END))::numeric) / (count(*))::numeric), 2)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   ->  Finalize GroupAggregate  (cost=10898.67..10899.48 rows=3 width=54) (actual time=130.970..138.211 rows=3 loops=1)
+         Group Key: c.segment
+         ->  Gather Merge  (cost=10898.67..10899.37 rows=6 width=22) (actual time=130.953..138.190 rows=9 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Sort  (cost=9898.65..9898.66 rows=3 width=22) (actual time=120.942..120.946 rows=3 loops=3)
+                     Sort Key: c.segment
+                     Sort Method: quicksort  Memory: 25kB
+                     Worker 0:  Sort Method: quicksort  Memory: 25kB
+                     Worker 1:  Sort Method: quicksort  Memory: 25kB
+                     ->  Partial HashAggregate  (cost=9898.59..9898.62 rows=3 width=22) (actual time=120.812..120.816 rows=3 loops=3)
+                           Group Key: c.segment
+                           Batches: 1  Memory Usage: 24kB
+                           Worker 0:  Batches: 1  Memory Usage: 24kB
+                           Worker 1:  Batches: 1  Memory Usage: 24kB
+                           ->  Hash Join  (cost=19.25..8336.10 rows=208333 width=7) (actual time=0.385..80.682 rows=166667 loops=3)
+                                 Hash Cond: ((t.customer_id)::text = (c.customer_id)::text)
+                                 ->  Parallel Seq Scan on transactions t  (cost=0.00..7765.33 rows=208333 width=9) (actual time=0.013..19.833 rows=166667 loops=3)
+                                 ->  Hash  (cost=13.00..13.00 rows=500 width=14) (actual time=0.286..0.287 rows=500 loops=3)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 31kB
+                                       ->  Seq Scan on customers c  (cost=0.00..13.00 rows=500 width=14) (actual time=0.027..0.107 rows=500 loops=3)
+ Planning Time: 1.543 ms
+ Execution Time: 138.461 ms
+(26 rows)
+
+                                                                   QUERY PLAN                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=10976.90..12252.66 rows=42484 width=104) (actual time=82.390..98.997 rows=168 loops=1)
+   Group Key: (EXTRACT(dow FROM created_at)), (EXTRACT(hour FROM created_at))
+   ->  Sort  (cost=10976.90..11083.36 rows=42583 width=72) (actual time=82.258..87.266 rows=42833 loops=1)
+         Sort Key: (EXTRACT(dow FROM created_at)), (EXTRACT(hour FROM created_at))
+         Sort Method: quicksort  Memory: 3368kB
+         ->  Bitmap Heap Scan on transactions t  (cost=954.90..7702.70 rows=42583 width=72) (actual time=6.173..42.976 rows=42833 loops=1)
+               Recheck Cond: (created_at >= (CURRENT_DATE - 7))
+               Filter: ((status)::text = 'approved'::text)
+               Rows Removed by Filter: 51
+               Heap Blocks: exact=5678
+               ->  Bitmap Index Scan on idx_txn_created_at  (cost=0.00..944.26 rows=42644 width=0) (actual time=5.056..5.057 rows=42884 loops=1)
+                     Index Cond: (created_at >= (CURRENT_DATE - 7))
+ Planning Time: 0.320 ms
+ Execution Time: 100.668 ms
+(14 rows)
+
