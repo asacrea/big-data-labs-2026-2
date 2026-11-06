@@ -1,0 +1,283 @@
+<mxfile host="app.diagrams.net" agent="kiro">
+  <diagram id="paytrack-lakehouse" name="PayTrack Lakehouse">
+    <mxGraphModel dx="1614" dy="992" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontFamily=Helvetica;fontColor=#1A1A1A;" value="PayTrack · Lakehouse end-to-end (Lab 2) — Batch (Medallion) · Streaming · Despliegue y consumo en AWS" vertex="1">
+          <mxGeometry height="36" width="2080" x="160" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zBatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF3FB;strokeColor=#2E6DA4;verticalAlign=top;align=left;spacingLeft=16;fontStyle=1;fontSize=15;fontFamily=Helvetica;dashed=0;" value="ZONA 1 · BATCH (local y AWS usan el mismo codigo)        raw -&gt; bronze -&gt; silver -&gt; gold ; audit = time travel sobre silver" vertex="1">
+          <mxGeometry height="470" width="2240" x="80" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="b_files" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#555555;fontSize=13;fontFamily=Helvetica;align=center;" value="data/batchN/*.json&#xa;&#xa;customers · merchants&#xa;transactions · fraud_events" vertex="1">
+          <mxGeometry height="110" width="200" x="120" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="b_ingest" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=13;fontFamily=Helvetica;align=center;" value="ingest.py&#xa;&#xa;particion de llegada&#xa;+ JSON Lines" vertex="1">
+          <mxGeometry height="100" width="190" x="400" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="b_raw" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#F2F2F2;strokeColor=#555555;fontSize=13;fontFamily=Helvetica;align=center;" value="raw/ — local o S3 segun entorno&#xa;&#xa;&lt;dataset&gt;/&#xa;ingest_date=YYYY-MM-DD" vertex="1">
+          <mxGeometry height="120" width="200" x="670" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="b_jbronze" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="job bronze&#xa;&#xa;metadatos de ingesta&#xa;replaceWhere (idempotente)" vertex="1">
+          <mxGeometry height="110" width="220" x="950" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="b_tbronze" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#F2F2F2;strokeColor=#555555;fontSize=13;fontFamily=Helvetica;align=center;" value="lakehouse/bronze/&#xa;&lt;dataset&gt;&#xa;&#xa;Delta (todo texto)" vertex="1">
+          <mxGeometry height="120" width="210" x="1250" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="b_jsilver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="job silver&#xa;&#xa;dedup · tipado · calidad&#xa;MERGE · PII enmascarada" vertex="1">
+          <mxGeometry height="110" width="230" x="1540" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="b_silver" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontStyle=1;fontSize=13;fontFamily=Helvetica;align=center;" value="lakehouse/silver/transactions&#xa;&#xa;★ MISMA tabla para batch y streaming ★" vertex="1">
+          <mxGeometry height="130" width="260" x="1850" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="b_squar" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=13;fontFamily=Helvetica;align=center;" value="silver/transactions_quarantine&#xa;&#xa;filas que no pasan calidad" vertex="1">
+          <mxGeometry height="110" width="250" x="1530" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="b_sdim" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#F2F2F2;strokeColor=#555555;fontSize=13;fontFamily=Helvetica;align=center;" value="Otras tablas Silver&#xa;&#xa;silver/customers (PII)&#xa;silver/merchants&#xa;silver/fraud_events" vertex="1">
+          <mxGeometry height="110" width="260" x="1850" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="b_jgold" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="job gold" vertex="1">
+          <mxGeometry height="70" width="150" x="400" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="b_gold" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=13;fontFamily=Helvetica;align=center;" value="gold/daily_merchant_summary&#xa;gold/fraud_weekly_report&#xa;gold/hourly_volume" vertex="1">
+          <mxGeometry height="110" width="260" x="620" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="b_jaudit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="job audit&#xa;(independiente)&#xa;time travel sobre&#xa;versiones de silver" vertex="1">
+          <mxGeometry height="110" width="210" x="960" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="b_status" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=13;fontFamily=Helvetica;align=center;" value="gold/status_changes&#xa;&#xa;que cambio con el ultimo lote" vertex="1">
+          <mxGeometry height="100" width="210" x="1250" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="zStream" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEAF6;strokeColor=#8064A2;verticalAlign=top;align=left;spacingLeft=16;fontStyle=1;fontSize=15;fontFamily=Helvetica;dashed=0;" value="ZONA 2 · STREAMING (jobs/stream.py)        broker -&gt; consulta bronze -&gt; bronze/transaction_events -&gt; 3 ramas independientes · cada consulta con su checkpoint" vertex="1">
+          <mxGeometry height="620" width="2240" x="80" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="srcGroup" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#B85450;verticalAlign=top;align=center;fontStyle=2;fontSize=12;fontFamily=Helvetica;" value="FUENTES ALTERNATIVAS (una u otra, no en serie)" vertex="1">
+          <mxGeometry height="260" width="260" x="120" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="s_producer" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=13;fontFamily=Helvetica;align=center;" value="producer.py&#xa;&#xa;pagos · contracargos&#xa;reenvios · tardios · rafagas&#xa;partition key = customer_id" vertex="1">
+          <mxGeometry height="130" width="220" x="140" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="s_kafka" parent="1" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=13;fontFamily=Helvetica;align=center;rounded=1;" value="Kafka (LOCAL)&#xa;topic paytrack.transactions&#xa;3 particiones" vertex="1">
+          <mxGeometry height="90" width="220" x="140" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="s_kinesis" parent="1" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=13;fontFamily=Helvetica;align=center;rounded=1;" value="Kinesis (AWS)&#xa;paytrack-transactions&#xa;2 shards" vertex="1">
+          <mxGeometry height="90" width="220" x="140" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="s_qbronze" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="consulta bronze&#xa;&#xa;broker -&gt; append&#xa;checkpoint: bronze" vertex="1">
+          <mxGeometry height="110" width="220" x="470" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="s_tbronze" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#F2F2F2;strokeColor=#555555;fontSize=13;fontFamily=Helvetica;align=center;" value="lakehouse/bronze/&#xa;transaction_events&#xa;&#xa;Delta (append)" vertex="1">
+          <mxGeometry height="120" width="220" x="780" y="815" as="geometry" />
+        </mxCell>
+        <mxCell id="s_qsilver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="consulta silver&#xa;&#xa;foreachBatch + MERGE&#xa;SIN watermark&#xa;checkpoint: silver" vertex="1">
+          <mxGeometry height="120" width="240" x="1120" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="s_silverRef" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontStyle=1;fontSize=13;fontFamily=Helvetica;align=center;dashed=1;" value="silver/transactions&#xa;(la MISMA tabla del batch)" vertex="1">
+          <mxGeometry height="110" width="250" x="1470" y="665" as="geometry" />
+        </mxCell>
+        <mxCell id="s_clean" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=13;fontFamily=Helvetica;align=center;" value="deduplicacion con watermark&#xa;(clean = dedup por event_id+event_time,&#xa;watermark 2 min sobre event_time)" vertex="1">
+          <mxGeometry height="110" width="280" x="1120" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="s_qmetrics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="consulta metrics&#xa;&#xa;ventanas fijas 1 min&#xa;por comercio&#xa;checkpoint: metrics" vertex="1">
+          <mxGeometry height="120" width="240" x="1500" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="s_tmetrics" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=13;fontFamily=Helvetica;align=center;" value="gold/&#xa;merchant_minute_metrics&#xa;&#xa;por comercio y minuto" vertex="1">
+          <mxGeometry height="120" width="250" x="1840" y="835" as="geometry" />
+        </mxCell>
+        <mxCell id="s_qalerts" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="consulta alerts&#xa;&#xa;ventana deslizante 30 s / 10 s&#xa;por cliente · &gt;=6 pagos&#xa;checkpoint: alerts" vertex="1">
+          <mxGeometry height="130" width="240" x="1500" y="1030" as="geometry" />
+        </mxCell>
+        <mxCell id="s_talerts" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=13;fontFamily=Helvetica;align=center;" value="gold/fraud_alerts&#xa;&#xa;por cliente y ventana" vertex="1">
+          <mxGeometry height="110" width="250" x="1840" y="1035" as="geometry" />
+        </mxCell>
+        <mxCell id="s_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4E6;strokeColor=#D79B00;fontSize=12;fontFamily=Helvetica;align=left;spacingLeft=10;verticalAlign=middle;" value="metrics y alerts son ramas independientes que leen la misma tabla bronze; no van en serie ni salen del job gold batch." vertex="1">
+          <mxGeometry height="110" width="560" x="470" y="1030" as="geometry" />
+        </mxCell>
+        <mxCell id="zAWS" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDF4E3;strokeColor=#D79B00;verticalAlign=top;align=left;spacingLeft=16;fontStyle=1;fontSize=15;fontFamily=Helvetica;dashed=0;" value="ZONA 3 · DESPLIEGUE Y CONSUMO EN AWS (pendiente de ejecutar)        S3 (datos) · Glue (ejecucion) · Glue Catalog (metadatos) · Athena (consulta)" vertex="1">
+          <mxGeometry height="540" width="2240" x="80" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_s3" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=13;fontFamily=Helvetica;align=center;" value="S3  s3://&lt;bucket&gt;  (DATOS)&#xa;&#xa;raw/ · lakehouse/{bronze,silver,gold} ·&#xa;checkpoints/ · athena-results/" vertex="1">
+          <mxGeometry height="150" width="330" x="140" y="1420" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_gbatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="Glue Jobs (batch)&#xa;&#xa;paytrack-bronze / -silver&#xa;-gold / -audit&#xa;Glue 5.0 · 2x G.1X" vertex="1">
+          <mxGeometry height="140" width="250" x="580" y="1400" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_gstream" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=13;fontFamily=Helvetica;align=center;" value="Glue Streaming Job&#xa;&#xa;paytrack-stream&#xa;(mismo stream.py)&#xa;fuente: Kinesis" vertex="1">
+          <mxGeometry height="140" width="250" x="580" y="1600" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_catalog" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=13;fontFamily=Helvetica;align=center;" value="Glue Data Catalog&#xa;(METADATOS)&#xa;&#xa;database paytrack_lakehouse&#xa;esquema + particiones de&#xa;las tablas Delta" vertex="1">
+          <mxGeometry height="150" width="280" x="1300" y="1410" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_athena" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=13;fontFamily=Helvetica;align=center;" value="Amazon Athena&#xa;&#xa;workgroup paytrack-lakehouse-wg&#xa;sql/athena.sql&#xa;(TODO 1-4 batch · 5-6 streaming)" vertex="1">
+          <mxGeometry height="160" width="320" x="1780" y="1500" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_lifecycle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4E6;strokeColor=#D79B00;fontSize=12;fontFamily=Helvetica;align=left;spacingLeft=10;verticalAlign=middle;" value="Lifecycle (implementado) SOLO en raw/:&#xa;STANDARD_IA 30 d, GLACIER_IR 90 d, sin expiracion.&#xa;lakehouse/ no expira por edad." vertex="1">
+          <mxGeometry height="110" width="330" x="140" y="1630" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontSize=12;fontFamily=Helvetica;align=left;spacingLeft=10;verticalAlign=middle;" value="Mismo codigo que en local; el stream lee de Kinesis en vez de Kafka.&#xa;Athena consulta los datos Delta en S3; el Catalog es solo metadatos.&#xa;Las tablas se registran con el DDL de Athena." vertex="1">
+          <mxGeometry height="110" width="520" x="900" y="1630" as="geometry" />
+        </mxCell>
+        <mxCell id="localNote" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCE9F6;strokeColor=#2E6DA4;fontSize=12;fontFamily=Helvetica;align=left;spacingLeft=10;verticalAlign=middle;" value="LOCAL = Docker + Spark + Delta. Almacenamiento: lakehouse-local/ (no S3). Ejecucion: spark-submit en contenedor (no Glue). S3 y Glue son solo de AWS." vertex="1">
+          <mxGeometry height="48" width="990" x="120" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontFamily=Helvetica;fontColor=#333333;" value="Leyenda:  verde = job / consulta (Spark o Glue)   ·   naranja claro / amarillo / gris = tabla Delta   ·   azul = script o servicio de consulta   ·   morado = broker (Kafka / Kinesis)   ·   naranja ★ = silver compartida batch+streaming" vertex="1">
+          <mxGeometry height="26" width="2180" x="120" y="1850" as="geometry" />
+        </mxCell>
+        <mxCell id="eb1" edge="1" parent="1" source="b_files" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="b_ingest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb2" edge="1" parent="1" source="b_ingest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="b_raw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb3" edge="1" parent="1" source="b_raw" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="b_jbronze">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb4" edge="1" parent="1" source="b_jbronze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="b_tbronze">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb5" edge="1" parent="1" source="b_tbronze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="b_jsilver">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb6" edge="1" parent="1" source="b_jsilver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EAF3FB;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="b_silver" value="validas (MERGE)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb7" edge="1" parent="1" source="b_jsilver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#B85450;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EAF3FB;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="b_squar" value="rechazadas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb8" edge="1" parent="1" source="b_jsilver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EAF3FB;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="b_sdim" value="escribe tablas Silver">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1712" y="330" />
+              <mxPoint x="1980" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eb9" edge="1" parent="1" source="b_silver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EAF3FB;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="b_jgold" value="lee silver">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1915" y="500" />
+              <mxPoint x="475" y="500" />
+              <mxPoint x="475" y="345" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eb10" edge="1" parent="1" source="b_jgold" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="b_gold">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb11" edge="1" parent="1" source="b_silver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EAF3FB;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="b_jaudit" value="time travel (versiones de silver)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1980" y="325" />
+              <mxPoint x="1065" y="325" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eb12" edge="1" parent="1" source="b_jaudit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="b_status">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="es1" edge="1" parent="1" source="s_producer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673A6;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_kafka" value="--sink kafka">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="1055" />
+              <mxPoint x="100" y="765" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="es2" edge="1" parent="1" source="s_producer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673A6;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="s_kinesis" value="--sink kinesis">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="1055" />
+              <mxPoint x="400" y="885" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="es3" edge="1" parent="1" source="s_kafka" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673A6;strokeWidth=2;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_qbronze" value="broker (una fuente)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="765" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="es4" edge="1" parent="1" source="s_kinesis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673A6;strokeWidth=2;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_qbronze">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="885" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="es5" edge="1" parent="1" source="s_qbronze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;" target="s_tbronze" value="append">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="es6" edge="1" parent="1" source="s_tbronze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#D79B00;strokeWidth=2;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_qsilver" value="eventos crudos (SIN watermark)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="890" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="es7" edge="1" parent="1" source="s_qsilver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#D79B00;strokeWidth=2;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;" target="s_silverRef" value="MERGE por micro-lote">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="es8" edge="1" parent="1" source="s_tbronze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_clean" value="eventos">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="890" y="915" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="es9" edge="1" parent="1" source="s_clean" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_qmetrics" value="clean">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="es10" edge="1" parent="1" source="s_qmetrics" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="s_tmetrics">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="es11" edge="1" parent="1" source="s_clean" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#EFEAF6;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_qalerts" value="clean">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="es12" edge="1" parent="1" source="s_qalerts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;" target="s_talerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea1" edge="1" parent="1" source="aws_s3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#FDF4E3;exitX=1;exitY=0.33;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="aws_gbatch" value="ingest + jobs batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea2" edge="1" parent="1" source="aws_gbatch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#FDF4E3;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=1;entryY=0.6;entryDx=0;entryDy=0;" target="aws_s3" value="escribe Delta">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea3" edge="1" parent="1" source="aws_gstream" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#333333;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#FDF4E3;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.85;entryDx=0;entryDy=0;" target="aws_s3" value="lee Kinesis -&gt; escribe Delta">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#6C8EBF;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#FDF4E3;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" value="DDL CREATE EXTERNAL TABLE&#xa;registra las tablas (una vez)">
+          <mxGeometry relative="1" x="-0.0159" as="geometry">
+            <Array as="points">
+              <mxPoint x="2000" y="1390" />
+              <mxPoint x="1620" y="1390" />
+              <mxPoint x="1620" y="1490" />
+            </Array>
+            <mxPoint x="2000" y="1500" as="sourcePoint" />
+            <mxPoint x="1580" y="1490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ea5" edge="1" parent="1" source="zAWS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#6C8EBF;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#FDF4E3;exitX=0.862;exitY=0.389;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitPerimeter=0;" value="lee metadatos (esquema/particiones)">
+          <mxGeometry relative="1" x="0.0476" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="2000" y="1500.1" />
+              <mxPoint x="2000" y="1490" />
+            </Array>
+            <mxPoint x="2000" y="1430" as="sourcePoint" />
+            <mxPoint x="1580" y="1490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ea6" edge="1" parent="1" source="aws_s3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=none;strokeColor=#333333;strokeWidth=2;fontSize=12;fontFamily=Helvetica;labelBackgroundColor=#FDF4E3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="aws_athena" value="CONSULTA datos Delta en S3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="305" y="1790" />
+              <mxPoint x="2140" y="1790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
