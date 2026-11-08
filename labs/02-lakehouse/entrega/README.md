@@ -9,6 +9,10 @@ Este archivo es el índice de nuestra entrega. Sigue la misma estructura del enu
 Los archivos dados (`run_local.sh`, `run_aws.sh`, `tests/`) y las validaciones de cada job no se modificaron.
 Única excepción: `jobs/common.py`, porque Glue 5.0 no entrega la columna `__src_timestamp` (explicado en el informe).
 
+## Video de sustentación
+
+🎥 **[Sustentación Lab 02 · Ortiz Vélez](https://eafit-my.sharepoint.com/:v:/r/personal/savelezc_eafit_edu_co/_layouts/15/stream.aspx?id=%2Fpersonal%2Fsavelezc_eafit_edu_co%2FDocuments%2FSustentacion_OrtizVelez_Lab02.mp4&share=cQrA6MdpMqS-QZbWNBz-bZQ8EgUC39QjvEqDTDRZqqGCpX_v7Q)** (OneDrive EAFIT): sustentación en video del laboratorio.
+
 Estado: ✅ hecho y verificado · 🟡 hecho, falta verificar o falta evidencia · ⬜ pendiente
 
 ---
