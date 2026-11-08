@@ -1,0 +1,8 @@
+Disparo real del kill switch · 2026-11-03 23:58
+estado final del stack: DELETE_FAILED
+stream de Kinesis: borrado
+recursos con DELETE_FAILED:
+paytrack-lakehouse-dev	The following resource(s) failed to delete: [LakehouseBucket, ServerlessDeploymentBucket, GlueDatabase]. 
+ServerlessDeploymentBucket	Resource handler returned message: "The bucket you tried to delete is not empty (Service: S3, Status Code: 409, Request ID: NRNSVKYZ54CB27B1, Extended Request ID: 4WyovrQK2WvyjqCXUc+4l1irQfqVy1beAdzgoTCoUU8s8q+TpygXG7+U0DaupTNhfvJsxM4pX8I=) (SDK Attempt Count: 1)" (RequestToken: 524d1e21-6bbe-a105-c8f5-87186384b100, HandlerErrorCode: GeneralServiceException)
+GlueDatabase	Resource handler returned message: "User: arn:aws:sts::809411919665:assumed-role/paytrack-killswitch-role/9d81bd38528539c9a0803bce9800a585 is not authorized to perform: glue:DeleteDatabase on resource: arn:aws:glue:us-east-1:809411919665:userDefinedFunction/paytrack_lakehouse/* because no identity-based policy allows the glue:DeleteDatabase action (Service: Glue, Status Code: 400, Request ID: 88f05309-53a6-42fe-aa44-25c6ae366856) (SDK Attempt Count: 1)" (RequestToken: 14d10738-b3f3-c701-d75b-a73c6ef6852b, HandlerErrorCode: AccessDenied)
+LakehouseBucket	Resource handler returned message: "The bucket you tried to delete is not empty (Service: S3, Status Code: 409, Request ID: JA6ARR111GDAHF0P, Extended Request ID: gJc8TW12GBhnEq+m0p3LDPTOgaf1jS3mW12FuYF5ndjn8ZNWzIUGVIDfl1Ey1BD2nJuk49+SxCj5D4PR4qlantxZ97L9x6Yq) (SDK Attempt Count: 1)" (RequestToken: 743bbcb9-1c64-fdec-0280-84966d49a1d5, HandlerErrorCode: GeneralServiceException)

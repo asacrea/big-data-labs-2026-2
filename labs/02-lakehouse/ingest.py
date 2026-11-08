@@ -19,24 +19,45 @@ from pathlib import Path
 
 DATASETS = ["transactions", "fraud_events", "customers", "merchants"]
 
-
 # ── TODO 1: prefijo de la partición de llegada ───────────────────────────────
 # Devuelve el prefijo donde queda un dataset para un lote, con partición estilo
 # Hive para que Spark, Glue y Athena la reconozcan:
 #   raw/<dataset>/ingest_date=<YYYY-MM-DD>/
 # Ejemplo: raw_prefix("transactions", "2026-09-30") → "raw/transactions/ingest_date=2026-09-30/"
 # Si la fecha no es una fecha válida en formato YYYY-MM-DD, lanza ValueError.
+
+#def raw_prefix(dataset: str, ingest_date: str) -> str:
+#    raise NotImplementedError("TODO 1: raw_prefix")
+
+from datetime import datetime
+
 def raw_prefix(dataset: str, ingest_date: str) -> str:
-    raise NotImplementedError("TODO 1: raw_prefix")
+    # Validar que la fecha sea válida en formato YYYY-MM-DD
+    try:
+        datetime.strptime(ingest_date, "%Y-%m-%d")
+    except ValueError:
+        raise ValueError(f"La fecha '{ingest_date}' no tiene un formato válido YYYY-MM-DD.")
+    
+    # Retornar el prefijo con el estilo de partición de Hive
+    return f"raw/{dataset}/ingest_date={ingest_date}/"
 
 
 # ── TODO 2: formato JSON Lines ───────────────────────────────────────────────
 # generate_data.py produce un arreglo JSON ([{...}, {...}]), pero Spark, Glue y
 # Athena esperan JSON Lines: un objeto JSON por línea, sin corchetes ni comas
 # entre registros. Convierte la lista a ese formato, conservando las tildes.
-def to_json_lines(records: list[dict]) -> str:
-    raise NotImplementedError("TODO 2: to_json_lines")
 
+#def to_json_lines(records: list[dict]) -> str:
+#    raise NotImplementedError("TODO 2: to_json_lines")
+
+import json
+
+def to_json_lines(records: list[dict]) -> str:
+    # Convertir cada diccionario a un string JSON en una sola línea conservando tildes
+    lines = [json.dumps(record, ensure_ascii=False) for record in records]
+    
+    # Unir todas las líneas con saltos de línea y asegurar un salto al final si hay registros
+    return "\n".join(lines) + ("\n" if lines else "")
 
 # ── Dado ─────────────────────────────────────────────────────────────────────
 

@@ -26,20 +26,52 @@ history = DeltaTable.forPath(spark, TXN_PATH).history()
 history.select("version", "timestamp", "operation", "operationMetrics").show(truncate=80)
 last_merge = history.filter("operation = 'MERGE'").orderBy(F.desc("version")).first()
 
-
 # ── TODO 1: las dos versiones ────────────────────────────────────────────────
 # Devuelve la tabla tal como estaba en la versión `version` (time travel).
+
+#def read_version(version: int) -> DataFrame:
+#    raise NotImplementedError("TODO 1: read_version")
+
 def read_version(version: int) -> DataFrame:
-    raise NotImplementedError("TODO 1: read_version")
+    # Carga la tabla Delta en el punto exacto de la versión solicitada
+    return spark.read \
+        .format("delta") \
+        .option("versionAsOf", version) \
+        .load(TXN_PATH)
 
 
 # ── TODO 2: cambios de estado ────────────────────────────────────────────────
 # Compara `before` y `after` y devuelve las transacciones que existían en ambas
 # versiones y cuyo status cambió, con las columnas:
 #   transaction_id, customer_id, amount_cop, old_status, new_status
-def status_changes(before: DataFrame, after: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 2: status_changes")
 
+#def status_changes(before: DataFrame, after: DataFrame) -> DataFrame:
+#    raise NotImplementedError("TODO 2: status_changes")
+
+import pyspark.sql.functions as F
+
+def status_changes(before: DataFrame, after: DataFrame) -> DataFrame:
+    # 1. Renombrar la columna status en ambos DataFrames para evitar colisiones
+    df_before = before.withColumnRenamed("status", "old_status")
+    df_after = after.withColumnRenamed("status", "new_status")
+    
+    # 2. Hacer Inner Join por transaction_id (solo transacciones que existen en ambas)
+    # 3. Filtrar donde el estado haya cambiado
+    # 4. Seleccionar las columnas solicitadas
+    changes_df = df_before.join(
+        df_after, 
+        on="transaction_id", 
+        how="inner"
+    ).filter(
+        F.col("old_status") != F.col("new_status")
+    ).select(
+        "transaction_id",
+        df_after["customer_id"],  # Especificamos origen para evitar ambigüedad si es necesario
+        df_after["amount_cop"],
+        "old_status",
+        "new_status"
+    ) 
+    return changes_df
 
 # ── Ejecución y validación (dadas) ───────────────────────────────────────────
 

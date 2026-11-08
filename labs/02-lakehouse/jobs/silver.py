@@ -35,14 +35,27 @@ def ensure_table(df: DataFrame, path: str, partition_by: list[str]) -> None:
     if not table_exists(spark, path):
         df.limit(0).write.format("delta").partitionBy(*partition_by).save(path)
 
-
 # ── TODO 1: deduplicar ───────────────────────────────────────────────────────
 # Deja una sola fila por `key`: la de ingested_at más reciente. Usa una función
 # de ventana (Window + row_number); dropDuplicates no te deja elegir cuál fila
 # se conserva.
-def deduplicate(df: DataFrame, key: str) -> DataFrame:
-    raise NotImplementedError("TODO 1: deduplicate")
 
+#def deduplicate(df: DataFrame, key: str) -> DataFrame:
+#    raise NotImplementedError("TODO 1: deduplicate")
+
+from pyspark.sql import DataFrame
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col, row_number
+
+def deduplicate(df: DataFrame, key: str) -> DataFrame:
+    # 1. Definir la ventana: agrupar por la clave y ordenar por fecha de ingesta descendente
+    window_spec = Window.partitionBy(key).orderBy(col("ingested_at").desc())
+    
+    # 2. Enumerar las filas, filtrar la más reciente (1) y eliminar la columna temporal
+    return df \
+        .withColumn("rn", row_number().over(window_spec)) \
+        .filter(col("rn") == 1) \
+        .drop("rn")
 
 # ── TODO 2: tipar ────────────────────────────────────────────────────────────
 # En Bronze todo es texto. Devuelve las transacciones con:
@@ -50,18 +63,50 @@ def deduplicate(df: DataFrame, key: str) -> DataFrame:
 #   - event_ts (timestamp) a partir de "timestamp", sin la columna "timestamp"
 #   - is_fraud como boolean
 #   - columnas de partición year ("YYYY") y month ("MM") derivadas de event_ts
-def standardize(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 2: standardize")
 
+#def standardize(df: DataFrame) -> DataFrame:
+#    raise NotImplementedError("TODO 2: standardize")
+
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, year, month, lpad
+
+def standardize(df: DataFrame) -> DataFrame:
+    return df \
+        .withColumn("amount_cop", col("amount_cop").cast("decimal(15,2)")) \
+        .withColumn("event_ts", col("timestamp").cast("timestamp")) \
+        .drop("timestamp") \
+        .withColumn("is_fraud", col("is_fraud").cast("boolean")) \
+        .withColumn("year", year(col("event_ts")).cast("string")) \
+        .withColumn("month", lpad(month(col("event_ts")).cast("string"), 2, "0"))
 
 # ── TODO 3: reglas de calidad ────────────────────────────────────────────────
 # Agrega la columna dq_reason con el PRIMER problema de la fila, o NULL si está bien:
 #   customer_id nulo                                → 'missing_customer'
 #   amount_cop nulo, <= 0 o >= AMOUNT_MAX           → 'invalid_amount'
 #   status que no está en VALID_STATUS              → 'invalid_status'
-def add_quality_flags(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 3: add_quality_flags")
 
+#def add_quality_flags(df: DataFrame) -> DataFrame:
+#    raise NotImplementedError("TODO 3: add_quality_flags")
+
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
+
+def add_quality_flags(df: DataFrame) -> DataFrame:
+    # Definimos las condiciones secuenciales
+    df_with_flags = df.withColumn(
+        "dq_reason",
+        F.when(F.col("customer_id").isNull(), "missing_customer")
+        .when(
+            (F.col("amount_cop").isNull()) | 
+            (F.col("amount_cop") <= 0) | 
+            (F.col("amount_cop") >= F.lit(AMOUNT_MAX)), 
+            "invalid_amount"
+        )
+        .when(~F.col("status").isin(VALID_STATUS), "invalid_status")
+        .otherwise(F.lit(None))
+    )
+    
+    return df_with_flags
 
 # ── TODO 4: upsert con MERGE ─────────────────────────────────────────────────
 # Integra `valid` en la tabla Delta de `path` (que ya existe) usando la API
@@ -71,18 +116,65 @@ def add_quality_flags(df: DataFrame) -> DataFrame:
 #   - si ya existe y el status es el mismo: no hagas nada
 #   - si no existe: insértala completa
 # Re-ejecutar el job con el mismo lote no debe cambiar la tabla.
-def upsert_transactions(valid: DataFrame, path: str) -> None:
-    raise NotImplementedError("TODO 4: upsert_transactions")
 
+#def upsert_transactions(valid: DataFrame, path: str) -> None:
+#    raise NotImplementedError("TODO 4: upsert_transactions")
+
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
+from delta.tables import DeltaTable
+
+def upsert_transactions(valid: DataFrame, path: str) -> None:
+    # 1. Obtener la referencia a la tabla Delta existente usando la sesión de spark activa
+    spark = valid.sparkSession
+    delta_table = DeltaTable.forPath(spark, path)
+    
+    # 2. Ejecutar la operación MERGE
+    delta_table.alias("target") \
+        .merge(
+            source=valid.alias("source"),
+            condition="target.transaction_id = source.transaction_id"
+        ) \
+        .whenMatchedUpdate(
+            # CONDICIÓN: Si ya existe Y el status cambió
+            condition="target.status <> source.status",
+            set={
+                "status": "source.status",
+                "is_fraud": "source.is_fraud",
+                "silver_updated_at": "source.silver_updated_at"
+            }
+        ) \
+        .whenNotMatchedInsertAll() \
+        .execute()
 
 # ── TODO 5: proteger datos personales ────────────────────────────────────────
 # Devuelve una expresión (Column) con el email enmascarado: los primeros 3
 # caracteres del usuario + "***" + el dominio.
 #   "carlos.perez@gmail.com" → "car***@gmail.com"
 # Pista: F.regexp_replace
-def masked_email(col: str = "email"):
-    raise NotImplementedError("TODO 5: masked_email")
 
+#def masked_email(col: str = "email"):
+#    raise NotImplementedError("TODO 5: masked_email")
+
+from pyspark.sql import functions as F
+from pyspark.sql.column import Column
+
+def masked_email(col: str = "email") -> Column:
+    # 1. Separamos el usuario y el dominio usando el '@' como divisor
+    user_part = F.substring_index(F.col(col), "@", 1)
+    domain_part = F.substring_index(F.col(col), "@", -1)
+    
+    # 2. Tomamos los primeros 3 caracteres del usuario (o menos si el usuario es más corto)
+    first_3 = F.substring(user_part, 1, 3)
+    
+    # 3. Construimos el email enmascarado uniendo las partes de forma exacta
+    masked_expr = F.concat(first_3, F.lit("***@"), domain_part)
+    
+    # 4. Controlamos casos nulos o vacíos para que no dejen la fila como NULL
+    return F.when(
+        F.col(col).isNull() | (F.trim(F.col(col)) == "") | (~F.col(col).contains("@")), 
+        F.lit("err***@invalid.com")
+    ).otherwise(masked_expr)
 
 # ── Ejecución (dada) ─────────────────────────────────────────────────────────
 

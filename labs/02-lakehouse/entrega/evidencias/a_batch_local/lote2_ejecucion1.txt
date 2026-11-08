@@ -1,0 +1,71 @@
+━━━ ingest ━━━
+✓ transactions: 2316 registros → lakehouse-local/raw/transactions/ingest_date=2026-09-30/part-0000.json
+✓ fraud_events: 10 registros → lakehouse-local/raw/fraud_events/ingest_date=2026-09-30/part-0000.json
+✓ customers: 500 registros → lakehouse-local/raw/customers/ingest_date=2026-09-30/part-0000.json
+✓ merchants: 8 registros → lakehouse-local/raw/merchants/ingest_date=2026-09-30/part-0000.json
+
+━━━ bronze ━━━
+✓ transactions: tiene las columnas de auditoría
+✓ transactions: el lote 2026-09-30 tiene 2316 filas (sin duplicar)
+✓ transactions: source_file apunta al archivo del lote
+✓ fraud_events: tiene las columnas de auditoría
+✓ fraud_events: el lote 2026-09-30 tiene 10 filas (sin duplicar)
+✓ fraud_events: source_file apunta al archivo del lote
+✓ customers: tiene las columnas de auditoría
+✓ customers: el lote 2026-09-30 tiene 500 filas (sin duplicar)
+✓ customers: source_file apunta al archivo del lote
+✓ merchants: tiene las columnas de auditoría
+✓ merchants: el lote 2026-09-30 tiene 8 filas (sin duplicar)
+✓ merchants: source_file apunta al archivo del lote
+
+Bronze listo para el lote 2026-09-30
+
+━━━ silver ━━━
+✓ silver.transactions: tipos correctos
+✓ lote: válidas + cuarentena = transacciones distintas del lote (no se perdió nada)
+✓ cuarentena: cada fila tiene un dq_reason válido
+✓ silver: sin transaction_id duplicados
+✓ silver: se insertaron las 1882 transacciones nuevas
+✓ silver: el status de cada transacción del lote quedó actualizado
+✓ silver: todas las filas cumplen las reglas de calidad
+✓ silver.customers: sin nombres y con emails enmascarados
+
+Silver listo para el lote 2026-09-30
+
+━━━ gold ━━━
+✓ daily: una fila por día y comercio
+✓ daily: cuadra el número de transacciones con silver
+✓ daily: cuadra el monto aprobado
+✓ daily: cuadra el monto en contracargos
+✓ daily: particiones bien formadas
+✓ weekly: una fila por semana, patrón y segmento
+✓ weekly: cuadra el número de eventos
+✓ weekly: las semanas empiezan en lunes
+✓ hourly: 24 horas
+✓ hourly: cuadra con las aprobadas de silver
+
+Gold listo
+
+━━━ audit ━━━
++-------+-----------------------+---------+--------------------------------------------------------------------------------+
+|version|              timestamp|operation|                                                                operationMetrics|
++-------+-----------------------+---------+--------------------------------------------------------------------------------+
+|      3|2026-11-02 13:19:42.888|    MERGE|{numTargetRowsCopied -> 27962, numTargetRowsDeleted -> 0, numTargetFilesAdded...|
+|      2|2026-11-02 13:16:02.417|    MERGE|{numTargetRowsCopied -> 28238, numTargetRowsDeleted -> 0, numTargetFilesAdded...|
+|      1|2026-10-28 15:56:15.525|    MERGE|{numTargetRowsCopied -> 0, numTargetRowsDeleted -> 0, numTargetFilesAdded -> ...|
+|      0|2026-10-28 15:56:07.478|    WRITE|                        {numFiles -> 0, numOutputRows -> 0, numOutputBytes -> 0}|
++-------+-----------------------+---------+--------------------------------------------------------------------------------+
+
+Versión 3: 1882 insertadas, 276 actualizadas
++----------+----------+-------------+-----------+
+|old_status|new_status|transacciones|  monto_cop|
++----------+----------+-------------+-----------+
+|  approved|chargeback|          276|23933218.70|
++----------+----------+-------------+-----------+
+
+✓ status_changes: columnas correctas
+✓ status_changes: coincide con las filas que actualizó el MERGE
+✓ status_changes: solo cambios reales
+✓ las versiones difieren exactamente en las filas insertadas por el MERGE
+
+Auditoría lista

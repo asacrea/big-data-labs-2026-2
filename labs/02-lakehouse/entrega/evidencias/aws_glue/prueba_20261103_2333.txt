@@ -1,0 +1,123 @@
+Lab 2 · prueba reducida en AWS · 2026-11-03 23:33 · log: labs/02-lakehouse/entrega/evidencias/aws_glue/prueba_20261103_2333.txt
+
+━━━ verificación previa (23:33:57) ━━━
+  ✓ rama lab2
+  ✓ STUDENT_ID=ortizvelez
+  ✓ cuenta 809411919665, región us-east-1
+  ✓ lotes en data/batch1 y data/batch2
+  ✓ tests en verde
+  ✓ serverless Framework Core: 3.40.0
+  ✓ no existe el stack paytrack-lakehouse-dev
+  ✓ no existe el stream paytrack-transactions
+  ✓ grupos de logs de Glue previos: 0
+
+━━━ kill switch en AWS (borra el stack en 120 min si nadie lo hace antes) (23:34:12) ━━━
+  ✓ schedule paytrack-killswitch: borra paytrack-lakehouse-dev a las 2026-11-04T06:34:17 UTC
+
+━━━ deploy (23:34:32) ━━━
+
+Deploying paytrack-lakehouse to stage dev (us-east-1)
+
+✔ Service deployed to stack paytrack-lakehouse-dev (71s)
+
+  ✓ bucket paytrack-lakehouse-ortizvelez-809411919665
+
+━━━ Parte A · lote 1 (23:36:10) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+━━━ ingest ━━━
+✓ transactions: 30600 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/transactions/ingest_date=2026-09-29/part-0000.json
+✓ fraud_events: 114 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/fraud_events/ingest_date=2026-09-29/part-0000.json
+✓ customers: 500 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/customers/ingest_date=2026-09-29/part-0000.json
+✓ merchants: 8 registros → s3://paytrack-lakehouse-ortizvelez-809411919665/raw/merchants/ingest_date=2026-09-29/part-0000.json
+
+━━━ bronze ━━━
+........ ✓ SUCCEEDED
+
+━━━ silver ━━━
+........ ✓ SUCCEEDED
+
+━━━ gold ━━━
+........ ✓ SUCCEEDED
+
+━━━ audit ━━━
+...... ✓ SUCCEEDED
+
+Pipeline completo para el lote 2026-09-29
+
+━━━ Parte B · stream (23:45:53) ━━━
+Bucket: paytrack-lakehouse-ortizvelez-809411919665
+━━━ subiendo jobs ━━━
+
+━━━ stream ━━━
+Job paytrack-stream lanzado (jr_c40652ebb8a670451bd7c303acfde310e7ea0e9b1be9396f2889aee3568185c3). Glue tarda ~1 min en arrancar; Kinesis guarda
+los eventos mientras tanto y el job los lee desde el más antiguo.
+  enviados: 20  enviados: 40  enviados: 60  enviados: 80  enviados: 100  enviados: 120  enviados: 140  enviados: 160  enviados: 180  enviados: 200  enviados: 220  enviados: 240  enviados: 260  enviados: 280  enviados: 307  enviados: 327  enviados: 347  enviados: 374  enviados: 394  enviados: 414  enviados: 434  enviados: 454  enviados: 474  enviados: 494  enviados: 514  enviados: 534  enviados: 554  enviados: 574  enviados: 594  enviados: 614  enviados: 634  enviados: 654  enviados: 674  enviados: 694  enviados: 714  enviados: 734  enviados: 760  enviados: 780  enviados: 800  enviados: 820  enviados: 840  enviados: 860  enviados: 886  enviados: 906  enviados: 926  enviados: 946  enviados: 966  enviados: 986  enviados: 1006  enviados: 1026  enviados: 1046  enviados: 1066  enviados: 1086  enviados: 1106  enviados: 1126  enviados: 1146  enviados: 1166  enviados: 1186  enviados: 1206  enviados: 1226  enviados: 1246  enviados: 1266  enviados: 1291  enviados: 1317  enviados: 1337  enviados: 1357  enviados: 1377  enviados: 1397  enviados: 1417  enviados: 1437  enviados: 1457  enviados: 1477  enviados: 1497  enviados: 1517  enviados: 1537  enviados: 1557  enviados: 1577  enviados: 1597  enviados: 1617  enviados: 1637  enviados: 1657  enviados: 1677  enviados: 1697  enviados: 1717  enviados: 1737  enviados: 1757  enviados: 1777  enviados: 1797  enviados: 1817  enviados: 1837  enviados: 1857  enviados: 1877  enviados: 1897  enviados: 1917  enviados: 1942  enviados: 1962  enviados: 1982  enviados: 2002  enviados: 2022  enviados: 2042  enviados: 2062  enviados: 2082  enviados: 2108  enviados: 2128  enviados: 2148  enviados: 2168  enviados: 2188  enviados: 2208  enviados: 2228  enviados: 2248  enviados: 2268  enviados: 2288  enviados: 2308  enviados: 2328  enviados: 2348  enviados: 2375  enviados: 2395  enviados: 2415  enviados: 2435  enviados: 2455  enviados: 2475  enviados: 2495  enviados: 2520  enviados: 2540  enviados: 2560  enviados: 2580  enviados: 2600  enviados: 2620  enviados: 2640  enviados: 2660  enviados: 2680  enviados: 2700  enviados: 2720  enviados: 2740  enviados: 2760  enviados: 2785  enviados: 2805  enviados: 2825  enviados: 2845  enviados: 2865  enviados: 2885  enviados: 2905  enviados: 2925  enviados: 2945  enviados: 2965  enviados: 2985  enviados: 3011  enviados: 3031  enviados: 3051  enviados: 3071  enviados: 3091  enviados: 3111  enviados: 3136  enviados: 3156  enviados: 3176  enviados: 3196  enviados: 3216  enviados: 3236  enviados: 3256  enviados: 3276  enviados: 3296  enviados: 3316  enviados: 3336  enviados: 3356  enviados: 3376  enviados: 3396  enviados: 3416  enviados: 3436  enviados: 3456  enviados: 3476  enviados: 3496  enviados: 3516  enviados: 3536  enviados: 3556  enviados: 3576  enviados: 3596  enviados: 3616  enviados: 3636  enviados: 3656  enviados: 3683  enviados: 3703  enviados: 3723  enviados: 3743  enviados: 3763  enviados: 3783  enviados: 3803  enviados: 3823  enviados: 3843  enviados: 3863  enviados: 3883  enviados: 3903  enviados: 3923  enviados: 3943  enviados: 3963  enviados: 3983  enviados: 4003  enviados: 4023  enviados: 4043  enviados: 4063  enviados: 4083  enviados: 4109  enviados: 4136  enviados: 4156  enviados: 4176  enviados: 4196  enviados: 4216  enviados: 4236  enviados: 4262  enviados: 4287  enviados: 4307  enviados: 4327  enviados: 4353  enviados: 4378  enviados: 4398  enviados: 4418  enviados: 4438  enviados: 4458  enviados: 4478  enviados: 4498  enviados: 4518  enviados: 4538  enviados: 4558  enviados: 4578  enviados: 4598  enviados: 4618  enviados: 4638  enviados: 4658  enviados: 4678  enviados: 4698  enviados: 4718  enviados: 4738  enviados: 4758  enviados: 4778  enviados: 4798  enviados: 4818  enviados: 4838  enviados: 4858  enviados: 4878  enviados: 4898  enviados: 4918
+✓ 4918 eventos enviados en 240s (chargeback: 93, payment: 4825) · 0 perdidos
+Esperando a que el job termine (corre 300 s y luego valida)
+.......... ✓ SUCCEEDED
+
+━━━ estado de los jobs (23:52:56) ━━━
+paytrack-bronze	SUCCEEDED	2026-11-03T23:36:40.476000-05:00	116	2026-09-29
+paytrack-silver	SUCCEEDED	2026-11-03T23:39:05.689000-05:00	137	2026-09-29
+paytrack-gold	SUCCEEDED	2026-11-03T23:41:34.229000-05:00	136	2026-09-29
+paytrack-audit	SUCCEEDED	2026-11-03T23:44:05.997000-05:00	96	2026-09-29
+paytrack-stream	SUCCEEDED	2026-11-03T23:46:01.482000-05:00	398	None
+
+━━━ logs del stream (23:53:07) ━━━
+Columnas del conector de Kinesis: [('event_id', 'string'), ('event_type', 'string'), ('event_time', 'string'), ('transaction_id', 'string'), ('customer_id', 'string'), ('merchant_id', 'string'), ('merchant_name', 'string'), ('merchant_category', 'string'), ('amount_cop', 'double'), ('payment_method', 'string'), ('status', 'string'), ('is_fraud', 'boolean'), ('timestamp', 'string'), ('city', 'string'), ('$add$record_timestamp$_temporary$', 'timestamp')]
+Stream listo: 32926 transacciones en silver, 37 ventanas de métricas, 25 alertas
+⚠ el conector no agregó __src_timestamp; se usa $add$record_timestamp$_temporary$
+
+━━━ Athena: DDL y las 6 consultas (23:54:30) ━━━
+  ✓ 8 tablas Delta registradas
+  ✓ TODO 1: 5 filas · 0.00 MB escaneados
+  ✓ TODO 2: 5 filas · 0.08 MB escaneados
+  ✓ TODO 3: 3 filas · 0.00 MB escaneados
+  ✓ TODO 4: 0 filas · 0.22 MB escaneados
+  ✓ TODO 5 (streaming): 1 filas · 0.08 MB escaneados
+  ✓ TODO 6 (streaming): 8 filas · 0.11 MB escaneados
+  → labs\02-lakehouse\entrega\evidencias\athena\prueba_athena_resultados.md
+
+━━━ disparo real del kill switch (en ~2 min) (23:55:06) ━━━
+  ✓ schedule paytrack-killswitch: borra paytrack-lakehouse-dev a las 2026-11-04T04:57:08 UTC
+  · 23:55:29 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:55:48 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:56:07 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:56:26 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:56:45 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:57:04 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:57:24 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:57:43 stack: UPDATE_COMPLETE · stream: paytrack-transactions
+  · 23:58:02 stack: DELETE_IN_PROGRESS · stream: paytrack-transactions
+  · 23:58:21 stack: DELETE_FAILED · stream: borrado
+Disparo real del kill switch · 2026-11-03 23:58
+estado final del stack: DELETE_FAILED
+stream de Kinesis: borrado
+recursos con DELETE_FAILED:
+paytrack-lakehouse-dev	The following resource(s) failed to delete: [LakehouseBucket, ServerlessDeploymentBucket, GlueDatabase]. 
+ServerlessDeploymentBucket	Resource handler returned message: "The bucket you tried to delete is not empty (Service: S3, Status Code: 409, Request ID: NRNSVKYZ54CB27B1, Extended Request ID: 4WyovrQK2WvyjqCXUc+4l1irQfqVy1beAdzgoTCoUU8s8q+TpygXG7+U0DaupTNhfvJsxM4pX8I=) (SDK Attempt Count: 1)" (RequestToken: 524d1e21-6bbe-a105-c8f5-87186384b100, HandlerErrorCode: GeneralServiceException)
+GlueDatabase	Resource handler returned message: "User: arn:aws:sts::809411919665:assumed-role/paytrack-killswitch-role/9d81bd38528539c9a0803bce9800a585 is not authorized to perform: glue:DeleteDatabase on resource: arn:aws:glue:us-east-1:809411919665:userDefinedFunction/paytrack_lakehouse/* because no identity-based policy allows the glue:DeleteDatabase action (Service: Glue, Status Code: 400, Request ID: 88f05309-53a6-42fe-aa44-25c6ae366856) (SDK Attempt Count: 1)" (RequestToken: 14d10738-b3f3-c701-d75b-a73c6ef6852b, HandlerErrorCode: AccessDenied)
+LakehouseBucket	Resource handler returned message: "The bucket you tried to delete is not empty (Service: S3, Status Code: 409, Request ID: JA6ARR111GDAHF0P, Extended Request ID: gJc8TW12GBhnEq+m0p3LDPTOgaf1jS3mW12FuYF5ndjn8ZNWzIUGVIDfl1Ey1BD2nJuk49+SxCj5D4PR4qlantxZ97L9x6Yq) (SDK Attempt Count: 1)" (RequestToken: 743bbcb9-1c64-fdec-0280-84966d49a1d5, HandlerErrorCode: GeneralServiceException)
+  ✓ el kill switch borró el stream de Kinesis
+  ⚠ el kill switch dejó otros recursos: revisar los permisos de su rol (labs/02-lakehouse/entrega/evidencias/aws_glue/prueba_logs_20261103_2333/kill_switch.txt)
+
+━━━ desmontaje (23:58:24) ━━━
+  · bucket paytrack-lakehouse-ortizvelez-809411919665 vaciado
+  · bucket paytrack-lakehouse-dev-serverlessdeploymentbucket-wj86t4bhpxbk vaciado
+  · borrando el stack paytrack-lakehouse-dev (puede tardar unos minutos)
+  · rol paytrack-killswitch-role borrado
+  · log group /aws-glue/jobs/error borrado
+  · log group /aws-glue/jobs/logs-v2 borrado
+  · log group /aws-glue/jobs/output borrado
+
+━━━ verificación de la limpieza (00:00:04) ━━━
+  ✓ sin stack paytrack-lakehouse-dev
+  ✓ sin stream de Kinesis paytrack-transactions
+  ✓ sin buckets paytrack-lakehouse-*
+  ✓ sin jobs de Glue paytrack-*
+  ✓ sin schedule paytrack-killswitch
+  ✓ sin rol paytrack-killswitch-role
+  → AWS limpio
+
+✓ Prueba reducida completa · 00:00:15. Evidencias en labs/02-lakehouse/entrega/evidencias/aws_glue/prueba_logs_20261103_2333 y labs/02-lakehouse/entrega/evidencias/aws_glue/prueba_20261103_2333.txt.

@@ -27,14 +27,26 @@ def read_raw(dataset: str) -> DataFrame:
         f"{BASE}/raw/{dataset}/ingest_date={INGEST_DATE}/"
     )
 
-
 # ── TODO 1: metadatos de ingesta ─────────────────────────────────────────────
 # Agrega tres columnas de auditoría:
 #   - ingest_date: el valor de INGEST_DATE (texto)
 #   - ingested_at: la marca de tiempo actual
 #   - source_file: la ruta del archivo de origen (columna oculta _metadata.file_path)
+
+#def add_ingestion_metadata(df: DataFrame) -> DataFrame:
+#    raise NotImplementedError("TODO 1: add_ingestion_metadata")
+
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import lit, current_timestamp, col
+
+# Asumiendo que INGEST_DATE viene definido previamente en tu entorno, 
+# por ejemplo: INGEST_DATE = "2026-09-30"
+
 def add_ingestion_metadata(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 1: add_ingestion_metadata")
+    return df \
+        .withColumn("ingest_date", lit(INGEST_DATE)) \
+        .withColumn("ingested_at", current_timestamp()) \
+        .withColumn("source_file", col("_metadata.file_path"))
 
 
 # ── TODO 2: escritura idempotente ────────────────────────────────────────────
@@ -43,9 +55,20 @@ def add_ingestion_metadata(df: DataFrame) -> DataFrame:
 # debe quedar igual que tras una sola ejecución (sin duplicar el lote), y los
 # lotes de otras fechas no se deben tocar.
 # Pista: busca la opción replaceWhere de Delta Lake.
-def write_bronze(df: DataFrame, path: str) -> None:
-    raise NotImplementedError("TODO 2: write_bronze")
 
+#def write_bronze(df: DataFrame, path: str) -> None:
+#    raise NotImplementedError("TODO 2: write_bronze")
+
+from pyspark.sql import DataFrame
+
+def write_bronze(df: DataFrame, path: str) -> None:
+    # Escribir en formato delta, particionado y reemplazando solo el lote actual
+    df.write \
+        .format("delta") \
+        .mode("overwrite") \
+        .partitionBy("ingest_date") \
+        .option("replaceWhere", f"ingest_date = '{INGEST_DATE}'") \
+        .save(path)
 
 # ── Ejecución y validación (dadas) ───────────────────────────────────────────
 

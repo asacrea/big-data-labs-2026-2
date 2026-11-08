@@ -1,0 +1,53 @@
+### Q2 cuarentena por motivo y lote
+Q2 2026-09-29 invalid_amount 1178
+Q2 2026-09-29 missing_customer 584
+Q2 2026-09-30 invalid_amount 78
+Q2 2026-09-30 missing_customer 40
+Q2 bronze 2026-09-29 filas 30600 distintas 30000 duplicadas 600
+Q2 bronze 2026-09-30 filas 2316 distintas 2276 duplicadas 40
+Q1 tipos bronze: [('amount_cop', 'string'), ('is_fraud', 'string'), ('timestamp', 'string')]
+### Q13 historial de silver.transactions
+Q13 versiones 49 operaciones {'WRITE': 1, 'MERGE': 48}
+Q13 v 1 2026-10-28 20:56:15.525000 fuente 28238 insert 28238 update 0 copiadas 0 archivos+ 2 archivos- 0
+Q13 v 2 2026-11-02 18:16:02.417000 fuente 28238 insert 0 update 0 copiadas 28238 archivos+ 2 archivos- 2
+Q13 v 3 2026-11-02 18:19:42.888000 fuente 2158 insert 1882 update 276 copiadas 27962 archivos+ 2 archivos- 2
+Q13 v 4 2026-11-02 18:22:50.626000 fuente 2158 insert 0 update 0 copiadas 30120 archivos+ 2 archivos- 2
+Q13 v 5 2026-11-02 19:30:57.605000 fuente 3873 insert 3797 update 76 copiadas 30044 archivos+ 3 archivos- 2
+Q13 v 6 2026-11-02 19:31:08.269000 fuente 3893 insert 3829 update 59 copiadas 33858 archivos+ 3 archivos- 3
+Q13 v 43 2026-11-04 07:02:57.040000 fuente 212 insert 197 update 7 copiadas 33074 archivos+ 3 archivos- 3
+Q13 v 44 2026-11-04 07:03:12.188000 fuente 408 insert 401 update 5 copiadas 33273 archivos+ 3 archivos- 3
+Q13 v 45 2026-11-04 07:03:28.274000 fuente 399 insert 386 update 9 copiadas 33670 archivos+ 3 archivos- 3
+Q13 v 46 2026-11-04 07:03:44.819000 fuente 195 insert 183 update 6 copiadas 19449 archivos+ 2 archivos- 2
+Q13 v 47 2026-11-04 07:04:02.183000 fuente 402 insert 388 update 9 copiadas 34239 archivos+ 3 archivos- 3
+Q13 v 48 2026-11-04 07:04:19.965000 fuente 159 insert 153 update 3 copiadas 20023 archivos+ 2 archivos- 2
+Q13 merges de stream 44 filas fuente 27730 copiadas total 1289391 promedio copiadas por merge 29304 max 41547
+Q13 merges sin cambios 0
+Q13 archivos parquet activos 9
+### Q11 contracargos con un evento posterior de la misma transacción
+Q11 contracargos 544 | de pagos del stream 31
+Q11 evento no-contracargo que llega después del contracargo 0
+Q11 de esos, 10 s o más después (otro micro-lote) 0
+Q11 silver: contracargos en silver 796
+### Q10 umbral de alerta (pagos sin repetidos, ventanas de 30 s cada 10 s)
+Q10 20/s umbral>=6: alertas=47 aciertos=37 precision=78.7% clientes con fraude detectados=14/14
+Q10 20/s umbral>=7: alertas=33 aciertos=31 precision=93.9% clientes con fraude detectados=13/14
+Q10 20/s umbral>=8: alertas=27 aciertos=26 precision=96.3% clientes con fraude detectados=13/14
+Q10 20/s umbral>=9: alertas=15 aciertos=15 precision=100.0% clientes con fraude detectados=9/14
+Q10 20/s ventana 15 s cada 5 s, umbral>=6: alertas=29 aciertos=28 precision=96.6% clientes con fraude detectados=14/14
+Q10 50/s umbral>=6: alertas=372 aciertos=96 precision=25.8% clientes con fraude detectados=32/32
+Q10 50/s umbral>=7: alertas=172 aciertos=83 precision=48.3% clientes con fraude detectados=30/32
+Q10 50/s umbral>=8: alertas=92 aciertos=61 precision=66.3% clientes con fraude detectados=24/32
+Q10 50/s umbral>=9: alertas=55 aciertos=48 precision=87.3% clientes con fraude detectados=21/32
+Q10 50/s ventana 15 s cada 5 s, umbral>=6: alertas=108 aciertos=75 precision=69.4% clientes con fraude detectados=31/32
+### Q9 latencia de alertas
+Q9 productor 2026-11-04 06:59:46 -> 2026-11-04 07:03:48
+Q9 alertas de la corrida 25 aciertos 16
+Q9 todas: n=25 ultimo pago -> alerta min=138s mediana=152s max=166s | cierre de ventana -> alerta mediana=147s
+Q9 con fraude: n=16 ultimo pago -> alerta min=138s mediana=152s max=166s | cierre de ventana -> alerta mediana=150s
+Q9 escritas con el productor activo: n=18 ultimo pago -> alerta min=140s mediana=152s max=166s | cierre de ventana -> alerta mediana=150s
+Q9 con fraude y productor activo: n=12 ultimo pago -> alerta min=144s mediana=152s max=166s | cierre de ventana -> alerta mediana=150s
+### Q3 MERGE con y sin la condición, sobre una copia
+Q3 filas fuente (lote 2 ya integrado) 1882
+Q3 con condición: reportadas como actualizadas=0 | cambios reales de status=0
+Q3 sin condición: reportadas como actualizadas=1882 | cambios reales de status=0
+Q1 tipos amount_cop lote 1: {'float': 29697, 'str': 600, 'int': 303}
