@@ -33,7 +33,26 @@ fraud = read_table(spark, table_path(BASE, "silver", "fraud_events"))
 #   approval_rate_pct       % de transacciones aprobadas, 2 decimales
 #   year, month             columnas de partición ("YYYY", "MM")
 def daily_merchant_summary() -> DataFrame:
-    raise NotImplementedError("TODO 1: daily_merchant_summary")
+    is_approved = F.col("status") == "approved"
+    is_chargeback = F.col("status") == "chargeback"
+    zero = F.lit(0).cast("decimal(25,2)")
+    daily = (
+        txn.withColumn("day", F.to_date("event_ts"))
+        .groupBy("day", "merchant_id")
+        .agg(
+            F.count("*").alias("num_transactions"),
+            F.coalesce(F.sum(F.when(is_approved, F.col("amount_cop"))), zero).alias("approved_cop"),
+            F.coalesce(F.sum(F.when(is_chargeback, F.col("amount_cop"))), zero).alias("chargeback_cop"),
+            F.round(100 * F.avg(F.when(is_approved, 1).otherwise(0)), 2).alias("approval_rate_pct"),
+        )
+    )
+    return (
+        daily.join(merchants.select("merchant_id", "merchant_name", "merchant_category"), "merchant_id", "left")
+        .withColumn("year", F.date_format("day", "yyyy"))
+        .withColumn("month", F.date_format("day", "MM"))
+        .select("day", "merchant_id", "merchant_name", "merchant_category", "num_transactions",
+                "approved_cop", "chargeback_cop", "approval_rate_pct", "year", "month")
+    )
 
 
 # ── TODO 2: fraud_weekly_report ──────────────────────────────────────────────
@@ -45,14 +64,33 @@ def daily_merchant_summary() -> DataFrame:
 #   total_cop               monto total de las transacciones involucradas
 # Solo cuentan los eventos cuya transacción está en silver.transactions.
 def fraud_weekly_report() -> DataFrame:
-    raise NotImplementedError("TODO 2: fraud_weekly_report")
+    # Join interno con silver.transactions: descarta eventos cuya transacción fue a cuarentena
+    events = (
+        fraud.join(txn.select("transaction_id", "customer_id", "amount_cop"), "transaction_id")
+        .join(customers.select("customer_id", "segment"), "customer_id", "left")
+        .withColumn("week_start", F.to_date(F.date_trunc("week", F.col("detected_at"))))  # semana ISO: lunes
+    )
+    return events.groupBy("week_start", "pattern", "segment").agg(
+        F.count("*").alias("num_events"),
+        F.round(F.avg("risk_score"), 4).alias("avg_risk_score"),
+        F.sum("amount_cop").alias("total_cop"),
+    )
 
 
 # ── TODO 3: hourly_volume ────────────────────────────────────────────────────
 # Una fila por HORA del día (0-23) con las transacciones APROBADAS:
 #   hour, num_transactions, total_cop, avg_cop (2 decimales)
 def hourly_volume() -> DataFrame:
-    raise NotImplementedError("TODO 3: hourly_volume")
+    return (
+        txn.filter("status = 'approved'")
+        .withColumn("hour", F.hour("event_ts"))
+        .groupBy("hour")
+        .agg(
+            F.count("*").alias("num_transactions"),
+            F.sum("amount_cop").alias("total_cop"),
+            F.round(F.avg("amount_cop"), 2).alias("avg_cop"),
+        )
+    )
 
 
 # ── Ejecución y validación (dadas) ───────────────────────────────────────────
