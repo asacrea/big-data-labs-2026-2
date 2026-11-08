@@ -95,7 +95,20 @@ def read_events(spark: SparkSession, source: str, stream: str, bootstrap: str, s
         },
     )
     src = "__src_timestamp"
-    arrival = F.timestamp_millis(src) if dict(df.dtypes)[src] in ("bigint", "int") else F.col(src).cast("timestamp")
+    tipos = dict(df.dtypes)
+    # Nota del Lab 2 (8 de noviembre de 2026): en AWS este bloque fallaba con
+    # KeyError: '__src_timestamp'. Según la documentación de AWS, addRecordTimestamp agrega esa
+    # columna desde Glue 4.0, pero en Glue 5.0 la hora de llegada vino con el nombre interno
+    # '$add$record_timestamp$_temporary$' (lo vimos en el log del job). Consultamos la
+    # documentación y aplicamos el cambio que consideramos necesario, porque sin él el job se
+    # caía al arrancar y nos quedábamos sin streaming en AWS: si __src_timestamp no llega, la
+    # hora de llegada es la del micro-lote. No usamos el nombre interno porque Glue lo puede
+    # cambiar sin aviso. arrival_ts solo desempata en latest_per_transaction y fija la partición
+    # de bronze; las ventanas y el MERGE dependen de event_time, así que los resultados no cambian.
+    if src not in tipos:
+        print(f"read_events: el conector de Kinesis no trajo {src}; columnas: {df.dtypes}")
+        return df.withColumn("arrival_ts", F.current_timestamp())
+    arrival = F.timestamp_millis(src) if tipos[src] in ("bigint", "int") else F.col(src).cast("timestamp")
     return df.withColumn("arrival_ts", arrival).drop(src)
 
 

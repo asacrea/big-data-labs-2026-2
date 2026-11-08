@@ -15,6 +15,7 @@ Completa los TODO y valida tu lógica con:
 
 import argparse
 import json
+from datetime import datetime
 from pathlib import Path
 
 DATASETS = ["transactions", "fraud_events", "customers", "merchants"]
@@ -27,7 +28,12 @@ DATASETS = ["transactions", "fraud_events", "customers", "merchants"]
 # Ejemplo: raw_prefix("transactions", "2026-09-30") → "raw/transactions/ingest_date=2026-09-30/"
 # Si la fecha no es una fecha válida en formato YYYY-MM-DD, lanza ValueError.
 def raw_prefix(dataset: str, ingest_date: str) -> str:
-    raise NotImplementedError("TODO 1: raw_prefix")
+    # strptime rechaza fechas imposibles (2026-13-01) y otros separadores (2026/09/30).
+    # La comparación final exige el formato exacto con ceros (rechaza 2026-9-30).
+    fecha = datetime.strptime(ingest_date, "%Y-%m-%d")
+    if fecha.strftime("%Y-%m-%d") != ingest_date:
+        raise ValueError(f"ingest_date debe tener formato YYYY-MM-DD: {ingest_date!r}")
+    return f"raw/{dataset}/ingest_date={ingest_date}/"
 
 
 # ── TODO 2: formato JSON Lines ───────────────────────────────────────────────
@@ -35,7 +41,8 @@ def raw_prefix(dataset: str, ingest_date: str) -> str:
 # Athena esperan JSON Lines: un objeto JSON por línea, sin corchetes ni comas
 # entre registros. Convierte la lista a ese formato, conservando las tildes.
 def to_json_lines(records: list[dict]) -> str:
-    raise NotImplementedError("TODO 2: to_json_lines")
+    # Un objeto por línea. ensure_ascii=False conserva las tildes (Medellín) sin escaparlas.
+    return "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records)
 
 
 # ── Dado ─────────────────────────────────────────────────────────────────────

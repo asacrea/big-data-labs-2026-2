@@ -41,7 +41,13 @@ def ensure_table(df: DataFrame, path: str, partition_by: list[str]) -> None:
 # de ventana (Window + row_number); dropDuplicates no te deja elegir cuál fila
 # se conserva.
 def deduplicate(df: DataFrame, key: str) -> DataFrame:
-    raise NotImplementedError("TODO 1: deduplicate")
+    # Dentro de un lote, las copias repetidas tienen el mismo ingested_at. Para que la
+    # elección no dependa del orden en que Spark lea las filas, desempato con un hash de
+    # las columnas de negocio (sin los metadatos de ingesta, que cambian si se re-ejecuta
+    # Bronze). Así, repetir el job siempre conserva la misma copia.
+    negocio = [c for c in df.columns if c not in ("ingest_date", "ingested_at", "source_file")]
+    ventana = Window.partitionBy(key).orderBy(F.col("ingested_at").desc(), F.xxhash64(*negocio).desc())
+    return df.withColumn("_rn", F.row_number().over(ventana)).filter("_rn = 1").drop("_rn")
 
 
 # ── TODO 2: tipar ────────────────────────────────────────────────────────────
@@ -51,7 +57,15 @@ def deduplicate(df: DataFrame, key: str) -> DataFrame:
 #   - is_fraud como boolean
 #   - columnas de partición year ("YYYY") y month ("MM") derivadas de event_ts
 def standardize(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 2: standardize")
+    # cast deja NULL lo que no se puede convertir; esas filas las atrapa TODO 3.
+    return (
+        df.withColumn("amount_cop", F.col("amount_cop").cast("decimal(15,2)"))
+        .withColumn("event_ts", F.to_timestamp("timestamp"))
+        .drop("timestamp")
+        .withColumn("is_fraud", F.col("is_fraud").cast("boolean"))
+        .withColumn("year", F.date_format("event_ts", "yyyy"))
+        .withColumn("month", F.date_format("event_ts", "MM"))
+    )
 
 
 # ── TODO 3: reglas de calidad ────────────────────────────────────────────────
@@ -60,7 +74,15 @@ def standardize(df: DataFrame) -> DataFrame:
 #   amount_cop nulo, <= 0 o >= AMOUNT_MAX           → 'invalid_amount'
 #   status que no está en VALID_STATUS              → 'invalid_status'
 def add_quality_flags(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 3: add_quality_flags")
+    # when() se evalúa en orden, así que queda el PRIMER problema de la fila.
+    # status nulo se revisa aparte: isin(NULL) da NULL y la fila pasaría como válida.
+    amount = F.col("amount_cop")
+    return df.withColumn(
+        "dq_reason",
+        F.when(F.col("customer_id").isNull(), "missing_customer")
+        .when(amount.isNull() | (amount <= 0) | (amount >= AMOUNT_MAX), "invalid_amount")
+        .when(F.col("status").isNull() | ~F.col("status").isin(VALID_STATUS), "invalid_status"),
+    )
 
 
 # ── TODO 4: upsert con MERGE ─────────────────────────────────────────────────
@@ -72,7 +94,18 @@ def add_quality_flags(df: DataFrame) -> DataFrame:
 #   - si no existe: insértala completa
 # Re-ejecutar el job con el mismo lote no debe cambiar la tabla.
 def upsert_transactions(valid: DataFrame, path: str) -> None:
-    raise NotImplementedError("TODO 4: upsert_transactions")
+    # La condición del whenMatchedUpdate hace el MERGE idempotente: si el status no
+    # cambió, la fila no se reescribe y la auditoría no la cuenta como actualizada.
+    (
+        DeltaTable.forPath(spark, path).alias("t")
+        .merge(valid.alias("s"), "t.transaction_id = s.transaction_id")
+        .whenMatchedUpdate(
+            condition="t.status <> s.status",
+            set={"status": "s.status", "is_fraud": "s.is_fraud", "silver_updated_at": "s.silver_updated_at"},
+        )
+        .whenNotMatchedInsertAll()
+        .execute()
+    )
 
 
 # ── TODO 5: proteger datos personales ────────────────────────────────────────
@@ -81,7 +114,8 @@ def upsert_transactions(valid: DataFrame, path: str) -> None:
 #   "carlos.perez@gmail.com" → "car***@gmail.com"
 # Pista: F.regexp_replace
 def masked_email(col: str = "email"):
-    raise NotImplementedError("TODO 5: masked_email")
+    # Grupo 1: hasta 3 caracteres del usuario. Grupo 2: desde la @ hasta el final.
+    return F.regexp_replace(F.col(col), r"^([^@]{1,3})[^@]*(@.+)$", "$1***$2")
 
 
 # ── Ejecución (dada) ─────────────────────────────────────────────────────────
@@ -169,5 +203,8 @@ check(silver.filter(f"amount_cop <= 0 OR amount_cop >= {AMOUNT_MAX} OR customer_
 masked = read_table(spark, customers_path)
 check("name" not in masked.columns and masked.filter(~F.col("email").rlike(r"^[^@]{1,3}\*\*\*@[^@]+$")).count() == 0,
       "silver.customers: sin nombres y con emails enmascarados")
+
+# Agregado para el informe (pregunta 2): filas en cuarentena por motivo en este lote
+quarantined.groupBy("dq_reason").count().orderBy("dq_reason").show()
 
 print(f"\nSilver listo para el lote {INGEST_DATE}")

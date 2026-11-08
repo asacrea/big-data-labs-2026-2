@@ -50,7 +50,10 @@ PAYMENT_METHODS = ["credit_card", "debit_card", "nequi", "daviplata", "pse"]
 #     contracargos de sus pagos) lleguen a la misma partición, en orden
 #   - la carga se reparta entre particiones (no uses un valor constante)
 def partition_key(event: dict) -> str:
-    raise NotImplementedError("TODO 1: partition_key")
+    # El cliente: sus pagos, sus ráfagas y los contracargos de sus pagos comparten
+    # llave, así que caen en la misma partición y llegan en orden. Con cientos de
+    # clientes distintos, el hash reparte la carga entre las particiones.
+    return str(event["customer_id"])
 
 
 # ── TODO 2: configuración del productor de Kafka ─────────────────────────────
@@ -60,7 +63,14 @@ def partition_key(event: dict) -> str:
 # eventos dentro de una partición.
 # Pista: busca "acks" y "enable.idempotence" en la documentación de Kafka.
 def kafka_config(bootstrap: str) -> dict:
-    raise NotImplementedError("TODO 2: kafka_config")
+    return {
+        "bootstrap.servers": bootstrap,
+        # el líder y todas las réplicas sincronizadas deben confirmar cada evento
+        "acks": "all",
+        # el broker descarta los reintentos repetidos (id de productor + número de
+        # secuencia), así un reintento no duplica ni reordena eventos en la partición
+        "enable.idempotence": True,
+    }
 
 
 # ── TODO 3: reintentos en Kinesis ────────────────────────────────────────────
@@ -75,7 +85,16 @@ def kafka_config(bootstrap: str) -> dict:
 # quedaron sin enviar después del último intento.
 def put_with_retries(kinesis, stream: str, records: list[dict],
                      max_attempts: int = 4, base_delay: float = 0.2) -> int:
-    raise NotImplementedError("TODO 3: put_with_retries")
+    pendientes = list(records)
+    for intento in range(max_attempts):
+        if intento > 0:
+            time.sleep(base_delay * 2 ** (intento - 1))  # 1×, 2×, 4× base_delay...
+        respuesta = kinesis.put_records(StreamName=stream, Records=pendientes)
+        if respuesta.get("FailedRecordCount", 0) == 0:
+            return 0
+        # Records viene en el mismo orden del envío: se reintentan solo los que traen ErrorCode
+        pendientes = [r for r, res in zip(pendientes, respuesta["Records"]) if "ErrorCode" in res]
+    return len(pendientes)
 
 
 # ── Dado: generación de eventos ──────────────────────────────────────────────
