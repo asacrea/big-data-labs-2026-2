@@ -1,0 +1,106 @@
+$ date -u
+Mon Nov  9 00:34:03 UTC 2026
+$ athena: sql/athena.sql (workgroup paytrack-lakehouse-wg)
+Bucket: paytrack-lakehouse-rodriguez-056164770323
+Workgroup: paytrack-lakehouse-wg · base de datos: paytrack_lakehouse
+
+==============================================================================
+[1/14] DDL · SUCCEEDED · 0eeec210-e052-4ffa-b3d0-419990f41360
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.silver_transactions
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 108 ms
+==============================================================================
+[2/14] DDL · SUCCEEDED · af7c9df7-ea5c-456a-938b-4678a042145b
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.gold_daily_merchant_summary
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 123 ms
+==============================================================================
+[3/14] DDL · SUCCEEDED · bf226961-c331-46ab-9459-9f7e6b0d879a
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.gold_fraud_weekly_report
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 109 ms
+==============================================================================
+[4/14] DDL · SUCCEEDED · b703d76c-82a6-4731-ab8e-a105629b0d3c
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.gold_hourly_volume
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 111 ms
+==============================================================================
+[5/14] DDL · SUCCEEDED · 9dcc14a5-8a43-43e8-b29f-d1fceb270c11
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.gold_status_changes
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 112 ms
+==============================================================================
+[6/14] DDL · SUCCEEDED · 18f131fe-d561-4658-a5e7-b3cf3fe3029d
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.gold_merchant_minute_metrics
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 111 ms
+==============================================================================
+[7/14] DDL · SUCCEEDED · 7a6e53b1-21c3-40f4-a6d5-ff241d87fee5
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.gold_fraud_alerts
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 103 ms
+==============================================================================
+[8/14] DDL · SUCCEEDED · 921b35a0-15be-49e3-b36a-c6993941814d
+CREATE EXTERNAL TABLE IF NOT EXISTS paytrack_lakehouse.bronze_transaction_events
+MB escaneados: 0.0000 (0 bytes) · tiempo de ejecución: 117 ms
+==============================================================================
+[9/14] TODO 1 · SUCCEEDED · b8c6b170-a71c-4ae3-90d2-098d129e74d2
+MB escaneados: 0.0030 (3152 bytes) · tiempo de ejecución: 1187 ms
+merchant_id | merchant_name  | approved_cop | num_transactions | approval_rate_pct
+------------+----------------+--------------+------------------+------------------
+M005        | Netflix CO     | 149470616.21 | 1960             | 98.93            
+M003        | Claro Tienda   | 143709381.17 | 1879             | 99.52            
+M001        | Éxito Laureles | 143365795.31 | 1989             | 99.04            
+M004        | Copa Airlines  | 139779620.15 | 1924             | 98.75            
+M007        | TuBodega.com   | 139062488.68 | 1979             | 98.94            
+(5 filas)
+==============================================================================
+[10/14] TODO 2 · SUCCEEDED · 4d3010be-baf5-41ce-b97a-09a8638b985a
+MB escaneados: 0.0919 (96359 bytes) · tiempo de ejecución: 1821 ms
+merchant_id | merchant_name  | approved_cop | num_transactions | approval_rate_pct
+------------+----------------+--------------+------------------+------------------
+M005        | Netflix CO     | 149408641.63 | 1960             | 98.78            
+M001        | Éxito Laureles | 143177551.75 | 1989             | 98.94            
+M003        | Claro Tienda   | 143169923.34 | 1879             | 98.99            
+M004        | Copa Airlines  | 139349206.70 | 1924             | 98.39            
+M007        | TuBodega.com   | 138502084.95 | 1979             | 98.48            
+(5 filas)
+==============================================================================
+[11/14] TODO 3 · SUCCEEDED · e5162b33-4a1c-4265-b814-733b00f7ce88
+MB escaneados: 0.0003 (355 bytes) · tiempo de ejecución: 1134 ms
+segment    | week_start | num_events
+-----------+------------+-----------
+high_value | 2026-08-17 | 6         
+mass       | 2026-08-03 | 13        
+premium    | 2026-08-31 | 6         
+(3 filas)
+==============================================================================
+[12/14] TODO 4 · SUCCEEDED · 64dc4711-17b3-4762-9639-9bde7237bb4d
+MB escaneados: 0.2246 (235538 bytes) · tiempo de ejecución: 1710 ms
+merchant_category | num_chargebacks | reverted_cop
+------------------+-----------------+-------------
+retail            | 87              | 7151789.88  
+travel            | 40              | 2946262.07  
+telco             | 22              | 2505156.59  
+streaming         | 30              | 2491041.73  
+grocery           | 31              | 2156435.53  
+transport         | 31              | 1621689.00  
+delivery          | 35              | 1518463.09  
+(7 filas)
+==============================================================================
+[13/14] TODO 5 (streaming) · SUCCEEDED · 3407d417-24d5-4132-ad4d-41fc589e2527
+MB escaneados: 0.0726 (76105 bytes) · tiempo de ejecución: 2317 ms
+alertas | aciertos | precision_pct
+--------+----------+--------------
+38      | 31       | 81.58        
+(1 filas)
+==============================================================================
+[14/14] TODO 6 (streaming) · SUCCEEDED · 23b52861-15c8-41ea-b9a9-99a7ab05aa46
+MB escaneados: 0.1001 (105002 bytes) · tiempo de ejecución: 2199 ms
+day        | merchant_id | fast_payments | silver_payments | difference
+-----------+-------------+---------------+-----------------+-----------
+2026-11-09 | M001        | 181           | 606             | 425       
+2026-11-09 | M002        | 160           | 566             | 406       
+2026-11-09 | M003        | 177           | 591             | 414       
+2026-11-09 | M004        | 164           | 562             | 398       
+2026-11-09 | M005        | 161           | 583             | 422       
+2026-11-09 | M006        | 148           | 576             | 428       
+2026-11-09 | M007        | 163           | 578             | 415       
+2026-11-09 | M008        | 186           | 629             | 443       
+(8 filas)
+==============================================================================
+Total escaneado: 0.4926 MB
+exit athena: 0

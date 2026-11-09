@@ -1,0 +1,58 @@
+FACT quarantine
++-----------+----------------+-----+
+|ingest_date|dq_reason       |count|
++-----------+----------------+-----+
+|2026-09-29 |invalid_amount  |1175 |
+|2026-09-29 |missing_customer|590  |
+|2026-09-30 |invalid_amount  |79   |
+|2026-09-30 |missing_customer|40   |
++-----------+----------------+-----+
+
+FACT bronze per batch
++-----------+-----+-----+
+|ingest_date|filas|  ids|
++-----------+-----+-----+
+| 2026-09-30| 2316| 2276|
+| 2026-09-29|30600|30000|
++-----------+-----+-----+
+
+FACT silver history
++-------+---------+-----+----+------+
+|version|operation|ins  |upd |copied|
++-------+---------+-----+----+------+
+|0      |WRITE    |NULL |NULL|NULL  |
+|1      |MERGE    |28235|0   |0     |
+|2      |MERGE    |0    |0   |28235 |
+|3      |MERGE    |1881 |276 |27959 |
+|4      |MERGE    |0    |0   |30116 |
+|5      |MERGE    |3802 |75  |30041 |
+|6      |MERGE    |3808 |81  |33837 |
+|7      |MERGE    |3818 |79  |37647 |
+|8      |MERGE    |326  |4   |41540 |
+|9      |MERGE    |78   |2   |15452 |
+|10     |MERGE    |214  |1   |14739 |
+|11     |MERGE    |192  |4   |30404 |
+|12     |MERGE    |208  |2   |15452 |
+|13     |MERGE    |219  |4   |30320 |
+|14     |MERGE    |194  |4   |30539 |
+|15     |MERGE    |196  |4   |30733 |
+|16     |MERGE    |209  |1   |16270 |
+|17     |MERGE    |200  |0   |16480 |
+|18     |MERGE    |192  |6   |31336 |
+|19     |MERGE    |218  |3   |31531 |
+|20     |MERGE    |194  |3   |31749 |
+|21     |MERGE    |38   |0   |1829  |
++-------+---------+-----+----+------+
+
+RESULT stream merges n/copied min/max/avg/ins min/max/upd min/max: (17, 1829, 41540, 25876.0, 38, 3818, 0, 81)
+RESULT eventos 14796 distintos 14392 fast 12330 live 2466 live_distintos 2390
+RESULT precision todas: alertas=186 aciertos=147 falsos=39 precision=79.03%
+RESULT precision datos --fast: alertas=186 aciertos=147 falsos=39 precision=79.03%
+RESULT precision datos en vivo: alertas=0 aciertos=0 falsos=0 precision=0.00%
+FACT latencia alertas en vivo (escritura del archivo - ultimo pago fraudulento)
+RESULT latencia n/min/avg/max desde ultimo pago; avg desde fin de ventana: (0, None, None, None, None)
+FACT capa rapida vs silver (TODO 6)
+RESULT capa rapida 11760 silver TXNS 14105 diferencia 2345 16.6%
+RESULT silver total 44222 chargebacks 559
+RESULT silver files Row(numFiles=5, sizeInBytes=1148186)
+DONE

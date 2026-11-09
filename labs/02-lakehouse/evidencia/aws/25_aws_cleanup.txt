@@ -1,0 +1,15 @@
+$ date -u
+Mon Nov  9 00:34:49 UTC 2026
+$ aws s3 rm s3://paytrack-lakehouse-rodriguez-056164770323 --recursive
+exit s3 rm: 0
+$ serverless remove --stage dev
+Removing paytrack-lakehouse from stage dev (us-east-2)
+
+✔ Service paytrack-lakehouse has been successfully removed (23s)
+exit serverless remove: 0
+$ aws kinesis list-streams   (debe quedar vacío)
+[]
+$ aws cloudformation describe-stacks --stack-name paytrack-lakehouse-dev   (debe no existir)
+aws: [ERROR]: An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id paytrack-lakehouse-dev does not exist
+$ aws s3 ls | grep paytrack   (debe quedar vacío)
+(ningún bucket paytrack)

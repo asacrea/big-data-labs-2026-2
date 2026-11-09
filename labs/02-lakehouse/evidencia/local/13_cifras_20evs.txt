@@ -1,0 +1,88 @@
+FACT quarantine
++-----------+----------------+-----+
+|ingest_date|dq_reason       |count|
++-----------+----------------+-----+
+|2026-09-29 |invalid_amount  |1175 |
+|2026-09-29 |missing_customer|590  |
+|2026-09-30 |invalid_amount  |79   |
+|2026-09-30 |missing_customer|40   |
++-----------+----------------+-----+
+
+FACT bronze per batch
++-----------+-----+-----+
+|ingest_date|filas|  ids|
++-----------+-----+-----+
+| 2026-09-30| 2316| 2276|
+| 2026-09-29|30600|30000|
++-----------+-----+-----+
+
+FACT silver history
++-------+---------+-----+----+------+
+|version|operation|ins  |upd |copied|
++-------+---------+-----+----+------+
+|0      |WRITE    |NULL |NULL|NULL  |
+|1      |MERGE    |28235|0   |0     |
+|2      |MERGE    |0    |0   |28235 |
+|3      |MERGE    |1881 |276 |27959 |
+|4      |MERGE    |0    |0   |30116 |
+|5      |MERGE    |3802 |75  |30041 |
+|6      |MERGE    |3808 |81  |33837 |
+|7      |MERGE    |3818 |79  |37647 |
+|8      |MERGE    |326  |4   |41540 |
+|9      |MERGE    |78   |2   |15452 |
+|10     |MERGE    |214  |1   |14739 |
+|11     |MERGE    |192  |4   |30404 |
+|12     |MERGE    |208  |2   |15452 |
+|13     |MERGE    |219  |4   |30320 |
+|14     |MERGE    |194  |4   |30539 |
+|15     |MERGE    |196  |4   |30733 |
+|16     |MERGE    |209  |1   |16270 |
+|17     |MERGE    |200  |0   |16480 |
+|18     |MERGE    |192  |6   |31336 |
+|19     |MERGE    |218  |3   |31531 |
+|20     |MERGE    |194  |3   |31749 |
+|21     |MERGE    |38   |0   |1829  |
+|22     |MERGE    |186  |3   |30114 |
+|23     |MERGE    |188  |3   |14845 |
+|24     |MERGE    |210  |7   |30484 |
+|25     |MERGE    |196  |6   |30695 |
+|26     |MERGE    |193  |4   |15438 |
+|27     |MERGE    |215  |4   |31086 |
+|28     |MERGE    |192  |3   |31302 |
+|29     |MERGE    |194  |2   |31495 |
+|30     |MERGE    |230  |3   |17026 |
+|31     |MERGE    |199  |5   |31916 |
+|32     |MERGE    |185  |6   |32114 |
+|33     |MERGE    |211  |5   |32300 |
+|34     |MERGE    |197  |5   |32511 |
+|35     |MERGE    |190  |2   |17256 |
+|36     |MERGE    |189  |5   |32898 |
+|37     |MERGE    |204  |7   |33085 |
+|38     |MERGE    |189  |4   |33292 |
+|39     |MERGE    |199  |2   |18028 |
+|40     |MERGE    |210  |3   |19019 |
+|41     |MERGE    |189  |6   |19226 |
+|42     |MERGE    |204  |3   |18625 |
+|43     |MERGE    |222  |4   |34283 |
+|44     |MERGE    |199  |3   |34506 |
+|45     |MERGE    |195  |2   |20044 |
+|46     |MERGE    |208  |4   |34899 |
+|47     |MERGE    |199  |2   |19654 |
+|48     |MERGE    |189  |5   |35305 |
+|49     |MERGE    |225  |3   |35496 |
+|50     |MERGE    |200  |2   |35722 |
+|51     |MERGE    |18   |0   |5807  |
++-------+---------+-----+----+------+
+
+RESULT stream merges n/copied min/max/avg/ins min/max/upd min/max: (47, 1829, 41540, 26561.0, 18, 3818, 0, 81)
+RESULT eventos 20935 distintos 20331 fast 12330 live 8605 live_distintos 8329
+RESULT precision todas: alertas=264 aciertos=212 falsos=52 precision=80.30%
+RESULT precision datos --fast: alertas=186 aciertos=147 falsos=39 precision=79.03%
+RESULT precision datos en vivo: alertas=78 aciertos=65 falsos=13 precision=83.33%
+FACT latencia alertas en vivo (escritura del archivo - ultimo pago fraudulento)
+RESULT latencia n/min/avg/max desde ultimo pago; avg desde fin de ventana: (65, 132.5, 213.9, 339.3, 203.8)
+FACT capa rapida vs silver (TODO 6)
+RESULT capa rapida 16604 silver TXNS 19930 diferencia 3326 16.7%
+RESULT silver total 50047 chargebacks 673
+RESULT silver files Row(numFiles=6, sizeInBytes=1331757)
+DONE
