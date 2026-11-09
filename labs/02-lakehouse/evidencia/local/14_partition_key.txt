@@ -1,0 +1,9 @@
+paytrack.exp.constante:0:0
+paytrack.exp.constante:1:1217
+paytrack.exp.constante:2:0
+paytrack.exp.customer-id:0:456
+paytrack.exp.customer-id:1:355
+paytrack.exp.customer-id:2:406
+paytrack.exp.transaction-id:0:404
+paytrack.exp.transaction-id:1:403
+paytrack.exp.transaction-id:2:410

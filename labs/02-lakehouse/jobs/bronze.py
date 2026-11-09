@@ -34,7 +34,11 @@ def read_raw(dataset: str) -> DataFrame:
 #   - ingested_at: la marca de tiempo actual
 #   - source_file: la ruta del archivo de origen (columna oculta _metadata.file_path)
 def add_ingestion_metadata(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 1: add_ingestion_metadata")
+    return (
+        df.withColumn("ingest_date", F.lit(INGEST_DATE))
+        .withColumn("ingested_at", F.current_timestamp())
+        .withColumn("source_file", F.col("_metadata.file_path"))
+    )
 
 
 # ── TODO 2: escritura idempotente ────────────────────────────────────────────
@@ -44,7 +48,15 @@ def add_ingestion_metadata(df: DataFrame) -> DataFrame:
 # lotes de otras fechas no se deben tocar.
 # Pista: busca la opción replaceWhere de Delta Lake.
 def write_bronze(df: DataFrame, path: str) -> None:
-    raise NotImplementedError("TODO 2: write_bronze")
+    # overwrite + replaceWhere reemplaza solo la partición de este lote: re-ejecutar
+    # deja la misma tabla (con append se duplicaría) y no toca los demás lotes.
+    (
+        df.write.format("delta")
+        .mode("overwrite")
+        .partitionBy("ingest_date")
+        .option("replaceWhere", f"ingest_date = '{INGEST_DATE}'")
+        .save(path)
+    )
 
 
 # ── Ejecución y validación (dadas) ───────────────────────────────────────────

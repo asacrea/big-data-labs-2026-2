@@ -1,0 +1,278 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="lab2" name="Arquitectura Lab 2">
+    <mxGraphModel dx="2438" dy="1340" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1950" pageHeight="1050" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n_title" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=18;fontColor=#1f3864;fontStyle=1;" value="PayTrack · Lakehouse end-to-end en AWS (Lab 2): S3 + Delta Lake + Glue + Athena" vertex="1">
+          <mxGeometry height="40" width="1900" x="20" y="8" as="geometry" />
+        </mxCell>
+        <mxCell id="n_aws" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=none;strokeColor=#232f3e;strokeWidth=2;dashed=1;fontColor=#232f3e" value="AWS Cloud · us-east-2 · stack CloudFormation paytrack-lakehouse" vertex="1">
+          <mxGeometry height="960" width="1720" x="200" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="n_s3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=none;strokeColor=#3f8624;strokeWidth=2;fontColor=#3f8624" value="Amazon S3 · bucket paytrack-lakehouse" vertex="1">
+          <mxGeometry height="905" width="1310" x="375" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="n_bandA" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=#eef4fb;strokeColor=none" value="" vertex="1">
+          <mxGeometry height="330" width="1290" x="385" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="n_bandB" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=#fdf3e7;strokeColor=none" value="" vertex="1">
+          <mxGeometry height="495" width="1290" x="385" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="n_labA" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=13;fontColor=#2e5597;fontStyle=1;" value="BATCH&lt;br&gt;(un lote por ingest_date)" vertex="1">
+          <mxGeometry height="50" width="160" x="212" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="n_labB" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=13;fontColor=#b35900;fontStyle=1;" value="STREAMING&lt;br&gt;(eventos en tiempo real)" vertex="1">
+          <mxGeometry height="50" width="160" x="212" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="n_lraw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=center;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=none;strokeWidth=1.5;dashed=1;strokeColor=#7f7f7f;fontColor=#555555" value="RAW" vertex="1">
+          <mxGeometry height="865" width="160" x="390" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_lbronze" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=center;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=none;strokeWidth=1.5;dashed=1;strokeColor=#a0522d;fontColor=#a0522d" value="BRONZE" vertex="1">
+          <mxGeometry height="865" width="210" x="670" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_lsilver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=center;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=none;strokeWidth=1.5;dashed=1;strokeColor=#5a6f8c;fontColor=#4a5f7c" value="SILVER" vertex="1">
+          <mxGeometry height="865" width="240" x="1040" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_lgold" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;fontSize=12;fontStyle=1;align=center;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=none;strokeWidth=1.5;dashed=1;strokeColor=#b8860b;fontColor=#9a7209" value="GOLD" vertex="1">
+          <mxGeometry height="865" width="250" x="1420" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_data" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;align=center;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;data/batch1, data/batch2&lt;/b&gt;&lt;br&gt;arreglo JSON generado por&lt;br&gt;generate_data.py" vertex="1">
+          <mxGeometry height="80" width="165" x="20" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="n_ingest" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;align=center;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;ingest.py&lt;/b&gt;&lt;br&gt;valida la fecha y escribe&lt;br&gt;JSON Lines particionado" vertex="1">
+          <mxGeometry height="70" width="165" x="20" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="n_prod" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;align=center;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;producer.py&lt;/b&gt;&lt;br&gt;pagos, contracargos, reenvíos,&lt;br&gt;eventos tardíos y ráfagas&lt;br&gt;key = customer_id" vertex="1">
+          <mxGeometry height="100" width="165" x="20" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="n_kafka" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;align=center;verticalAlign=middle;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;Kafka (local)&lt;/b&gt;&lt;br&gt;topic paytrack.transactions&lt;br&gt;3 particiones" vertex="1">
+          <mxGeometry height="80" width="165" x="20" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="n_local" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" value="&lt;b&gt;Desarrollo local (Docker)&lt;/b&gt;&lt;br&gt;run_local.sh ejecuta los mismos&lt;br&gt;jobs con&lt;br&gt;BASE = lakehouse-local" vertex="1">
+          <mxGeometry height="95" width="165" x="20" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="n_kinesis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;align=center;verticalAlign=middle;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;Kinesis Data Streams&lt;/b&gt;&lt;br&gt;paytrack-transactions&lt;br&gt;2 shards" vertex="1">
+          <mxGeometry height="90" width="145" x="215" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="n_raw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;raw/&lt;/b&gt;&lt;br&gt;transactions/&lt;br&gt;fraud_events/&lt;br&gt;customers/&lt;br&gt;merchants/&lt;br&gt;ingest_date=YYYY-MM-DD&lt;br&gt;(JSON Lines)" vertex="1">
+          <mxGeometry height="125" width="140" x="400" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n_lc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" value="&lt;b&gt;Ciclo de vida de raw/&lt;/b&gt;&lt;br&gt;STANDARD_IA a 30 d&lt;br&gt;GLACIER_IR a 90 d, sin expirar" vertex="1">
+          <mxGeometry height="70" width="140" x="400" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="n_misc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" value="&lt;b&gt;Otros prefijos&lt;/b&gt;&lt;br&gt;scripts/ · athena-results/&lt;br&gt;(expiran a 7 d)" vertex="1">
+          <mxGeometry height="60" width="140" x="400" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="n_jbronze" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Glue job&lt;/b&gt;&lt;br&gt;paytrack-bronze&lt;br&gt;metadatos de ingesta&lt;br&gt;replaceWhere&lt;br&gt;(idempotente)" vertex="1">
+          <mxGeometry height="110" width="100" x="560" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="n_bronze" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;bronze/ (Delta)&lt;/b&gt;&lt;br&gt;transactions · fraud_events&lt;br&gt;customers · merchants&lt;br&gt;todo como texto, partición&lt;br&gt;ingest_date, + ingested_at,&lt;br&gt;source_file" vertex="1">
+          <mxGeometry height="140" width="190" x="680" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n_jsilver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Glue job&lt;/b&gt;&lt;br&gt;paytrack-silver&lt;br&gt;dedup → tipado →&lt;br&gt;calidad → MERGE&lt;br&gt;+ PII enmascarada" vertex="1">
+          <mxGeometry height="125" width="120" x="900" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="n_silver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;silver/ (Delta)&lt;/b&gt;&lt;br&gt;transactions (MERGE por transaction_id)&lt;br&gt;transactions_quarantine&lt;br&gt;customers (email enmascarado)&lt;br&gt;merchants · fraud_events" vertex="1">
+          <mxGeometry height="150" width="220" x="1050" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n_jgold" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Glue job&lt;/b&gt;&lt;br&gt;paytrack-gold&lt;br&gt;recalcula desde silver" vertex="1">
+          <mxGeometry height="70" width="100" x="1300" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="n_jaudit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Glue job&lt;/b&gt;&lt;br&gt;paytrack-audit&lt;br&gt;time travel:&lt;br&gt;versionAsOf" vertex="1">
+          <mxGeometry height="90" width="100" x="1300" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="n_gold" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;gold/ (Delta)&lt;/b&gt;&lt;br&gt;daily_merchant_summary&lt;br&gt;fraud_weekly_report&lt;br&gt;hourly_volume" vertex="1">
+          <mxGeometry height="100" width="230" x="1430" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n_status" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;gold/status_changes&lt;/b&gt;&lt;br&gt;contracargos del último lote" vertex="1">
+          <mxGeometry height="60" width="230" x="1430" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="n_ckpt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;dashed=1;" value="&lt;b&gt;checkpoints/&lt;/b&gt;&lt;br&gt;bronze · silver&lt;br&gt;metrics · alerts&lt;br&gt;(progreso de cada&lt;br&gt;consulta)" vertex="1">
+          <mxGeometry height="105" width="140" x="400" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="n_q1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;Consulta 1&lt;/b&gt;&lt;br&gt;bronze&lt;br&gt;append,&lt;br&gt;micro-lote 10 s" vertex="1">
+          <mxGeometry height="95" width="100" x="560" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="n_events" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;bronze/transaction_events&lt;/b&gt;&lt;br&gt;(Delta, append)&lt;br&gt;cada evento tal como llegó&lt;br&gt;+ arrival_ts" vertex="1">
+          <mxGeometry height="115" width="190" x="680" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="n_q2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;Consulta 2 · silver&lt;/b&gt;&lt;br&gt;foreachBatch + MERGE&lt;br&gt;sin watermark&lt;br&gt;chargeback = final" vertex="1">
+          <mxGeometry height="115" width="120" x="900" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="n_silver2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;silver/transactions&lt;/b&gt;&lt;br&gt;la MISMA tabla del batch&lt;br&gt;(pagos nuevos y contracargos)" vertex="1">
+          <mxGeometry height="95" width="220" x="1050" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="n_q3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;Consulta 3 · metrics&lt;/b&gt;&lt;br&gt;dropDuplicates +&lt;br&gt;watermark 2 min&lt;br&gt;ventana fija 1 min" vertex="1">
+          <mxGeometry height="115" width="120" x="900" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="n_q4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;Consulta 4 · alerts&lt;/b&gt;&lt;br&gt;dropDuplicates +&lt;br&gt;watermark 2 min&lt;br&gt;ventana 30 s cada 10 s&lt;br&gt;≥ 6 pagos por cliente" vertex="1">
+          <mxGeometry height="120" width="120" x="900" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="n_metrics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;gold/merchant_minute_metrics&lt;/b&gt;&lt;br&gt;una fila por ventana de&lt;br&gt;1 min y comercio" vertex="1">
+          <mxGeometry height="90" width="230" x="1430" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="n_alerts" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;gold/fraud_alerts&lt;/b&gt;&lt;br&gt;una fila por ventana y&lt;br&gt;cliente con alerta" vertex="1">
+          <mxGeometry height="90" width="230" x="1430" y="835" as="geometry" />
+        </mxCell>
+        <mxCell id="n_cfn" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" value="&lt;b&gt;CloudFormation&lt;/b&gt;&lt;br&gt;serverless deploy: S3, 5 jobs&lt;br&gt;Glue, Kinesis, catálogo,&lt;br&gt;Athena, IAM" vertex="1">
+          <mxGeometry height="85" width="165" x="1740" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="n_catalog" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;AWS Glue Data Catalog&lt;/b&gt;&lt;br&gt;base paytrack_lakehouse&lt;br&gt;tablas Delta registradas" vertex="1">
+          <mxGeometry height="75" width="165" x="1740" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="n_athena" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;Amazon Athena&lt;/b&gt;&lt;br&gt;workgroup paytrack-lakehouse-wg&lt;br&gt;sql/athena.sql: 6 consultas&lt;br&gt;silver_transactions&lt;br&gt;gold_* (batch y streaming)&lt;br&gt;bronze_transaction_events&lt;br&gt;Lee el _delta_log y las&lt;br&gt;particiones directo de S3" vertex="1">
+          <mxGeometry height="215" width="165" x="1740" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="n_logs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" value="&lt;b&gt;CloudWatch Logs&lt;/b&gt;&lt;br&gt;/aws-glue/jobs/output&lt;br&gt;/aws-glue/jobs/error&lt;br&gt;(validaciones ✓ / ✗)" vertex="1">
+          <mxGeometry height="80" width="165" x="1740" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="n_iam" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=10;align=center;verticalAlign=middle;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" value="&lt;b&gt;IAM GlueRole&lt;/b&gt;&lt;br&gt;S3 (lectura/escritura)&lt;br&gt;+ Kinesis (lectura)" vertex="1">
+          <mxGeometry height="60" width="165" x="1740" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="n_legend_t" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=11;fontColor=#333333;fontStyle=1;" value="Leyenda" vertex="1">
+          <mxGeometry height="22" width="165" x="1740" y="775" as="geometry" />
+        </mxCell>
+        <mxCell id="n_leg0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;Fuente / script local&lt;/b&gt;" vertex="1">
+          <mxGeometry height="24" width="165" x="1740" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="n_leg1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;Tabla o prefijo en S3&lt;/b&gt;" vertex="1">
+          <mxGeometry height="24" width="165" x="1740" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="n_leg2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Job de Glue (batch)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="24" width="165" x="1740" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="n_leg3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;Consulta de streaming&lt;/b&gt;" vertex="1">
+          <mxGeometry height="24" width="165" x="1740" y="890" as="geometry" />
+        </mxCell>
+        <mxCell id="n_leg4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;Broker de eventos&lt;/b&gt;" vertex="1">
+          <mxGeometry height="24" width="165" x="1740" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="n_leg5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=9;align=center;verticalAlign=middle;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;Consumo (Athena)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="24" width="165" x="1740" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n_data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_ingest" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n_ingest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_raw" value="PutObject">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="285" />
+              <mxPoint x="300" y="232" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n_raw" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_jbronze" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="n_jbronze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_bronze" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="n_bronze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_jsilver" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="n_jsilver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_silver" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n_silver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_jgold" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="n_silver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_jaudit" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="n_jgold" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_gold" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="n_jaudit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_status" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="n_silver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#9673a6;labelBackgroundColor=#ffffff;dashed=1;" target="n_silver2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="n_prod" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#8a6d00;labelBackgroundColor=#ffffff;" target="n_kafka" value="local">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="n_prod" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#8a6d00;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="n_kinesis" value="AWS">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="287" y="590" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="n_kinesis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#8a6d00;labelBackgroundColor=#ffffff;" target="n_q1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="n_kafka" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#8a6d00;labelBackgroundColor=#ffffff;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="n_q1" value="local">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="610" y="830" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="n_q1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_events" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="n_events" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;exitX=1;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_q2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="n_events" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_q3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="n_events" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_q4" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="885" y="790" />
+              <mxPoint x="885" y="890" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="n_q2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;" target="n_silver2" value="MERGE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="n_q3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_metrics" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="n_q4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#333333;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_alerts" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="n_gold" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#b85450;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2;entryDx=0;entryDy=0;" target="n_athena" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1690" y="220" />
+              <mxPoint x="1690" y="388" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="n_status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#b85450;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;" target="n_athena" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1700" y="315" />
+              <mxPoint x="1700" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e26" edge="1" parent="1" source="n_metrics" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#b85450;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="n_athena" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1690" y="745" />
+              <mxPoint x="1690" y="575" />
+              <mxPoint x="1822" y="575" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e27" edge="1" parent="1" source="n_alerts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#b85450;labelBackgroundColor=#ffffff;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" target="n_athena" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1705" y="862" />
+              <mxPoint x="1705" y="585" />
+              <mxPoint x="1863" y="585" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e28" edge="1" parent="1" source="n_athena" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=10;strokeColor=#b85450;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="n_catalog" value="esquema">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

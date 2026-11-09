@@ -30,7 +30,7 @@ last_merge = history.filter("operation = 'MERGE'").orderBy(F.desc("version")).fi
 # ── TODO 1: las dos versiones ────────────────────────────────────────────────
 # Devuelve la tabla tal como estaba en la versión `version` (time travel).
 def read_version(version: int) -> DataFrame:
-    raise NotImplementedError("TODO 1: read_version")
+    return spark.read.format("delta").option("versionAsOf", version).load(TXN_PATH)
 
 
 # ── TODO 2: cambios de estado ────────────────────────────────────────────────
@@ -38,7 +38,14 @@ def read_version(version: int) -> DataFrame:
 # versiones y cuyo status cambió, con las columnas:
 #   transaction_id, customer_id, amount_cop, old_status, new_status
 def status_changes(before: DataFrame, after: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 2: status_changes")
+    old = before.select("transaction_id", F.col("status").alias("old_status"))
+    new = after.select("transaction_id", "customer_id", "amount_cop", F.col("status").alias("new_status"))
+    # El join interno deja solo las transacciones que existían en ambas versiones
+    return (
+        old.join(new, "transaction_id")
+        .filter(F.col("old_status") != F.col("new_status"))
+        .select("transaction_id", "customer_id", "amount_cop", "old_status", "new_status")
+    )
 
 
 # ── Ejecución y validación (dadas) ───────────────────────────────────────────

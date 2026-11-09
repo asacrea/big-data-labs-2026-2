@@ -1,0 +1,25 @@
+$ date -u
+Mon Nov  9 00:16:47 UTC 2026
+$ bash labs/02-lakehouse/run_aws.sh data/batch2 2026-09-30
+Bucket: paytrack-lakehouse-rodriguez-056164770323
+━━━ subiendo jobs ━━━
+━━━ ingest ━━━
+✓ transactions: 2316 registros → s3://paytrack-lakehouse-rodriguez-056164770323/raw/transactions/ingest_date=2026-09-30/part-0000.json
+✓ fraud_events: 8 registros → s3://paytrack-lakehouse-rodriguez-056164770323/raw/fraud_events/ingest_date=2026-09-30/part-0000.json
+✓ customers: 500 registros → s3://paytrack-lakehouse-rodriguez-056164770323/raw/customers/ingest_date=2026-09-30/part-0000.json
+✓ merchants: 8 registros → s3://paytrack-lakehouse-rodriguez-056164770323/raw/merchants/ingest_date=2026-09-30/part-0000.json
+
+━━━ bronze ━━━
+......... ✓ SUCCEEDED
+
+━━━ silver ━━━
+......... ✓ SUCCEEDED
+
+━━━ gold ━━━
+........ ✓ SUCCEEDED
+
+━━━ audit ━━━
+..... ✓ SUCCEEDED
+
+Pipeline completo para el lote 2026-09-30
+exit run_aws.sh: 0

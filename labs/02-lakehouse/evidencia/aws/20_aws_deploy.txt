@@ -1,0 +1,38 @@
+$ date -u
+Mon Nov  9 00:05:18 UTC 2026
+$ serverless deploy --stage dev
+
+Deploying paytrack-lakehouse to stage dev (us-east-2)
+
+✔ Service deployed to stack paytrack-lakehouse-dev (73s)
+
+exit serverless deploy: 0
+
+$ aws cloudformation describe-stacks --stack-name paytrack-lakehouse-dev
+Estado: UPDATE_COMPLETE
+Outputs:
+- OutputKey: LakehouseBucket
+  OutputValue: paytrack-lakehouse-rodriguez-056164770323
+- ExportName: sls-paytrack-lakehouse-dev-ServerlessDeploymentBucketName
+  OutputKey: ServerlessDeploymentBucketName
+  OutputValue: paytrack-lakehouse-dev-serverlessdeploymentbucket-417ca377nbos
+- OutputKey: TransactionStream
+  OutputValue: paytrack-transactions
+Stack: paytrack-lakehouse-dev
+$ aws cloudformation list-stack-resources
+-----------------------------------------------------------------------------------
+|                               ListStackResources                                |
++-----------------------------------+--------------------------+------------------+
+|  AthenaWorkGroup                  |  AWS::Athena::WorkGroup  |  CREATE_COMPLETE |
+|  AuditJob                         |  AWS::Glue::Job          |  CREATE_COMPLETE |
+|  BronzeJob                        |  AWS::Glue::Job          |  CREATE_COMPLETE |
+|  GlueDatabase                     |  AWS::Glue::Database     |  CREATE_COMPLETE |
+|  GlueRole                         |  AWS::IAM::Role          |  CREATE_COMPLETE |
+|  GoldJob                          |  AWS::Glue::Job          |  CREATE_COMPLETE |
+|  LakehouseBucket                  |  AWS::S3::Bucket         |  CREATE_COMPLETE |
+|  ServerlessDeploymentBucket       |  AWS::S3::Bucket         |  CREATE_COMPLETE |
+|  ServerlessDeploymentBucketPolicy |  AWS::S3::BucketPolicy   |  CREATE_COMPLETE |
+|  SilverJob                        |  AWS::Glue::Job          |  CREATE_COMPLETE |
+|  StreamJob                        |  AWS::Glue::Job          |  CREATE_COMPLETE |
+|  TransactionStream                |  AWS::Kinesis::Stream    |  CREATE_COMPLETE |
++-----------------------------------+--------------------------+------------------+
