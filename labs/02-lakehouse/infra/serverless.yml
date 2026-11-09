@@ -58,11 +58,19 @@ resources:
               Status: Enabled
               Prefix: athena-results/
               ExpirationInDays: 7
-            # TODO: define la política de ciclo de vida de la zona raw/.
-            #   ¿Cuánto tiempo se re-procesa un lote? ¿Cuándo pasarlo a una clase más
-            #   barata (STANDARD_IA, GLACIER_IR)? ¿Se debe borrar alguna vez? (auditoría)
-            #   Usa Transitions (TransitionInDays + StorageClass) y/o ExpirationInDays.
-            #
+            # Zona raw: la copia original de cada lote, tal como llegó. Se vuelve a leer en las
+            # primeras semanas (correcciones y re-ejecuciones idempotentes del pipeline); después
+            # casi nadie la lee, pero es el soporte para auditoría y para reconstruir Bronze.
+            # Se conserva 10 años, el plazo de los soportes contables (Ley 962 de 2005, art. 28).
+            - Id: raw-lifecycle
+              Status: Enabled
+              Prefix: raw/
+              Transitions:
+                - TransitionInDays: 30    # S3 exige 30 días en STANDARD antes de pasar a IA
+                  StorageClass: STANDARD_IA
+                - TransitionInDays: 90    # GLACIER_IR cuesta menos y se sigue leyendo al instante
+                  StorageClass: GLACIER_IR
+              ExpirationInDays: 3650
             # Pregunta para el informe: ¿por qué NO debes poner una regla de expiración
             # sobre lakehouse/ (las tablas Delta)? ¿Qué usarías en su lugar?
             # Referencia:

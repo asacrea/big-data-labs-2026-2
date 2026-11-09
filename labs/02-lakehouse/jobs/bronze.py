@@ -34,7 +34,13 @@ def read_raw(dataset: str) -> DataFrame:
 #   - ingested_at: la marca de tiempo actual
 #   - source_file: la ruta del archivo de origen (columna oculta _metadata.file_path)
 def add_ingestion_metadata(df: DataFrame) -> DataFrame:
-    raise NotImplementedError("TODO 1: add_ingestion_metadata")
+    # source_file va primero: _metadata es una columna oculta de la lectura de archivos
+    # y se resuelve directamente sobre el DataFrame que salió de spark.read.
+    return (
+        df.withColumn("source_file", F.col("_metadata.file_path"))
+        .withColumn("ingest_date", F.lit(INGEST_DATE))
+        .withColumn("ingested_at", F.current_timestamp())
+    )
 
 
 # ── TODO 2: escritura idempotente ────────────────────────────────────────────
@@ -44,7 +50,17 @@ def add_ingestion_metadata(df: DataFrame) -> DataFrame:
 # lotes de otras fechas no se deben tocar.
 # Pista: busca la opción replaceWhere de Delta Lake.
 def write_bronze(df: DataFrame, path: str) -> None:
-    raise NotImplementedError("TODO 2: write_bronze")
+    # overwrite + replaceWhere reemplaza solo la partición de este lote: si el job se
+    # repite con la misma fecha, el lote se reescribe en vez de duplicarse, y las
+    # particiones de otras fechas no se tocan. Con append, cada re-ejecución sumaría
+    # otra copia del lote.
+    (
+        df.write.format("delta")
+        .mode("overwrite")
+        .partitionBy("ingest_date")
+        .option("replaceWhere", f"ingest_date = '{INGEST_DATE}'")
+        .save(path)
+    )
 
 
 # ── Ejecución y validación (dadas) ───────────────────────────────────────────

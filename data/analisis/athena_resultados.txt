@@ -1,0 +1,92 @@
+
+━━━ DDL silver_transactions: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 177 ms
+
+━━━ DDL gold_daily_merchant_summary: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 144 ms
+
+━━━ DDL gold_fraud_weekly_report: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 116 ms
+
+━━━ DDL gold_hourly_volume: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 96 ms
+
+━━━ DDL gold_status_changes: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 129 ms
+
+━━━ DDL gold_merchant_minute_metrics: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 135 ms
+
+━━━ DDL gold_fraud_alerts: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 102 ms
+
+━━━ DDL bronze_transaction_events: SUCCEEDED · 0 bytes (0.000 MB) escaneados · 143 ms
+
+━━━ TODO 1: SUCCEEDED · 3,147 bytes (0.003 MB) escaneados · 1143 ms
+  merchant_id | merchant_name  | approved_cop | transacciones | approval_rate_pct
+  ------------+----------------+--------------+---------------+------------------
+  M001        | Éxito Laureles | 162091110.36 | 1984          | 99.04            
+  M004        | Copa Airlines  | 155255119.94 | 2025          | 99.56            
+  M008        | Uber CO        | 148359608.36 | 1987          | 98.84            
+  M007        | TuBodega.com   | 146791287.69 | 1978          | 99.04            
+  M003        | Claro Tienda   | 143032567.61 | 1891          | 98.73            
+
+━━━ TODO 2: SUCCEEDED · 96,946 bytes (0.097 MB) escaneados · 734 ms
+  merchant_id | merchant_name  | approved_cop | transacciones | approval_rate_pct
+  ------------+----------------+--------------+---------------+------------------
+  M001        | Éxito Laureles | 159785930.81 | 1984          | 98.19            
+  M004        | Copa Airlines  | 154302372.80 | 2025          | 98.37            
+  M008        | Uber CO        | 147394524.95 | 1987          | 98.24            
+  M007        | TuBodega.com   | 145883788.63 | 1978          | 98.18            
+  M003        | Claro Tienda   | 141067197.14 | 1891          | 97.41            
+
+━━━ TODO 3: SUCCEEDED · 356 bytes (0.000 MB) escaneados · 2013 ms
+  segment    | week_start | eventos
+  -----------+------------+--------
+  mass       | 2026-08-24 | 14     
+  high_value | 2026-08-17 | 4      
+  premium    | 2026-09-14 | 4      
+
+━━━ TODO 4: SUCCEEDED · 452,277 bytes (0.452 MB) escaneados · 1912 ms
+  merchant_category | contracargos | monto_revertido_cop
+  ------------------+--------------+--------------------
+  retail            | 61           | 5719122.94         
+  telco             | 45           | 2814101.00         
+  streaming         | 35           | 2676398.40         
+  grocery           | 37           | 2654247.69         
+  travel            | 22           | 2556315.84         
+  delivery          | 36           | 2549082.24         
+  transport         | 40           | 1973818.01         
+
+━━━ TODO 5: SUCCEEDED · 271,862 bytes (0.272 MB) escaneados · 3694 ms
+  alertas | aciertos | precision_pct
+  --------+----------+--------------
+  524     | 179      | 34.2         
+
+━━━ TODO 5 por corrida: SUCCEEDED · 271,862 bytes (0.272 MB) escaneados · 2463 ms
+  corrida | desde                       | hasta                       | alertas | aciertos | precision_pct
+  --------+-----------------------------+-----------------------------+---------+----------+--------------
+  1       | 2026-11-08 11:54:20.000 UTC | 2026-11-08 11:58:40.000 UTC | 73      | 64       | 87.7         
+  2       | 2026-11-08 12:20:50.000 UTC | 2026-11-08 12:25:20.000 UTC | 61      | 51       | 83.6         
+  3       | 2026-11-08 12:43:00.000 UTC | 2026-11-08 12:45:20.000 UTC | 390     | 64       | 16.4         
+
+━━━ TODO 6: SUCCEEDED · 469,112 bytes (0.469 MB) escaneados · 2021 ms
+  dia        | merchant_id | pagos_silver | pagos_streaming | diferencia
+  -----------+-------------+--------------+-----------------+-----------
+  2026-11-08 | M001        | 2621         | 1760            | 861       
+  2026-11-08 | M002        | 2579         | 1787            | 792       
+  2026-11-08 | M003        | 2734         | 1881            | 853       
+  2026-11-08 | M004        | 2634         | 1791            | 843       
+  2026-11-08 | M005        | 2645         | 1847            | 798       
+  2026-11-08 | M006        | 2671         | 1826            | 845       
+  2026-11-08 | M007        | 2684         | 1824            | 860       
+  2026-11-08 | M008        | 2563         | 1748            | 815       
+
+━━━ Extra: silver por origen y status: SUCCEEDED · 433,370 bytes (0.433 MB) escaneados · 1953 ms
+  origen    | status     | transacciones
+  ----------+------------+--------------
+  batch     | approved   | 29454        
+  batch     | chargeback | 636          
+  batch     | declined   | 30           
+  streaming | approved   | 19799        
+  streaming | chargeback | 54           
+  streaming | declined   | 1278         
+
+━━━ Extra: contracargos de transacciones batch por mes: SUCCEEDED · 594,838 bytes (0.595 MB) escaneados · 1604 ms
+  year | month | contracargos | monto_cop  
+  -----+-------+--------------+------------
+  2026 | 08    | 344          | 25644392.56
+  2026 | 09    | 292          | 22421667.32
